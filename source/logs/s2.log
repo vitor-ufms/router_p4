@@ -1,394 +1,547 @@
 Calling target program-options parser
-[02:24:44.834] [bmv2] [D] [thread 4962] Set default default entry for table 'MyIngress.ipv4_lpm': MyIngress.drop - 
-[02:24:44.835] [bmv2] [D] [thread 4962] Set default default entry for table 'tbl_drop': MyIngress.drop - 
+[18:22:44.819] [bmv2] [D] [thread 5885] Set default default entry for table 'MyIngress.ipv4_lpm': MyIngress.drop - 
+[18:22:44.819] [bmv2] [D] [thread 5885] Set default default entry for table 'tbl_drop': MyIngress.drop - 
 Adding interface s2-eth1 as port 1
-[02:24:44.836] [bmv2] [D] [thread 4962] Adding interface s2-eth1 as port 1
+[18:22:44.820] [bmv2] [D] [thread 5885] Adding interface s2-eth1 as port 1
 Adding interface s2-eth2 as port 2
-[02:24:44.894] [bmv2] [D] [thread 4962] Adding interface s2-eth2 as port 2
+[18:22:44.854] [bmv2] [D] [thread 5885] Adding interface s2-eth2 as port 2
 Adding interface s2-eth3 as port 3
-[02:24:44.969] [bmv2] [D] [thread 4962] Adding interface s2-eth3 as port 3
+[18:22:44.899] [bmv2] [D] [thread 5885] Adding interface s2-eth3 as port 3
 Adding interface s2-eth4 as port 4
-[02:24:45.029] [bmv2] [D] [thread 4962] Adding interface s2-eth4 as port 4
+[18:22:44.932] [bmv2] [D] [thread 5885] Adding interface s2-eth4 as port 4
 Server listening on 0.0.0.0:50052
-[02:24:45.081] [bmv2] [I] [thread 4962] Starting Thrift server on port 9091
-[02:24:45.081] [bmv2] [I] [thread 4962] Thrift server was started
-[02:24:45.082] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Processing packet received on port 2
-[02:24:45.082] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Parser 'parser': start
-[02:24:45.082] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.082] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.082] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.082] [bmv2] [T] [thread 4972] [0.0] [cxt 0] Bytes parsed: 14
-[02:24:45.082] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Parser 'parser': end
-[02:24:45.083] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.083] [bmv2] [T] [thread 4972] [0.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.083] [bmv2] [T] [thread 4972] [0.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.083] [bmv2] [T] [thread 4972] [0.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.083] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Looking up key:
+[18:22:44.965] [bmv2] [I] [thread 5885] Starting Thrift server on port 9091
+[18:22:44.965] [bmv2] [I] [thread 5885] Thrift server was started
+[18:22:45.150] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Processing packet received on port 2
+[18:22:45.151] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Parser 'parser': start
+[18:22:45.151] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.152] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.152] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.153] [bmv2] [T] [thread 5895] [0.0] [cxt 0] Bytes parsed: 14
+[18:22:45.153] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Parser 'parser': end
+[18:22:45.154] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.154] [bmv2] [T] [thread 5895] [0.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.155] [bmv2] [T] [thread 5895] [0.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.156] [bmv2] [T] [thread 5895] [0.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.156] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Looking up key:
 
-[02:24:45.084] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.084] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.084] [bmv2] [T] [thread 4972] [0.0] [cxt 0] Action MyIngress.drop
-[02:24:45.084] [bmv2] [T] [thread 4972] [0.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.084] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.085] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Egress port is 511
-[02:24:45.085] [bmv2] [D] [thread 4972] [0.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.188] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Processing packet received on port 3
-[02:24:45.188] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Parser 'parser': start
-[02:24:45.188] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.188] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.188] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.189] [bmv2] [T] [thread 4972] [1.0] [cxt 0] Bytes parsed: 14
-[02:24:45.189] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Parser 'parser': end
-[02:24:45.189] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.189] [bmv2] [T] [thread 4972] [1.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.189] [bmv2] [T] [thread 4972] [1.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.190] [bmv2] [T] [thread 4972] [1.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.190] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Looking up key:
+[18:22:45.157] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.158] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.158] [bmv2] [T] [thread 5895] [0.0] [cxt 0] Action MyIngress.drop
+[18:22:45.158] [bmv2] [T] [thread 5895] [0.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.159] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.159] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Egress port is 511
+[18:22:45.160] [bmv2] [D] [thread 5895] [0.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.160] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Processing packet received on port 3
+[18:22:45.161] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Parser 'parser': start
+[18:22:45.162] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.162] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.163] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.163] [bmv2] [T] [thread 5895] [1.0] [cxt 0] Bytes parsed: 14
+[18:22:45.164] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Parser 'parser': end
+[18:22:45.164] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.165] [bmv2] [T] [thread 5895] [1.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.166] [bmv2] [T] [thread 5895] [1.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.166] [bmv2] [T] [thread 5895] [1.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.167] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Looking up key:
 
-[02:24:45.191] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.191] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.192] [bmv2] [T] [thread 4972] [1.0] [cxt 0] Action MyIngress.drop
-[02:24:45.192] [bmv2] [T] [thread 4972] [1.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.192] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.192] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Egress port is 511
-[02:24:45.192] [bmv2] [D] [thread 4972] [1.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.192] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Processing packet received on port 3
-[02:24:45.192] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Parser 'parser': start
-[02:24:45.192] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.193] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.193] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.193] [bmv2] [T] [thread 4972] [2.0] [cxt 0] Bytes parsed: 14
-[02:24:45.193] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Parser 'parser': end
-[02:24:45.193] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.194] [bmv2] [T] [thread 4972] [2.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.194] [bmv2] [T] [thread 4972] [2.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.194] [bmv2] [T] [thread 4972] [2.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.194] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Looking up key:
+[18:22:45.167] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.168] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.168] [bmv2] [T] [thread 5895] [1.0] [cxt 0] Action MyIngress.drop
+[18:22:45.169] [bmv2] [T] [thread 5895] [1.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.170] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.170] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Egress port is 511
+[18:22:45.171] [bmv2] [D] [thread 5895] [1.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.171] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Processing packet received on port 3
+[18:22:45.172] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Parser 'parser': start
+[18:22:45.172] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.173] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.174] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.174] [bmv2] [T] [thread 5895] [2.0] [cxt 0] Bytes parsed: 14
+[18:22:45.174] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Parser 'parser': end
+[18:22:45.175] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.175] [bmv2] [T] [thread 5895] [2.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.176] [bmv2] [T] [thread 5895] [2.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.176] [bmv2] [T] [thread 5895] [2.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.177] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Looking up key:
 
-[02:24:45.194] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.195] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.195] [bmv2] [T] [thread 4972] [2.0] [cxt 0] Action MyIngress.drop
-[02:24:45.195] [bmv2] [T] [thread 4972] [2.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.196] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.196] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Egress port is 511
-[02:24:45.196] [bmv2] [D] [thread 4972] [2.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.730] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Processing packet received on port 1
-[02:24:45.730] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Parser 'parser': start
-[02:24:45.730] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.730] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.730] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.731] [bmv2] [T] [thread 4972] [3.0] [cxt 0] Bytes parsed: 14
-[02:24:45.731] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Parser 'parser': end
-[02:24:45.732] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.732] [bmv2] [T] [thread 4972] [3.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.732] [bmv2] [T] [thread 4972] [3.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.732] [bmv2] [T] [thread 4972] [3.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.732] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Looking up key:
+[18:22:45.177] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.181] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.189] [bmv2] [T] [thread 5895] [2.0] [cxt 0] Action MyIngress.drop
+[18:22:45.190] [bmv2] [T] [thread 5895] [2.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.191] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.192] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Egress port is 511
+[18:22:45.194] [bmv2] [D] [thread 5895] [2.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.194] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Processing packet received on port 4
+[18:22:45.194] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Parser 'parser': start
+[18:22:45.194] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.194] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.194] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.194] [bmv2] [T] [thread 5895] [3.0] [cxt 0] Bytes parsed: 14
+[18:22:45.194] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Parser 'parser': end
+[18:22:45.194] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.194] [bmv2] [T] [thread 5895] [3.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.195] [bmv2] [T] [thread 5895] [3.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.195] [bmv2] [T] [thread 5895] [3.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.195] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Looking up key:
 
-[02:24:45.732] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.732] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.732] [bmv2] [T] [thread 4972] [3.0] [cxt 0] Action MyIngress.drop
-[02:24:45.732] [bmv2] [T] [thread 4972] [3.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.732] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.732] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Egress port is 511
-[02:24:45.732] [bmv2] [D] [thread 4972] [3.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.733] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Processing packet received on port 4
-[02:24:45.734] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Parser 'parser': start
-[02:24:45.734] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.734] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.734] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.734] [bmv2] [T] [thread 4972] [4.0] [cxt 0] Bytes parsed: 14
-[02:24:45.734] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Parser 'parser': end
-[02:24:45.734] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.734] [bmv2] [T] [thread 4972] [4.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.734] [bmv2] [T] [thread 4972] [4.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.736] [bmv2] [T] [thread 4972] [4.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.736] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Looking up key:
+[18:22:45.195] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.195] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.195] [bmv2] [T] [thread 5895] [3.0] [cxt 0] Action MyIngress.drop
+[18:22:45.196] [bmv2] [T] [thread 5895] [3.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.196] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.197] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Egress port is 511
+[18:22:45.197] [bmv2] [D] [thread 5895] [3.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.198] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Processing packet received on port 4
+[18:22:45.198] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Parser 'parser': start
+[18:22:45.199] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.199] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.200] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.200] [bmv2] [T] [thread 5895] [4.0] [cxt 0] Bytes parsed: 14
+[18:22:45.201] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Parser 'parser': end
+[18:22:45.201] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.201] [bmv2] [T] [thread 5895] [4.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.202] [bmv2] [T] [thread 5895] [4.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.202] [bmv2] [T] [thread 5895] [4.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.203] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Looking up key:
 
-[02:24:45.737] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.739] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.739] [bmv2] [T] [thread 4972] [4.0] [cxt 0] Action MyIngress.drop
-[02:24:45.740] [bmv2] [T] [thread 4972] [4.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.740] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.740] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Egress port is 511
-[02:24:45.740] [bmv2] [D] [thread 4972] [4.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.740] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Processing packet received on port 1
-[02:24:45.740] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Parser 'parser': start
-[02:24:45.740] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.740] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.740] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.740] [bmv2] [T] [thread 4972] [5.0] [cxt 0] Bytes parsed: 14
-[02:24:45.740] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Parser 'parser': end
-[02:24:45.740] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.740] [bmv2] [T] [thread 4972] [5.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.740] [bmv2] [T] [thread 4972] [5.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.740] [bmv2] [T] [thread 4972] [5.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.741] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Looking up key:
+[18:22:45.203] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.204] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.204] [bmv2] [T] [thread 5895] [4.0] [cxt 0] Action MyIngress.drop
+[18:22:45.204] [bmv2] [T] [thread 5895] [4.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.205] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.205] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Egress port is 511
+[18:22:45.205] [bmv2] [D] [thread 5895] [4.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.282] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Processing packet received on port 1
+[18:22:45.283] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Parser 'parser': start
+[18:22:45.284] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.284] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.284] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.284] [bmv2] [T] [thread 5895] [5.0] [cxt 0] Bytes parsed: 14
+[18:22:45.284] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Parser 'parser': end
+[18:22:45.285] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.285] [bmv2] [T] [thread 5895] [5.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.285] [bmv2] [T] [thread 5895] [5.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.286] [bmv2] [T] [thread 5895] [5.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.286] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Looking up key:
 
-[02:24:45.742] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.742] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.742] [bmv2] [T] [thread 4972] [5.0] [cxt 0] Action MyIngress.drop
-[02:24:45.744] [bmv2] [T] [thread 4972] [5.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.745] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.746] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Egress port is 511
-[02:24:45.746] [bmv2] [D] [thread 4972] [5.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.747] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Processing packet received on port 4
-[02:24:45.749] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Parser 'parser': start
-[02:24:45.749] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.749] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.750] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.750] [bmv2] [T] [thread 4972] [6.0] [cxt 0] Bytes parsed: 14
-[02:24:45.750] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Parser 'parser': end
-[02:24:45.750] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.750] [bmv2] [T] [thread 4972] [6.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.751] [bmv2] [T] [thread 4972] [6.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.751] [bmv2] [T] [thread 4972] [6.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.751] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Looking up key:
+[18:22:45.286] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.286] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.286] [bmv2] [T] [thread 5895] [5.0] [cxt 0] Action MyIngress.drop
+[18:22:45.287] [bmv2] [T] [thread 5895] [5.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.287] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.287] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Egress port is 511
+[18:22:45.287] [bmv2] [D] [thread 5895] [5.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.288] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Processing packet received on port 1
+[18:22:45.288] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Parser 'parser': start
+[18:22:45.288] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.288] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.288] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.289] [bmv2] [T] [thread 5895] [6.0] [cxt 0] Bytes parsed: 14
+[18:22:45.289] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Parser 'parser': end
+[18:22:45.289] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.290] [bmv2] [T] [thread 5895] [6.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.291] [bmv2] [T] [thread 5895] [6.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.291] [bmv2] [T] [thread 5895] [6.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.291] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Looking up key:
 
-[02:24:45.752] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.752] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.752] [bmv2] [T] [thread 4972] [6.0] [cxt 0] Action MyIngress.drop
-[02:24:45.753] [bmv2] [T] [thread 4972] [6.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.753] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.754] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Egress port is 511
-[02:24:45.754] [bmv2] [D] [thread 4972] [6.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.814] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Processing packet received on port 3
-[02:24:45.814] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Parser 'parser': start
-[02:24:45.815] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.815] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.815] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.815] [bmv2] [T] [thread 4972] [7.0] [cxt 0] Bytes parsed: 14
-[02:24:45.816] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Parser 'parser': end
-[02:24:45.816] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.816] [bmv2] [T] [thread 4972] [7.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.817] [bmv2] [T] [thread 4972] [7.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.817] [bmv2] [T] [thread 4972] [7.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.818] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Looking up key:
+[18:22:45.291] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.291] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.292] [bmv2] [T] [thread 5895] [6.0] [cxt 0] Action MyIngress.drop
+[18:22:45.292] [bmv2] [T] [thread 5895] [6.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.292] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.292] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Egress port is 511
+[18:22:45.292] [bmv2] [D] [thread 5895] [6.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.340] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Processing packet received on port 4
+[18:22:45.341] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Parser 'parser': start
+[18:22:45.341] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.341] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.341] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.341] [bmv2] [T] [thread 5895] [7.0] [cxt 0] Bytes parsed: 14
+[18:22:45.341] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Parser 'parser': end
+[18:22:45.342] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.342] [bmv2] [T] [thread 5895] [7.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.342] [bmv2] [T] [thread 5895] [7.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.342] [bmv2] [T] [thread 5895] [7.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.342] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Looking up key:
 
-[02:24:45.819] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.819] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.819] [bmv2] [T] [thread 4972] [7.0] [cxt 0] Action MyIngress.drop
-[02:24:45.820] [bmv2] [T] [thread 4972] [7.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.820] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.821] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Egress port is 511
-[02:24:45.821] [bmv2] [D] [thread 4972] [7.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.883] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Processing packet received on port 2
-[02:24:45.885] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Parser 'parser': start
-[02:24:45.885] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.886] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.886] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.887] [bmv2] [T] [thread 4972] [8.0] [cxt 0] Bytes parsed: 14
-[02:24:45.887] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Parser 'parser': end
-[02:24:45.888] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.889] [bmv2] [T] [thread 4972] [8.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.889] [bmv2] [T] [thread 4972] [8.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.890] [bmv2] [T] [thread 4972] [8.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.891] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Looking up key:
+[18:22:45.342] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.343] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.343] [bmv2] [T] [thread 5895] [7.0] [cxt 0] Action MyIngress.drop
+[18:22:45.343] [bmv2] [T] [thread 5895] [7.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.344] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.344] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Egress port is 511
+[18:22:45.345] [bmv2] [D] [thread 5895] [7.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.345] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Processing packet received on port 4
+[18:22:45.345] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Parser 'parser': start
+[18:22:45.346] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.346] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.346] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.347] [bmv2] [T] [thread 5895] [8.0] [cxt 0] Bytes parsed: 14
+[18:22:45.347] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Parser 'parser': end
+[18:22:45.348] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.348] [bmv2] [T] [thread 5895] [8.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.348] [bmv2] [T] [thread 5895] [8.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.349] [bmv2] [T] [thread 5895] [8.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.350] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Looking up key:
 
-[02:24:45.891] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.891] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.892] [bmv2] [T] [thread 4972] [8.0] [cxt 0] Action MyIngress.drop
-[02:24:45.892] [bmv2] [T] [thread 4972] [8.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.893] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.893] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Egress port is 511
-[02:24:45.893] [bmv2] [D] [thread 4972] [8.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.894] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Processing packet received on port 2
-[02:24:45.894] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Parser 'parser': start
-[02:24:45.895] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.896] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.896] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.896] [bmv2] [T] [thread 4972] [9.0] [cxt 0] Bytes parsed: 14
-[02:24:45.897] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Parser 'parser': end
-[02:24:45.897] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.897] [bmv2] [T] [thread 4972] [9.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.897] [bmv2] [T] [thread 4972] [9.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.898] [bmv2] [T] [thread 4972] [9.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.898] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Looking up key:
+[18:22:45.350] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.351] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.351] [bmv2] [T] [thread 5895] [8.0] [cxt 0] Action MyIngress.drop
+[18:22:45.351] [bmv2] [T] [thread 5895] [8.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.352] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.352] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Egress port is 511
+[18:22:45.352] [bmv2] [D] [thread 5895] [8.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.567] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Processing packet received on port 4
+[18:22:45.568] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Parser 'parser': start
+[18:22:45.568] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.568] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.569] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.569] [bmv2] [T] [thread 5895] [9.0] [cxt 0] Bytes parsed: 14
+[18:22:45.569] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Parser 'parser': end
+[18:22:45.569] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.569] [bmv2] [T] [thread 5895] [9.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.569] [bmv2] [T] [thread 5895] [9.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.569] [bmv2] [T] [thread 5895] [9.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.569] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Looking up key:
 
-[02:24:45.899] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.899] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.900] [bmv2] [T] [thread 4972] [9.0] [cxt 0] Action MyIngress.drop
-[02:24:45.900] [bmv2] [T] [thread 4972] [9.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.901] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.901] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Egress port is 511
-[02:24:45.901] [bmv2] [D] [thread 4972] [9.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.933] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Processing packet received on port 2
-[02:24:45.933] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Parser 'parser': start
-[02:24:45.934] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.934] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.934] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.935] [bmv2] [T] [thread 4972] [10.0] [cxt 0] Bytes parsed: 14
-[02:24:45.935] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Parser 'parser': end
-[02:24:45.936] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.936] [bmv2] [T] [thread 4972] [10.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.936] [bmv2] [T] [thread 4972] [10.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.937] [bmv2] [T] [thread 4972] [10.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.937] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Looking up key:
+[18:22:45.569] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.569] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.569] [bmv2] [T] [thread 5895] [9.0] [cxt 0] Action MyIngress.drop
+[18:22:45.570] [bmv2] [T] [thread 5895] [9.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.570] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.570] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Egress port is 511
+[18:22:45.570] [bmv2] [D] [thread 5895] [9.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.632] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Processing packet received on port 3
+[18:22:45.632] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Parser 'parser': start
+[18:22:45.632] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.633] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.634] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.634] [bmv2] [T] [thread 5895] [10.0] [cxt 0] Bytes parsed: 14
+[18:22:45.635] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Parser 'parser': end
+[18:22:45.635] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.636] [bmv2] [T] [thread 5895] [10.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.637] [bmv2] [T] [thread 5895] [10.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.637] [bmv2] [T] [thread 5895] [10.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.637] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Looking up key:
 
-[02:24:45.938] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.938] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.938] [bmv2] [T] [thread 4972] [10.0] [cxt 0] Action MyIngress.drop
-[02:24:45.939] [bmv2] [T] [thread 4972] [10.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.940] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.940] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Egress port is 511
-[02:24:45.941] [bmv2] [D] [thread 4972] [10.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.979] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Processing packet received on port 4
-[02:24:45.981] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Parser 'parser': start
-[02:24:45.981] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.982] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.982] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.985] [bmv2] [T] [thread 4972] [11.0] [cxt 0] Bytes parsed: 14
-[02:24:45.986] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Parser 'parser': end
-[02:24:45.987] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.987] [bmv2] [T] [thread 4972] [11.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.988] [bmv2] [T] [thread 4972] [11.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.988] [bmv2] [T] [thread 4972] [11.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.989] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Looking up key:
+[18:22:45.638] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.638] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.639] [bmv2] [T] [thread 5895] [10.0] [cxt 0] Action MyIngress.drop
+[18:22:45.639] [bmv2] [T] [thread 5895] [10.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.640] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.640] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Egress port is 511
+[18:22:45.641] [bmv2] [D] [thread 5895] [10.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.641] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Processing packet received on port 3
+[18:22:45.642] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Parser 'parser': start
+[18:22:45.642] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.643] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.643] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.644] [bmv2] [T] [thread 5895] [11.0] [cxt 0] Bytes parsed: 14
+[18:22:45.645] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Parser 'parser': end
+[18:22:45.645] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.646] [bmv2] [T] [thread 5895] [11.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.646] [bmv2] [T] [thread 5895] [11.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.647] [bmv2] [T] [thread 5895] [11.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.648] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Looking up key:
 
-[02:24:45.989] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.989] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.990] [bmv2] [T] [thread 4972] [11.0] [cxt 0] Action MyIngress.drop
-[02:24:45.990] [bmv2] [T] [thread 4972] [11.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.990] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.991] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Egress port is 511
-[02:24:45.991] [bmv2] [D] [thread 4972] [11.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:45.992] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Processing packet received on port 4
-[02:24:45.993] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Parser 'parser': start
-[02:24:45.993] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:45.994] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Extracting header 'ethernet'
-[02:24:45.994] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:45.995] [bmv2] [T] [thread 4972] [12.0] [cxt 0] Bytes parsed: 14
-[02:24:45.995] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Parser 'parser': end
-[02:24:45.995] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Pipeline 'ingress': start
-[02:24:45.996] [bmv2] [T] [thread 4972] [12.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:45.996] [bmv2] [T] [thread 4972] [12.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:45.996] [bmv2] [T] [thread 4972] [12.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:45.997] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Looking up key:
+[18:22:45.648] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.649] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.650] [bmv2] [T] [thread 5895] [11.0] [cxt 0] Action MyIngress.drop
+[18:22:45.650] [bmv2] [T] [thread 5895] [11.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.651] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.651] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Egress port is 511
+[18:22:45.652] [bmv2] [D] [thread 5895] [11.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.661] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Processing packet received on port 2
+[18:22:45.661] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Parser 'parser': start
+[18:22:45.662] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.662] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.662] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.662] [bmv2] [T] [thread 5895] [12.0] [cxt 0] Bytes parsed: 14
+[18:22:45.663] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Parser 'parser': end
+[18:22:45.663] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.664] [bmv2] [T] [thread 5895] [12.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.664] [bmv2] [T] [thread 5895] [12.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.665] [bmv2] [T] [thread 5895] [12.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.665] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Looking up key:
 
-[02:24:45.997] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:45.998] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:45.998] [bmv2] [T] [thread 4972] [12.0] [cxt 0] Action MyIngress.drop
-[02:24:45.998] [bmv2] [T] [thread 4972] [12.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:45.999] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Pipeline 'ingress': end
-[02:24:45.999] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Egress port is 511
-[02:24:46.000] [bmv2] [D] [thread 4972] [12.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:46.044] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Processing packet received on port 3
-[02:24:46.044] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Parser 'parser': start
-[02:24:46.044] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:46.045] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Extracting header 'ethernet'
-[02:24:46.045] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:46.046] [bmv2] [T] [thread 4972] [13.0] [cxt 0] Bytes parsed: 14
-[02:24:46.046] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Parser 'parser': end
-[02:24:46.046] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Pipeline 'ingress': start
-[02:24:46.047] [bmv2] [T] [thread 4972] [13.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:46.047] [bmv2] [T] [thread 4972] [13.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:46.047] [bmv2] [T] [thread 4972] [13.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:46.048] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Looking up key:
+[18:22:45.666] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.666] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.667] [bmv2] [T] [thread 5895] [12.0] [cxt 0] Action MyIngress.drop
+[18:22:45.667] [bmv2] [T] [thread 5895] [12.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.668] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.669] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Egress port is 511
+[18:22:45.669] [bmv2] [D] [thread 5895] [12.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.669] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Processing packet received on port 2
+[18:22:45.670] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Parser 'parser': start
+[18:22:45.670] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.671] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.671] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.671] [bmv2] [T] [thread 5895] [13.0] [cxt 0] Bytes parsed: 14
+[18:22:45.672] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Parser 'parser': end
+[18:22:45.672] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.673] [bmv2] [T] [thread 5895] [13.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.673] [bmv2] [T] [thread 5895] [13.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.674] [bmv2] [T] [thread 5895] [13.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.674] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Looking up key:
 
-[02:24:46.048] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:46.048] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:46.049] [bmv2] [T] [thread 4972] [13.0] [cxt 0] Action MyIngress.drop
-[02:24:46.049] [bmv2] [T] [thread 4972] [13.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:46.049] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Pipeline 'ingress': end
-[02:24:46.049] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Egress port is 511
-[02:24:46.050] [bmv2] [D] [thread 4972] [13.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:46.050] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Processing packet received on port 3
-[02:24:46.051] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Parser 'parser': start
-[02:24:46.051] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:46.051] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Extracting header 'ethernet'
-[02:24:46.051] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:46.052] [bmv2] [T] [thread 4972] [14.0] [cxt 0] Bytes parsed: 14
-[02:24:46.052] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Parser 'parser': end
-[02:24:46.052] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Pipeline 'ingress': start
-[02:24:46.053] [bmv2] [T] [thread 4972] [14.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:46.053] [bmv2] [T] [thread 4972] [14.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:46.054] [bmv2] [T] [thread 4972] [14.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:46.054] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Looking up key:
+[18:22:45.674] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.675] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.675] [bmv2] [T] [thread 5895] [13.0] [cxt 0] Action MyIngress.drop
+[18:22:45.676] [bmv2] [T] [thread 5895] [13.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.676] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.676] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Egress port is 511
+[18:22:45.677] [bmv2] [D] [thread 5895] [13.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.790] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Processing packet received on port 3
+[18:22:45.791] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Parser 'parser': start
+[18:22:45.791] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.791] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.792] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.792] [bmv2] [T] [thread 5895] [14.0] [cxt 0] Bytes parsed: 14
+[18:22:45.792] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Parser 'parser': end
+[18:22:45.792] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.793] [bmv2] [T] [thread 5895] [14.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.793] [bmv2] [T] [thread 5895] [14.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.793] [bmv2] [T] [thread 5895] [14.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.794] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Looking up key:
 
-[02:24:46.054] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:46.054] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:46.054] [bmv2] [T] [thread 4972] [14.0] [cxt 0] Action MyIngress.drop
-[02:24:46.055] [bmv2] [T] [thread 4972] [14.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:46.055] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Pipeline 'ingress': end
-[02:24:46.055] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Egress port is 511
-[02:24:46.056] [bmv2] [D] [thread 4972] [14.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:46.133] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Processing packet received on port 1
-[02:24:46.133] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Parser 'parser': start
-[02:24:46.134] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:46.134] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Extracting header 'ethernet'
-[02:24:46.135] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:46.135] [bmv2] [T] [thread 4972] [15.0] [cxt 0] Bytes parsed: 14
-[02:24:46.135] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Parser 'parser': end
-[02:24:46.135] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Pipeline 'ingress': start
-[02:24:46.136] [bmv2] [T] [thread 4972] [15.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:46.136] [bmv2] [T] [thread 4972] [15.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:46.137] [bmv2] [T] [thread 4972] [15.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:46.137] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Looking up key:
+[18:22:45.794] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.794] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.794] [bmv2] [T] [thread 5895] [14.0] [cxt 0] Action MyIngress.drop
+[18:22:45.794] [bmv2] [T] [thread 5895] [14.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.794] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.795] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Egress port is 511
+[18:22:45.795] [bmv2] [D] [thread 5895] [14.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.822] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Processing packet received on port 4
+[18:22:45.822] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Parser 'parser': start
+[18:22:45.822] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.822] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.823] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.823] [bmv2] [T] [thread 5895] [15.0] [cxt 0] Bytes parsed: 14
+[18:22:45.823] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Parser 'parser': end
+[18:22:45.824] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.824] [bmv2] [T] [thread 5895] [15.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.825] [bmv2] [T] [thread 5895] [15.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.825] [bmv2] [T] [thread 5895] [15.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.825] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Looking up key:
 
-[02:24:46.138] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:46.138] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:46.139] [bmv2] [T] [thread 4972] [15.0] [cxt 0] Action MyIngress.drop
-[02:24:46.139] [bmv2] [T] [thread 4972] [15.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:46.140] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Pipeline 'ingress': end
-[02:24:46.141] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Egress port is 511
-[02:24:46.141] [bmv2] [D] [thread 4972] [15.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:46.164] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Processing packet received on port 4
-[02:24:46.164] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Parser 'parser': start
-[02:24:46.164] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:46.164] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Extracting header 'ethernet'
-[02:24:46.164] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:46.164] [bmv2] [T] [thread 4972] [16.0] [cxt 0] Bytes parsed: 14
-[02:24:46.164] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Parser 'parser': end
-[02:24:46.164] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Pipeline 'ingress': start
-[02:24:46.164] [bmv2] [T] [thread 4972] [16.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:46.164] [bmv2] [T] [thread 4972] [16.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:46.164] [bmv2] [T] [thread 4972] [16.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:46.164] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Looking up key:
+[18:22:45.825] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.825] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.826] [bmv2] [T] [thread 5895] [15.0] [cxt 0] Action MyIngress.drop
+[18:22:45.826] [bmv2] [T] [thread 5895] [15.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.826] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.826] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Egress port is 511
+[18:22:45.826] [bmv2] [D] [thread 5895] [15.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:45.853] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Processing packet received on port 1
+[18:22:45.853] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Parser 'parser': start
+[18:22:45.853] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:45.853] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Extracting header 'ethernet'
+[18:22:45.853] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:45.856] [bmv2] [T] [thread 5895] [16.0] [cxt 0] Bytes parsed: 14
+[18:22:45.856] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Parser 'parser': end
+[18:22:45.856] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Pipeline 'ingress': start
+[18:22:45.856] [bmv2] [T] [thread 5895] [16.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:45.856] [bmv2] [T] [thread 5895] [16.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:45.857] [bmv2] [T] [thread 5895] [16.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:45.857] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Looking up key:
 
-[02:24:46.165] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:46.165] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:46.165] [bmv2] [T] [thread 4972] [16.0] [cxt 0] Action MyIngress.drop
-[02:24:46.165] [bmv2] [T] [thread 4972] [16.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:46.166] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Pipeline 'ingress': end
-[02:24:46.166] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Egress port is 511
-[02:24:46.166] [bmv2] [D] [thread 4972] [16.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:46.519] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Processing packet received on port 3
-[02:24:46.520] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Parser 'parser': start
-[02:24:46.520] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:46.520] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Extracting header 'ethernet'
-[02:24:46.521] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:46.522] [bmv2] [T] [thread 4972] [17.0] [cxt 0] Bytes parsed: 14
-[02:24:46.522] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Parser 'parser': end
-[02:24:46.522] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Pipeline 'ingress': start
-[02:24:46.522] [bmv2] [T] [thread 4972] [17.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:46.522] [bmv2] [T] [thread 4972] [17.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:46.522] [bmv2] [T] [thread 4972] [17.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:46.522] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Looking up key:
+[18:22:45.857] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:45.857] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:45.858] [bmv2] [T] [thread 5895] [16.0] [cxt 0] Action MyIngress.drop
+[18:22:45.858] [bmv2] [T] [thread 5895] [16.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:45.858] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Pipeline 'ingress': end
+[18:22:45.858] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Egress port is 511
+[18:22:45.858] [bmv2] [D] [thread 5895] [16.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:46.107] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Processing packet received on port 2
+[18:22:46.108] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Parser 'parser': start
+[18:22:46.108] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:46.109] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Extracting header 'ethernet'
+[18:22:46.109] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:46.109] [bmv2] [T] [thread 5895] [17.0] [cxt 0] Bytes parsed: 14
+[18:22:46.109] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Parser 'parser': end
+[18:22:46.109] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Pipeline 'ingress': start
+[18:22:46.109] [bmv2] [T] [thread 5895] [17.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:46.109] [bmv2] [T] [thread 5895] [17.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:46.109] [bmv2] [T] [thread 5895] [17.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:46.109] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Looking up key:
 
-[02:24:46.522] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:46.523] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:46.523] [bmv2] [T] [thread 4972] [17.0] [cxt 0] Action MyIngress.drop
-[02:24:46.523] [bmv2] [T] [thread 4972] [17.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:46.523] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Pipeline 'ingress': end
-[02:24:46.524] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Egress port is 511
-[02:24:46.524] [bmv2] [D] [thread 4972] [17.0] [cxt 0] Dropping packet at the end of ingress
-[02:24:46.644] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Processing packet received on port 4
-[02:24:46.645] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Parser 'parser': start
-[02:24:46.645] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Parser 'parser' entering state 'start'
-[02:24:46.645] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Extracting header 'ethernet'
-[02:24:46.646] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Parser state 'start': key is 86dd
-[02:24:46.646] [bmv2] [T] [thread 4972] [18.0] [cxt 0] Bytes parsed: 14
-[02:24:46.646] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Parser 'parser': end
-[02:24:46.646] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Pipeline 'ingress': start
-[02:24:46.646] [bmv2] [T] [thread 4972] [18.0] [cxt 0] basic.p4(114) Condition "hdr.ipv4.isValid()" (node_2) is false
-[02:24:46.646] [bmv2] [T] [thread 4972] [18.0] [cxt 0] basic.p4(117) Condition "hdr.ipv4.ttl <= 5" (node_4) is true
-[02:24:46.646] [bmv2] [T] [thread 4972] [18.0] [cxt 0] Applying table 'tbl_drop'
-[02:24:46.646] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Looking up key:
+[18:22:46.109] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:46.109] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:46.109] [bmv2] [T] [thread 5895] [17.0] [cxt 0] Action MyIngress.drop
+[18:22:46.109] [bmv2] [T] [thread 5895] [17.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:46.110] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Pipeline 'ingress': end
+[18:22:46.110] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Egress port is 511
+[18:22:46.110] [bmv2] [D] [thread 5895] [17.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Processing packet received on port 3
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Parser 'parser': start
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Extracting header 'ethernet'
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:46.110] [bmv2] [T] [thread 5895] [18.0] [cxt 0] Bytes parsed: 14
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Parser 'parser': end
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Pipeline 'ingress': start
+[18:22:46.110] [bmv2] [T] [thread 5895] [18.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:46.110] [bmv2] [T] [thread 5895] [18.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:46.110] [bmv2] [T] [thread 5895] [18.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Looking up key:
 
-[02:24:46.647] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Table 'tbl_drop': miss
-[02:24:46.648] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Action entry is MyIngress.drop - 
-[02:24:46.649] [bmv2] [T] [thread 4972] [18.0] [cxt 0] Action MyIngress.drop
-[02:24:46.650] [bmv2] [T] [thread 4972] [18.0] [cxt 0] basic.p4(90) Primitive mark_to_drop(standard_metadata)
-[02:24:46.651] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Pipeline 'ingress': end
-[02:24:46.651] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Egress port is 511
-[02:24:46.652] [bmv2] [D] [thread 4972] [18.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:46.110] [bmv2] [T] [thread 5895] [18.0] [cxt 0] Action MyIngress.drop
+[18:22:46.110] [bmv2] [T] [thread 5895] [18.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:46.110] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Pipeline 'ingress': end
+[18:22:46.111] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Egress port is 511
+[18:22:46.111] [bmv2] [D] [thread 5895] [18.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:47.473] [bmv2] [W] [thread 5963] [P4Runtime] p4::tmp::P4DeviceConfig is deprecated
+[18:22:47.476] [bmv2] [D] [thread 5963] Set default default entry for table 'MyIngress.ipv4_lpm': MyIngress.drop - 
+[18:22:47.477] [bmv2] [D] [thread 5963] Set default default entry for table 'tbl_drop': MyIngress.drop - 
+[18:22:47.479] [bmv2] [D] [thread 5963] simple_switch target has been notified of a config swap
+[18:22:47.484] [bmv2] [D] [thread 5964] Set default entry for table 'MyIngress.ipv4_lpm': MyIngress.drop - 
+[18:22:47.489] [bmv2] [D] [thread 5963] Entry 0 added to table 'MyIngress.ipv4_lpm'
+[18:22:47.489] [bmv2] [D] [thread 5963] Dumping entry 0
+Match key:
+* hdr.ipv4.dstAddr    : LPM       0a000101/32
+Action entry: MyIngress.ipv4_forward - 80000000300,4,
+
+[18:22:47.493] [bmv2] [D] [thread 5964] Entry 1 added to table 'MyIngress.ipv4_lpm'
+[18:22:47.494] [bmv2] [D] [thread 5964] Dumping entry 1
+Match key:
+* hdr.ipv4.dstAddr    : LPM       0a000202/32
+Action entry: MyIngress.ipv4_forward - 80000000400,3,
+
+[18:22:47.497] [bmv2] [D] [thread 5963] Entry 2 added to table 'MyIngress.ipv4_lpm'
+[18:22:47.498] [bmv2] [D] [thread 5963] Dumping entry 2
+Match key:
+* hdr.ipv4.dstAddr    : LPM       0a000303/32
+Action entry: MyIngress.ipv4_forward - 80000000333,1,
+
+[18:22:47.502] [bmv2] [D] [thread 5964] Entry 3 added to table 'MyIngress.ipv4_lpm'
+[18:22:47.502] [bmv2] [D] [thread 5964] Dumping entry 3
+Match key:
+* hdr.ipv4.dstAddr    : LPM       0a000404/32
+Action entry: MyIngress.ipv4_forward - 80000000444,2,
+
+[18:22:49.499] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Processing packet received on port 1
+[18:22:49.499] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Parser 'parser': start
+[18:22:49.500] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:49.500] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Extracting header 'ethernet'
+[18:22:49.500] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:49.500] [bmv2] [T] [thread 5895] [19.0] [cxt 0] Bytes parsed: 14
+[18:22:49.500] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Parser 'parser': end
+[18:22:49.500] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Pipeline 'ingress': start
+[18:22:49.500] [bmv2] [T] [thread 5895] [19.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:49.500] [bmv2] [T] [thread 5895] [19.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:49.501] [bmv2] [T] [thread 5895] [19.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:49.502] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Looking up key:
+
+[18:22:49.502] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:49.502] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:49.502] [bmv2] [T] [thread 5895] [19.0] [cxt 0] Action MyIngress.drop
+[18:22:49.502] [bmv2] [T] [thread 5895] [19.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:49.502] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Pipeline 'ingress': end
+[18:22:49.502] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Egress port is 511
+[18:22:49.503] [bmv2] [D] [thread 5895] [19.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:49.506] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Processing packet received on port 3
+[18:22:49.506] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Parser 'parser': start
+[18:22:49.507] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:49.507] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Extracting header 'ethernet'
+[18:22:49.507] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:49.507] [bmv2] [T] [thread 5895] [20.0] [cxt 0] Bytes parsed: 14
+[18:22:49.507] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Parser 'parser': end
+[18:22:49.507] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Pipeline 'ingress': start
+[18:22:49.507] [bmv2] [T] [thread 5895] [20.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:49.508] [bmv2] [T] [thread 5895] [20.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:49.508] [bmv2] [T] [thread 5895] [20.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:49.508] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Looking up key:
+
+[18:22:49.508] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:49.508] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:49.508] [bmv2] [T] [thread 5895] [20.0] [cxt 0] Action MyIngress.drop
+[18:22:49.508] [bmv2] [T] [thread 5895] [20.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:49.508] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Pipeline 'ingress': end
+[18:22:49.509] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Egress port is 511
+[18:22:49.509] [bmv2] [D] [thread 5895] [20.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:49.509] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Processing packet received on port 4
+[18:22:49.509] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Parser 'parser': start
+[18:22:49.509] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:49.510] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Extracting header 'ethernet'
+[18:22:49.510] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:49.510] [bmv2] [T] [thread 5895] [21.0] [cxt 0] Bytes parsed: 14
+[18:22:49.510] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Parser 'parser': end
+[18:22:49.510] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Pipeline 'ingress': start
+[18:22:49.511] [bmv2] [T] [thread 5895] [21.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:49.511] [bmv2] [T] [thread 5895] [21.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:49.511] [bmv2] [T] [thread 5895] [21.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:49.511] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Looking up key:
+
+[18:22:49.511] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:49.511] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:49.511] [bmv2] [T] [thread 5895] [21.0] [cxt 0] Action MyIngress.drop
+[18:22:49.512] [bmv2] [T] [thread 5895] [21.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:49.512] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Pipeline 'ingress': end
+[18:22:49.512] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Egress port is 511
+[18:22:49.512] [bmv2] [D] [thread 5895] [21.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:49.512] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Processing packet received on port 3
+[18:22:49.512] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Parser 'parser': start
+[18:22:49.512] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:49.513] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Extracting header 'ethernet'
+[18:22:49.513] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:49.513] [bmv2] [T] [thread 5895] [22.0] [cxt 0] Bytes parsed: 14
+[18:22:49.513] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Parser 'parser': end
+[18:22:49.513] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Pipeline 'ingress': start
+[18:22:49.514] [bmv2] [T] [thread 5895] [22.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:49.514] [bmv2] [T] [thread 5895] [22.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:49.514] [bmv2] [T] [thread 5895] [22.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:49.514] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Looking up key:
+
+[18:22:49.515] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:49.515] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:49.515] [bmv2] [T] [thread 5895] [22.0] [cxt 0] Action MyIngress.drop
+[18:22:49.515] [bmv2] [T] [thread 5895] [22.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:49.516] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Pipeline 'ingress': end
+[18:22:49.516] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Egress port is 511
+[18:22:49.516] [bmv2] [D] [thread 5895] [22.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:49.765] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Processing packet received on port 4
+[18:22:49.767] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Parser 'parser': start
+[18:22:49.768] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:49.769] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Extracting header 'ethernet'
+[18:22:49.770] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:49.770] [bmv2] [T] [thread 5895] [23.0] [cxt 0] Bytes parsed: 14
+[18:22:49.770] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Parser 'parser': end
+[18:22:49.771] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Pipeline 'ingress': start
+[18:22:49.771] [bmv2] [T] [thread 5895] [23.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:49.771] [bmv2] [T] [thread 5895] [23.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:49.772] [bmv2] [T] [thread 5895] [23.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:49.772] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Looking up key:
+
+[18:22:49.772] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:49.773] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:49.773] [bmv2] [T] [thread 5895] [23.0] [cxt 0] Action MyIngress.drop
+[18:22:49.773] [bmv2] [T] [thread 5895] [23.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:49.773] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Pipeline 'ingress': end
+[18:22:49.773] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Egress port is 511
+[18:22:49.774] [bmv2] [D] [thread 5895] [23.0] [cxt 0] Dropping packet at the end of ingress
+[18:22:50.011] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Processing packet received on port 2
+[18:22:50.011] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Parser 'parser': start
+[18:22:50.012] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Parser 'parser' entering state 'start'
+[18:22:50.012] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Extracting header 'ethernet'
+[18:22:50.013] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Parser state 'start': key is 86dd
+[18:22:50.014] [bmv2] [T] [thread 5895] [24.0] [cxt 0] Bytes parsed: 14
+[18:22:50.014] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Parser 'parser': end
+[18:22:50.014] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Pipeline 'ingress': start
+[18:22:50.014] [bmv2] [T] [thread 5895] [24.0] [cxt 0] basic.p4(127) Condition "hdr.ipv4.isValid()" (node_2) is false
+[18:22:50.015] [bmv2] [T] [thread 5895] [24.0] [cxt 0] basic.p4(130) Condition "hdr.ipv4.ttl == 0" (node_4) is true
+[18:22:50.015] [bmv2] [T] [thread 5895] [24.0] [cxt 0] Applying table 'tbl_drop'
+[18:22:50.015] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Looking up key:
+
+[18:22:50.015] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Table 'tbl_drop': miss
+[18:22:50.016] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Action entry is MyIngress.drop - 
+[18:22:50.016] [bmv2] [T] [thread 5895] [24.0] [cxt 0] Action MyIngress.drop
+[18:22:50.016] [bmv2] [T] [thread 5895] [24.0] [cxt 0] basic.p4(103) Primitive mark_to_drop(standard_metadata)
+[18:22:50.016] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Pipeline 'ingress': end
+[18:22:50.017] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Egress port is 511
+[18:22:50.017] [bmv2] [D] [thread 5895] [24.0] [cxt 0] Dropping packet at the end of ingress
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory

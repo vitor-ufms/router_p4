@@ -176,7 +176,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 161,
+        "line" : 174,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -193,7 +193,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 139,
+        "line" : 152,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },
@@ -269,7 +269,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 90,
+            "line" : 103,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -291,7 +291,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 90,
+            "line" : 103,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -326,7 +326,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 94,
+            "line" : 107,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = port"
           }
@@ -345,7 +345,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 95,
+            "line" : 108,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.srcAddr = hdr.ethernet.dstAddr"
           }
@@ -364,7 +364,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 96,
+            "line" : 109,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.dstAddr = dstAddr"
           }
@@ -406,7 +406,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 97,
+            "line" : 110,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
           }
@@ -420,7 +420,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 86,
+        "line" : 99,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
@@ -431,7 +431,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 100,
+            "line" : 113,
             "column" : 10,
             "source_fragment" : "ipv4_lpm"
           },
@@ -469,7 +469,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 118,
+            "line" : 131,
             "column" : 12,
             "source_fragment" : "drop()"
           },
@@ -501,7 +501,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 114,
+            "line" : 127,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid()"
           },
@@ -524,21 +524,21 @@
           "id" : 1,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 117,
+            "line" : 130,
             "column" : 11,
-            "source_fragment" : "hdr.ipv4.ttl <= 5"
+            "source_fragment" : "hdr.ipv4.ttl == 0"
           },
           "expression" : {
             "type" : "expression",
             "value" : {
-              "op" : "<=",
+              "op" : "==",
               "left" : {
                 "type" : "field",
                 "value" : ["ipv4", "ttl"]
               },
               "right" : {
                 "type" : "hexstr",
-                "value" : "0x05"
+                "value" : "0x00"
               }
             }
           },
@@ -552,7 +552,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 127,
+        "line" : 140,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
@@ -568,7 +568,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 139,
+        "line" : 152,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },

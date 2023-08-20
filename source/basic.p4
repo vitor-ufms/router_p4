@@ -3,6 +3,8 @@
 #include <v1model.p4>
 
 const bit<16> TYPE_IPV4 = 0x800;
+const bit<16> TYPE_IPV6 = 0x86DD;
+const bit<16> TYPE_ARP = 0x806;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -31,6 +33,17 @@ header ipv4_t {
     bit<16>   hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
+}
+
+header ipv6_t {
+    bit<4>  version;
+    bit<8>  traf_class;
+    bit<20> flow_lab;
+    bit<16> payload_length;
+    bit<8>  next_header;
+    bit<8>  hop_lim;
+    bit<128> srcAddr;
+    bit<128> dstAddr;
 }
 
 struct metadata {
