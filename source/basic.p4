@@ -68,16 +68,21 @@ parser MyParser(packet_in packet,
         transition parse_ethernet;
     }
 
-    state parse_ethernet {
+    state parse_ethernet { // ethernet
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             TYPE_IPV4: parse_ipv4;
+            TYPE_IPV6: parse_ipv6;
             default: accept;
         }
     }
 
-    state parse_ipv4 {
+    state parse_ipv4 { // ipv4
         packet.extract(hdr.ipv4);
+        transition accept;
+    }
+    state parse_ipv6{ // ipv6
+        packet.extract(hdr.ipv6);
         transition accept;
     }
 
