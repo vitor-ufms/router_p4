@@ -1,10 +1,10 @@
 
-[2023-08-18 20:30:49.807] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2023-08-20 02:24:47.527] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
-Message too long (16222 bytes)! Skipping log...
+Message too long (18515 bytes)! Skipping log...
 ---
 
-[2023-08-18 20:30:49.824] /p4.v1.P4Runtime/Write
+[2023-08-20 02:24:47.541] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -26,7 +26,7 @@ updates {
 }
 ---
 
-[2023-08-18 20:30:49.830] /p4.v1.P4Runtime/Write
+[2023-08-20 02:24:47.545] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -62,7 +62,7 @@ updates {
 }
 ---
 
-[2023-08-18 20:30:49.833] /p4.v1.P4Runtime/Write
+[2023-08-20 02:24:47.549] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -98,7 +98,7 @@ updates {
 }
 ---
 
-[2023-08-18 20:30:49.837] /p4.v1.P4Runtime/Write
+[2023-08-20 02:24:47.554] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -134,7 +134,7 @@ updates {
 }
 ---
 
-[2023-08-18 20:30:49.840] /p4.v1.P4Runtime/Write
+[2023-08-20 02:24:47.559] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {

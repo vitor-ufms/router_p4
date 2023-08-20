@@ -114,6 +114,9 @@ control MyIngress(inout headers hdr,
         if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
         }
+        if(hdr.ipv4.ttl == 0){ // subtrai e depois verifica, tem qu enviar mensagem de erro?
+            drop();
+        }
     }
 }
 
