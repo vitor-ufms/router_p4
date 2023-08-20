@@ -130,12 +130,15 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-        if (hdr.ipv4.isValid()) {
+        if (hdr.ipv4.isValid()) { // procedimentos para ipv4
             ipv4_lpm.apply();
+            if(hdr.ipv4.ttl == 0) // subtrai e depois verifica, tem qu enviar mensagem de erro?
+                drop();
         }
-        if(hdr.ipv4.ttl == 0){ // subtrai e depois verifica, tem qu enviar mensagem de erro?
-            drop();
-        }
+        if(hdr.ipv6.isValid()) // procedimentos ipv6
+            //ipv6_table.apply();
+            if(hdr.ipv6.hop_lim == 0)
+                drop();
     }
 }
 
