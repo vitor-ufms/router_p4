@@ -53,6 +53,7 @@ struct metadata {
 struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
+    ipv6_t       ipv6;
 }
 
 /*************************************************************************
