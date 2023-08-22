@@ -133,7 +133,7 @@ control MyIngress(inout headers hdr,
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
             ipv4_lpm.apply();
             if(hdr.ipv4.ttl == 0) // subtrai e depois verifica, tem qu enviar mensagem de erro?
-                drop();
+                drop(); 
         }
         if(hdr.ipv6.isValid()) // procedimentos ipv6
             //ipv6_table.apply();
@@ -199,3 +199,15 @@ MyEgress(),
 MyComputeChecksum(),
 MyDeparser()
 ) main;
+
+
+/*************************************************************************
+***********************  Comentarios add   *******************************
+*************************************************************************/
+/*
+ 
+ erro de checksum descarta o pacote // RFC 1812 item 4.2.2.5
+ 
+
+
+*/

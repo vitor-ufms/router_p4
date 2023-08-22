@@ -1,0 +1,269 @@
+{
+    "source_info": {
+        "action": {
+            "node_source_map": {
+                "ingress::act_forward": {
+                    "debug_state_value": 50331648, 
+                    "label": "pif_action_state_ingress::act_forward", 
+                    "live_ranges": null, 
+                    "lineno": 23, 
+                    "filename": "bypass.p4"
+                }
+            }
+        }, 
+        "ctlflow": {
+            "ingress_flow": {
+                "node_source_map": {
+                    "ingress::tbl_direction": {
+                        "debug_state_value": 33554432, 
+                        "label": "pif_ctlflow_state_ingress_flow_ingress::tbl_direction", 
+                        "live_ranges": null, 
+                        "lineno": 27, 
+                        "filename": "bypass.p4"
+                    }
+                }
+            }
+        }, 
+        "table_hit": {
+            "node_source_map": {
+                "ingress::act_forward": {
+                    "label": "pif_table_hit_ingress::act_forward", 
+                    "lineno": null, 
+                    "filename": null
+                }
+            }
+        }, 
+        "parrep": {
+            "node_source_map": {
+                "start": {
+                    "debug_state_value": 16777216, 
+                    "label": "pif_parrep_state_start", 
+                    "live_ranges": null, 
+                    "lineno": 11, 
+                    "filename": "bypass.p4"
+                }
+            }
+        }
+    }, 
+    "parrep": {
+        "tierinfo": {}, 
+        "control_off_lw": 0, 
+        "node_map": {
+            "0": "start"
+        }, 
+        "headers": {}, 
+        "rt_symbols": {
+            "0": "_parrep_0", 
+            "1": "_parrep_1", 
+            "2": "_parrep_2", 
+            "3": "_parrep_3", 
+            "4": "_parrep_4", 
+            "5": "_parrep_5", 
+            "6": "_parrep_6", 
+            "7": "_parrep_7"
+        }, 
+        "control_layout": [
+            {
+                "tier": null, 
+                "width": 1, 
+                "off": 0, 
+                "field": "valid"
+            }
+        ], 
+        "stacked_headers": [], 
+        "metadata": {
+            "standard_metadata": {
+                "layout": [
+                    {
+                        "layout": [
+                            {
+                                "width": 32, 
+                                "lmbitoff": 0, 
+                                "name": "clone_spec", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "clone_spec", 
+                        "lmoff": 0, 
+                        "width": 32, 
+                        "cname": "clone_spec", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 16, 
+                                "lmbitoff": 32, 
+                                "name": "egress_spec", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "egress_spec", 
+                        "lmoff": 32, 
+                        "width": 16, 
+                        "cname": "egress_spec", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 16, 
+                                "lmbitoff": 48, 
+                                "name": "egress_port", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "egress_port", 
+                        "lmoff": 48, 
+                        "width": 16, 
+                        "cname": "egress_port", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 16, 
+                                "lmbitoff": 64, 
+                                "name": "ingress_port", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "ingress_port", 
+                        "lmoff": 64, 
+                        "width": 16, 
+                        "cname": "ingress_port", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 14, 
+                                "lmbitoff": 80, 
+                                "name": "packet_length", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "packet_length", 
+                        "lmoff": 80, 
+                        "width": 14, 
+                        "cname": "packet_length", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 1, 
+                                "lmbitoff": 94, 
+                                "name": "checksum_error", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "checksum_error", 
+                        "lmoff": 94, 
+                        "width": 1, 
+                        "cname": "checksum_error", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 1, 
+                                "lmbitoff": 95, 
+                                "name": "_padding_0", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "_padding_0", 
+                        "lmoff": 95, 
+                        "width": 1, 
+                        "cname": "_padding_0", 
+                        "attributes": {
+                            "padding": true
+                        }
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 10, 
+                                "lmbitoff": 96, 
+                                "name": "egress_instance", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "egress_instance", 
+                        "lmoff": 96, 
+                        "width": 10, 
+                        "cname": "egress_instance", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 8, 
+                                "lmbitoff": 106, 
+                                "name": "parser_error_location", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "parser_error_location", 
+                        "lmoff": 106, 
+                        "width": 8, 
+                        "cname": "parser_error_location", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 4, 
+                                "lmbitoff": 114, 
+                                "name": "instance_type", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "instance_type", 
+                        "lmoff": 114, 
+                        "width": 4, 
+                        "cname": "instance_type", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 3, 
+                                "lmbitoff": 118, 
+                                "name": "parser_status", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "parser_status", 
+                        "lmoff": 118, 
+                        "width": 3, 
+                        "cname": "parser_status", 
+                        "attributes": {}
+                    }, 
+                    {
+                        "layout": [
+                            {
+                                "width": 7, 
+                                "lmbitoff": 121, 
+                                "name": "_padding_1", 
+                                "fldbitoff": 0
+                            }
+                        ], 
+                        "name": "_padding_1", 
+                        "lmoff": 121, 
+                        "width": 7, 
+                        "cname": "_padding_1", 
+                        "attributes": {
+                            "padding": true
+                        }
+                    }
+                ], 
+                "off_lw": 1
+            }
+        }
+    }, 
+    "counters": {
+        "direct_counter": {}
+    }
+}

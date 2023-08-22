@@ -1,0 +1,131 @@
+##########################################
+# Header instance definitions            #
+##########################################
+
+errors:
+    type: enum
+    values:
+    -   NoError: 1
+    -   PacketTooShort: 2
+    -   NoMatch: 3
+    -   StackOutOfBounds: 4
+    -   HeaderTooShort: 5
+    -   ParserTimeout: 6
+
+standard_metadata:
+    fields:
+    -   ingress_port: 16
+    -   packet_length: 14
+    -   egress_spec: 16
+    -   egress_port: 16
+    -   egress_instance: 10
+    -   instance_type: 4
+    -   clone_spec: 32
+    -   parser_error_location: 8
+    -   parser_status: 3
+    -   checksum_error: 1
+    type: metadata
+
+
+##########################################
+# Parse states                           #
+##########################################
+
+start:
+    src_filename: bypass.p4
+    src_lineno: 11
+    type: parse_state
+
+
+##########################################
+# Parser                                 #
+##########################################
+
+parser:
+    format: dot
+    implementation: |-
+        digraph {
+            start -> exit [value="default", mask="none", order="0"]
+        }
+    start_state: start
+    type: parser
+
+
+##########################################
+# Action sets                            #
+##########################################
+
+ingress::act_forward:
+    implementation: modify_field(standard_metadata.egress_spec, port);
+    parameter_list:
+    -   port: 16
+    src_filename: bypass.p4
+    src_lineno: 23
+    type: action
+
+
+##########################################
+# Ingress and Egress tables              #
+##########################################
+
+ingress::tbl_direction:
+    allowed_actions:
+    - ingress::act_forward
+    match_on:
+        standard_metadata.ingress_port: exact
+    max_entries: 1025
+    src_filename: bypass.p4
+    src_lineno: 27
+    type: table
+
+
+##########################################
+# Ingress control flow                   #
+##########################################
+
+ingress_flow:
+    doc: control flow for ingress
+    format: dot
+    implementation: |-
+        digraph {
+            "ingress::tbl_direction" -> "exit_control_flow" [action = always]
+        }
+    start_state: ingress::tbl_direction
+    type: control_flow
+
+
+##########################################
+# Deparsers                              #
+##########################################
+
+deparser:
+    order: []
+    type: deparser
+
+
+##########################################
+# Processor layout                       #
+##########################################
+
+layout:
+    format: list
+    implementation:
+    - parser
+    - ingress
+    type: processor_layout
+
+
+##########################################
+# Source info                            #
+##########################################
+
+source_info:
+    date: 2023/06/01 23:35:22
+    output_file: output/firmware.yml
+    p4_version: '16'
+    source_files:
+    - bypass.p4
+    - ../../../../opt/netronome/p4/include/16/p4include/core.p4
+    type: source_info
+
+
