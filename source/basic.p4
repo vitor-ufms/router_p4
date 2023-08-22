@@ -95,7 +95,7 @@ parser MyParser(packet_in packet,
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     apply { 
-         verify_checksum(  // 
+         verify_checksum(  // adiciona 1 em standard_metadata.checksum_error se estiver erro
             hdr.ipv4.isValid(),
             {   hdr.ipv4.version,
                 hdr.ipv4.ihl,
