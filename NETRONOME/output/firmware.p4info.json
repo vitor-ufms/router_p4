@@ -1,0 +1,54 @@
+{
+ "tables": [
+  {
+   "preamble": {
+    "id": 33572994,
+    "name": "tbl_direction",
+    "alias": "tbl_direction"
+   },
+   "matchFields": [
+    {
+     "id": 1,
+     "name": "standard_metadata.ingress_port",
+     "bitwidth": 16,
+     "matchType": "EXACT"
+    }
+   ],
+   "actionRefs": [
+    {
+     "id": 16822368
+    },
+    {
+     "id": 16800567,
+     "annotations": [
+      "@defaultonly()"
+     ]
+    }
+   ],
+   "size": "1024"
+  }
+ ],
+ "actions": [
+  {
+   "preamble": {
+    "id": 16800567,
+    "name": "NoAction",
+    "alias": "NoAction"
+   }
+  },
+  {
+   "preamble": {
+    "id": 16822368,
+    "name": "act_forward",
+    "alias": "act_forward"
+   },
+   "params": [
+    {
+     "id": 1,
+     "name": "port",
+     "bitwidth": 16
+    }
+   ]
+  }
+ ]
+}
