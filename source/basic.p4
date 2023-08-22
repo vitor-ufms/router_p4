@@ -94,7 +94,24 @@ parser MyParser(packet_in packet,
 *************************************************************************/
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply {  }
+    apply { 
+         verify_checksum(  // 
+            hdr.ipv4.isValid(),
+            {   hdr.ipv4.version,
+                hdr.ipv4.ihl,
+                hdr.ipv4.diffserv,
+                hdr.ipv4.totalLen,
+                hdr.ipv4.identification,
+                hdr.ipv4.flags,
+                hdr.ipv4.fragOffset,
+                hdr.ipv4.ttl,
+                hdr.ipv4.protocol,
+                hdr.ipv4.srcAddr,
+                hdr.ipv4.dstAddr },
+            hdr.ipv4.hdrChecksum,
+            HashAlgorithm.csum16);
+
+     } 
 }
 
 
@@ -133,6 +150,8 @@ control MyIngress(inout headers hdr,
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
             ipv4_lpm.apply();
             if(hdr.ipv4.ttl == 0) // subtrai e depois verifica, tem qu enviar mensagem de erro?
+                drop();
+            if (standard_metadata.checksum_error == 1)
                 drop(); 
         }
         if(hdr.ipv6.isValid()) // procedimentos ipv6
@@ -204,10 +223,34 @@ MyDeparser()
 /*************************************************************************
 ***********************  Comentarios add   *******************************
 *************************************************************************/
-/*
- 
+/* RFC 1812
+
+ Qual topologia?
  erro de checksum descarta o pacote // RFC 1812 item 4.2.2.5
- 
+
+IMPREMENTAR:
+ - checksum verify
+ - forwarding ipv6
+ - Protocolo arp
+
+TESTAR:
+ - ttl
+ - checksum
+ - forwanding 
 
 
 */
+
+// header tcp_t {
+//     bit<16> srcPort;
+//     bit<16> dstPort;
+//     bit<32> seqNo;
+//     bit<32> ackNo;
+//     bit<4>  dataOffset;
+//     bit<3>  res;
+//     bit<3>  ecn;
+//     bit<6>  ctrl;
+//     bit<16> window;
+//     bit<16> checksum;
+//     bit<16> urgentPtr;
+// }
