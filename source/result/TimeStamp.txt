@@ -1,0 +1,19 @@
+bit<48> ingress_ts; // carimbo de data/hora, em microssegundos, definido quando o pacote aparece na entrada
+00 00 01 6c 28 64 = 23865444 = 23,865444
+
+bit<48> egress_ts; // um carimbo de data/hora, em microssegundos, definido quando o pacote inicia o processamento de saída,  lido no pipeline de saída
+00 00 01 6c 3a c4 = 23870148 = 23,870148
+
+bit<32> enq_ts; // um carimbo de data/hora, em microssegundos, definido quando o pacote é enfileirado pela primeira vez.
+01 6c 3a b1 = 23870129 = 23,870129
+
+bit<32> deq_ts; // deq_timedelta: o tempo, em microssegundos, que o pacote ficou na fila.
+00 00 00 14 = 20
+
+0000   08 00 00 00 03 00 ff ff ff ff ff ff 08 00 45 00   ..............E.
+0010   00 29 00 01 00 00 05 06 9d cb 0a 00 01 01 0a 00   .)..............
+0020   03 03 e9 d1 04 d2 00 00 00 00 00 00 00 00 50 02   ..............P.
+0030   20 00 48 3a 00 00 00 00 01 6c 28 64 00 00 01 6c    .H:.....l(d...l
+0040   3a c4 01 6c 3a b1 00 00 00 14 41                  :..l:.....A
+
+apartir de 20 00 48 3a 00 00

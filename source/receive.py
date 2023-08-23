@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+from hexdump import hexdump  # Importar a função hexdump do módulo hexdump
 
 from scapy.all import (
     TCP,
@@ -10,7 +11,8 @@ from scapy.all import (
     IPOption,
     ShortField,
     get_if_list,
-    sniff
+    sniff,
+    ls
 )
 from scapy.layers.inet import _IPOption_HDR
 
@@ -40,11 +42,14 @@ class IPOption_MRI(IPOption):
                                    IntField("", 0),
                                    length_from=lambda pkt:pkt.count*4) ]
 def handle_pkt(pkt):
-    if TCP in pkt and pkt[TCP].dport == 1234:
-        print("got a packet")
+    #if TCP in pkt and pkt[TCP].dport == 1234:
+        print(" ---------------------------------  got a packet ----------------------------------------------")
         pkt.show2()
-    #    hexdump(pkt)
+        #ls(pkt) # lista de valores dos campos
+        hexdump(bytes(pkt)) # imprime o pacote como hexadecimal
         sys.stdout.flush()
+    # else:
+    #     print("não é tcp")
 
 
 def main():

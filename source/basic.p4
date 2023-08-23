@@ -46,14 +46,40 @@ header ipv6_t {
     bit<128> dstAddr;
 }
 
+header tcp_t {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<32> seqNo;
+    bit<32> ackNo;
+    bit<4>  dataOffset;
+    bit<3>  res;
+    bit<3>  ecn;
+    bit<6>  ctrl;
+    bit<16> window;
+    bit<16> checksum;
+    bit<16> urgentPtr;
+}
+
+header time_stamp_t {
+
+    bit<48> ingress_ts; // carimbo de data/hora, em microssegundos, definido quando o pacote aparece na entrada
+    bit<48> egress_ts; // um carimbo de data/hora, em microssegundos, definido quando o pacote inicia o processamento de saída,  lido no pipeline de saída
+    bit<32> enq_ts; // um carimbo de data/hora, em microssegundos, definido quando o pacote é enfileirado pela primeira vez.
+    bit<32> deq_ts; // deq_timedelta: o tempo, em microssegundos, que o pacote ficou na fila.
+
+}
+
 struct metadata {
     /* empty */
+    time_stamp_t time;
 }
 
 struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
     ipv6_t       ipv6;
+    tcp_t        tcp;
+    time_stamp_t time;
 }
 
 /*************************************************************************
@@ -80,6 +106,7 @@ parser MyParser(packet_in packet,
 
     state parse_ipv4 { // ipv4
         packet.extract(hdr.ipv4);
+        //packet.extract(hdr.tcp); // APAGAR ESSA LINHA DEPOIS
         transition accept;
     }
     state parse_ipv6{ // ipv6
@@ -168,7 +195,26 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {  }
+    apply { 
+
+        if(!hdr.time.isValid()){
+
+            hdr.time.setValid();
+
+            hdr.time.ingress_ts = standard_metadata.ingress_global_timestamp;
+            hdr.time.egress_ts = standard_metadata.egress_global_timestamp;
+            hdr.time.enq_ts = standard_metadata.enq_timestamp;
+            hdr.time.deq_ts = standard_metadata.deq_timedelta;
+
+        }
+
+        //   meta.time.ingress_ts = standard_metadata.ingress_global_timestamp;
+        // meta.time.egress_ts = standard_metadata.egress_global_timestamp;
+        // meta.time.enq_ts = standard_metadata.enq_timestamp;
+        // meta.time.deq_ts = standard_metadata.deq_timedelta;
+    
+    
+     }
 }
 
 /*************************************************************************
@@ -203,6 +249,8 @@ control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
+        //packet.emit(hdr.tcp);
+        packet.emit(hdr.time);
     }
 }
 
