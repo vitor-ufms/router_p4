@@ -197,7 +197,7 @@ control MyEgress(inout headers hdr,
                  inout standard_metadata_t standard_metadata) {
     apply { 
 
-        if(!hdr.time.isValid()){
+        if(!hdr.time.isValid()){ // cria um header no pacote com time
 
             hdr.time.setValid();
 
