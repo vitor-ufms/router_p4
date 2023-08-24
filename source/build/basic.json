@@ -4,7 +4,7 @@
       "name" : "scalars_0",
       "id" : 0,
       "fields" : [
-        ["flag_0", 1, false],
+        ["pkt_to_router_0", 1, false],
         ["dstAddr_ether_0", 48, false],
         ["srcAddr_ipv4_0", 32, false],
         ["_padding_0", 7, false]
@@ -635,7 +635,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "flag_0"]
+              "value" : ["scalars", "pkt_to_router_0"]
             },
             {
               "type" : "hexstr",
@@ -646,7 +646,7 @@
             "filename" : "basic.p4",
             "line" : 169,
             "column" : 8,
-            "source_fragment" : "flag = 1"
+            "source_fragment" : "pkt_to_router = 1"
           }
         }
       ]
@@ -827,7 +827,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "flag_0"]
+              "value" : ["scalars", "pkt_to_router_0"]
             },
             {
               "type" : "hexstr",
@@ -838,7 +838,7 @@
             "filename" : "basic.p4",
             "line" : 154,
             "column" : 4,
-            "source_fragment" : "bit<1> flag = 0;"
+            "source_fragment" : "bit<1> pkt_to_router = 0;"
           }
         }
       ]
@@ -863,7 +863,7 @@
             "filename" : "basic.p4",
             "line" : 154,
             "column" : 4,
-            "source_fragment" : "bit<1> flag = 0;"
+            "source_fragment" : "bit<1> pkt_to_router = 0;"
           },
           "key" : [],
           "match_type" : "exact",
@@ -1148,7 +1148,7 @@
             "filename" : "basic.p4",
             "line" : 219,
             "column" : 19,
-            "source_fragment" : "flag == 1"
+            "source_fragment" : "pkt_to_router == 1"
           },
           "expression" : {
             "type" : "expression",
@@ -1156,7 +1156,7 @@
               "op" : "==",
               "left" : {
                 "type" : "field",
-                "value" : ["scalars", "flag_0"]
+                "value" : ["scalars", "pkt_to_router_0"]
               },
               "right" : {
                 "type" : "hexstr",

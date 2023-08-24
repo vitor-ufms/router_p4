@@ -151,7 +151,7 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    bit<1> flag = 0;
+    bit<1> pkt_to_router = 0;
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -166,7 +166,7 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
     action my_router( ){
-        flag = 1;
+        pkt_to_router = 1;
     }
     ////////////////
     action icmp_forward(){ // icmp para o roteador corrente
@@ -216,7 +216,7 @@ control MyIngress(inout headers hdr,
 
             if(hdr.icmp.isValid())
 
-                if(flag == 1){ // icmp para o roteador
+                if(pkt_to_router == 1){ // icmp para o roteador
                     if(hdr.icmp.type == ICMP_ECHO_REQUEST)
                         icmp_forward();
                         icmp_ping();
