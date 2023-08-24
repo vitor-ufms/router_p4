@@ -43,37 +43,6 @@ header ipv4_t {
     ip4Addr_t dstAddr;
 }
 
-header ipv6_t {
-    bit<4>  version;
-    bit<8>  traf_class;
-    bit<20> flow_lab;
-    bit<16> payload_length;
-    bit<8>  next_header;
-    bit<8>  hop_lim;
-    bit<128> srcAddr;
-    bit<128> dstAddr;
-}
-
-header tcp_t {
-    bit<16> srcPort;
-    bit<16> dstPort;
-    bit<32> seqNo;
-    bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
-    bit<16> window;
-    bit<16> checksum;
-    bit<16> urgentPtr;
-}
-
-header udp_t {
-    bit<16> srcPort;
-    bit<16> dstPort;
-    bit<16> length_;
-    bit<16> checksum;
-}
 
 
 header arp_t {
@@ -104,9 +73,6 @@ struct metadata {
 struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
-    ipv6_t       ipv6;
-    tcp_t        tcp;
-    //time_stamp_t time;
     arp_t        arp;
     icmp_t      icmp;
 }
@@ -128,9 +94,8 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             TYPE_IPV4: parse_ipv4;
-            TYPE_IPV6: parse_ipv6;
+            //TYPE_IPV6: parse_ipv6;
             TYPE_ARP: parse_arp;
-            // arp
             default: accept;
         }
     }
@@ -142,11 +107,6 @@ parser MyParser(packet_in packet,
             default: accept;
         }
     }
-    state parse_ipv6{ // ipv6
-        packet.extract(hdr.ipv6);
-        transition accept;
-    }
-
     state parse_arp{
         packet.extract(hdr.arp);
         transition accept;
@@ -190,6 +150,8 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+
+
     action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -204,6 +166,7 @@ control MyIngress(inout headers hdr,
     }
     ////////////////
     action icmp_forward(){ // icmp para o roteador corrente
+
         standard_metadata.egress_spec = standard_metadata.ingress_port;
         macAddr_t dstAddr_ether = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
@@ -212,9 +175,9 @@ control MyIngress(inout headers hdr,
         ip4Addr_t srcAddr_ipv4 = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
         hdr.ipv4.dstAddr = srcAddr_ipv4;
+
     }
     action icmp_ping(){
-
         //hdr.icmp.type = 0x08; rs loop
         hdr.icmp.type = ICMP_ECHO_REPLY; 
          
@@ -264,10 +227,7 @@ control MyIngress(inout headers hdr,
                         icmp_ping();
                 }
         }
-        if(hdr.ipv6.isValid()) // procedimentos ipv6
-            //ipv6_table.apply();
-            if(hdr.ipv6.hop_lim == 0)
-                drop();
+        
     }
 }
 
@@ -415,4 +375,40 @@ TESTAR:
         // meta.time.egress_ts = standard_metadata.egress_global_timestamp;
         // meta.time.enq_ts = standard_metadata.enq_timestamp;
         // meta.time.deq_ts = standard_metadata.deq_timedelta;
+
+
+
+        header ipv6_t {
+    bit<4>  version;
+    bit<8>  traf_class;
+    bit<20> flow_lab;
+    bit<16> payload_length;
+    bit<8>  next_header;
+    bit<8>  hop_lim;
+    bit<128> srcAddr;
+    bit<128> dstAddr;
+}
+
+
+
+header tcp_t {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<32> seqNo;
+    bit<32> ackNo;
+    bit<4>  dataOffset;
+    bit<3>  res;
+    bit<3>  ecn;
+    bit<6>  ctrl;
+    bit<16> window;
+    bit<16> checksum;
+    bit<16> urgentPtr;
+}
+
+header udp_t {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<16> length_;
+    bit<16> checksum;
+}
 */

@@ -20,7 +20,7 @@ tables {
     id: 25652968
   }
   action_refs {
-    id: 25856420
+    id: 21257015
   }
   size: 1024
 }
@@ -43,7 +43,7 @@ tables {
     id: 25652968
   }
   action_refs {
-    id: 25856420
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -51,16 +51,17 @@ tables {
 }
 actions {
   preamble {
-    id: 25652968
-    name: "MyIngress.drop"
-    alias: "drop"
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
   }
 }
 actions {
   preamble {
-    id: 25856420
-    name: "MyIngress.NoAction"
-    alias: "NoAction"
+    id: 25652968
+    name: "MyIngress.drop"
+    alias: "drop"
   }
 }
 actions {
