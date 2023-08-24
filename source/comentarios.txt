@@ -1,0 +1,8 @@
+
+PARSER
+    13.8 . Extração de dados  https://p4.org/p4-spec/docs/P4-16-v1.2.4.html#sec-packet-extract-two
+    linha 40  https://github.com/p4lang/p4c/blob/main/p4include/core.p4 
+    tamanho variado de pacote ip https://p4.org/p4-spec/docs/P4-16-v1.2.4.html#sec-packet-extract-two seção 13.8.2 . Extração de largura variável
+
+APPLY
+    if (ipv4_match.apply().hit)  se tiver acerto  ou .miss()

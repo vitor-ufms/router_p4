@@ -10,6 +10,8 @@ const bit<8> TYPE_IPV4_ICMP = 0x01;
 
 
 const bit<8> ICMP_ECHO_REPLY = 0x00;
+const bit<8> ICMP_ECHO_REQUEST = 0x08;
+const bit<8> ICMP_TIME_EXCEEDED = 0x0B;
 
 
 /*************************************************************************
@@ -94,18 +96,9 @@ header icmp_t {
     bit<16> checksum;
 }
 
-header time_stamp_t {
-
-    bit<48> ingress_ts; // carimbo de data/hora, em microssegundos, definido quando o pacote aparece na entrada
-    bit<48> egress_ts; // um carimbo de data/hora, em microssegundos, definido quando o pacote inicia o processamento de saída,  lido no pipeline de saída
-    bit<32> enq_ts; // um carimbo de data/hora, em microssegundos, definido quando o pacote é enfileirado pela primeira vez.
-    bit<32> deq_ts; // deq_timedelta: o tempo, em microssegundos, que o pacote ficou na fila.
-
-}
-
 struct metadata {
     /* empty */
-    time_stamp_t time;
+   // time_stamp_t time;
 }
 
 struct headers {
@@ -113,7 +106,7 @@ struct headers {
     ipv4_t       ipv4;
     ipv6_t       ipv6;
     tcp_t        tcp;
-    time_stamp_t time;
+    //time_stamp_t time;
     arp_t        arp;
     icmp_t      icmp;
 }
@@ -201,6 +194,8 @@ control MyIngress(inout headers hdr,
         mark_to_drop(standard_metadata);
     }
 
+    //action NoAction() {}
+
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         standard_metadata.egress_spec = port;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
@@ -208,7 +203,7 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
     ////////////////
-    action icmp_forward(){ // resposta de ping
+    action icmp_forward(){ // icmp para o roteador corrente
         standard_metadata.egress_spec = standard_metadata.ingress_port;
         macAddr_t dstAddr_ether = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
@@ -217,6 +212,8 @@ control MyIngress(inout headers hdr,
         ip4Addr_t srcAddr_ipv4 = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
         hdr.ipv4.dstAddr = srcAddr_ipv4;
+    }
+    action icmp_ping(){
 
         //hdr.icmp.type = 0x08; rs loop
         hdr.icmp.type = ICMP_ECHO_REPLY; 
@@ -246,21 +243,26 @@ control MyIngress(inout headers hdr,
             drop;
         }
         size = 1024;
-        //default_action = NoAction();
+        //default_action = NoAction(); // não faz nada se não for correspondente ao ip do roteador
     }
-
-
+ 
     apply {
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
             ipv4_lpm.apply();
 
-            if(hdr.ipv4.ttl == 0) // subtrai e depois verifica, tem qu enviar mensagem de erro?
+            if(hdr.ipv4.ttl == 0){ // subtrai e depois verifica, tem qu enviar mensagem de erro?
                 drop();
+                //gerar um icmp iniciar o ttl
+            }     
             if (standard_metadata.checksum_error == 1)
                 drop(); 
 
             if(hdr.icmp.isValid())
-                icmp_exact.apply();
+                //icmp_exact.apply(); // if (ipv4_match.apply().hit)  se tiver acerto  ou .miss()
+                if(icmp_exact.apply().hit){ // icmp para o roteador
+                    if(hdr.icmp.type == ICMP_ECHO_REQUEST)
+                        icmp_ping();
+                }
         }
         if(hdr.ipv6.isValid()) // procedimentos ipv6
             //ipv6_table.apply();
@@ -276,26 +278,8 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply { 
+    apply {   }
 
-        // if(!hdr.time.isValid()){ // cria um header no pacote com time
-
-        //     hdr.time.setValid();
-
-        //     hdr.time.ingress_ts = standard_metadata.ingress_global_timestamp;
-        //     hdr.time.egress_ts = standard_metadata.egress_global_timestamp;
-        //     hdr.time.enq_ts = standard_metadata.enq_timestamp;
-        //     hdr.time.deq_ts = standard_metadata.deq_timedelta;
-
-        // }
-
-        //   meta.time.ingress_ts = standard_metadata.ingress_global_timestamp;
-        // meta.time.egress_ts = standard_metadata.egress_global_timestamp;
-        // meta.time.enq_ts = standard_metadata.enq_timestamp;
-        // meta.time.deq_ts = standard_metadata.deq_timedelta;
-    
-    
-     }
 }
 
 /*************************************************************************
@@ -304,7 +288,7 @@ control MyEgress(inout headers hdr,
 
 control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
      apply {
-        update_checksum(
+        update_checksum( 
         hdr.ipv4.isValid(),
             { hdr.ipv4.version,
               hdr.ipv4.ihl,
@@ -322,7 +306,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
     
 
 
-        update_checksum_with_payload(
+        update_checksum_with_payload( // verificar se pacote icmp foi alterado
             hdr.icmp.isValid(),
                 { hdr.icmp.type,
                   hdr.icmp.code },
@@ -376,6 +360,7 @@ IMPREMENTAR:
  - Protocolo arp
  - icmp e icmpv6
  - broadcast
+ - tamanho variado de pacote ip 
 
 TESTAR:
  - ttl
@@ -384,6 +369,22 @@ TESTAR:
 
 
 */
+
+/*****************************  retalhos de código ************************************ 
+***************************************************************************************/
+/*
+
+
+
+// header time_stamp_t {
+
+//     bit<48> ingress_ts; // carimbo de data/hora, em microssegundos, definido quando o pacote aparece na entrada
+//     bit<48> egress_ts; // um carimbo de data/hora, em microssegundos, definido quando o pacote inicia o processamento de saída,  lido no pipeline de saída
+//     bit<32> enq_ts; // um carimbo de data/hora, em microssegundos, definido quando o pacote é enfileirado pela primeira vez.
+//     bit<32> deq_ts; // deq_timedelta: o tempo, em microssegundos, que o pacote ficou na fila.
+
+// }
+
 
 // header tcp_t {
 //     bit<16> srcPort;
@@ -398,3 +399,20 @@ TESTAR:
 //     bit<16> checksum;
 //     bit<16> urgentPtr;
 // }
+
+        // if(!hdr.time.isValid()){ // cria um header no pacote com time
+
+        //     hdr.time.setValid();
+
+        //     hdr.time.ingress_ts = standard_metadata.ingress_global_timestamp;
+        //     hdr.time.egress_ts = standard_metadata.egress_global_timestamp;
+        //     hdr.time.enq_ts = standard_metadata.enq_timestamp;
+        //     hdr.time.deq_ts = standard_metadata.deq_timedelta;
+
+        // }
+
+        //   meta.time.ingress_ts = standard_metadata.ingress_global_timestamp;
+        // meta.time.egress_ts = standard_metadata.egress_global_timestamp;
+        // meta.time.enq_ts = standard_metadata.enq_timestamp;
+        // meta.time.deq_ts = standard_metadata.deq_timedelta;
+*/

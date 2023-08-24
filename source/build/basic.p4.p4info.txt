@@ -20,7 +20,7 @@ tables {
     id: 25652968
   }
   action_refs {
-    id: 21257015
+    id: 25856420
   }
   size: 1024
 }
@@ -43,7 +43,7 @@ tables {
     id: 25652968
   }
   action_refs {
-    id: 21257015
+    id: 25856420
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -51,17 +51,16 @@ tables {
 }
 actions {
   preamble {
-    id: 21257015
-    name: "NoAction"
-    alias: "NoAction"
-    annotations: "@noWarn(\"unused\")"
+    id: 25652968
+    name: "MyIngress.drop"
+    alias: "drop"
   }
 }
 actions {
   preamble {
-    id: 25652968
-    name: "MyIngress.drop"
-    alias: "drop"
+    id: 25856420
+    name: "MyIngress.NoAction"
+    alias: "NoAction"
   }
 }
 actions {
@@ -86,6 +85,13 @@ actions {
     id: 21006855
     name: "MyIngress.icmp_forward"
     alias: "icmp_forward"
+  }
+}
+actions {
+  preamble {
+    id: 29380751
+    name: "MyIngress.icmp_ping"
+    alias: "icmp_ping"
   }
 }
 type_info {
