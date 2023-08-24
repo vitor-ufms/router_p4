@@ -100,6 +100,7 @@ parser MyParser(packet_in packet,
         transition select(hdr.ethernet.etherType) {
             TYPE_IPV4: parse_ipv4;
             TYPE_IPV6: parse_ipv6;
+            // arp
             default: accept;
         }
     }
@@ -250,7 +251,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
         //packet.emit(hdr.tcp);
-        packet.emit(hdr.time);
+        //packet.emit(hdr.time);
     }
 }
 
@@ -280,6 +281,8 @@ IMPREMENTAR:
  - checksum verify
  - forwarding ipv6
  - Protocolo arp
+ - icmp
+ - broadcast
 
 TESTAR:
  - ttl

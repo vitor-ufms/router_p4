@@ -275,11 +275,11 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 248,
+        "line" : 249,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
-      "order" : ["ethernet", "ipv4", "time"],
+      "order" : ["ethernet", "ipv4"],
       "primitives" : []
     }
   ],
@@ -292,7 +292,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 226,
+        "line" : 227,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },
@@ -349,7 +349,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 125,
+        "line" : 126,
         "column" : 9,
         "source_fragment" : "verify_checksum( // adiciona 1 em standard_metadata.checksum_error se estiver erro ..."
       },
@@ -425,7 +425,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 153,
+            "line" : 154,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -447,7 +447,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 153,
+            "line" : 154,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -469,7 +469,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 153,
+            "line" : 154,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -491,7 +491,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 153,
+            "line" : 154,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -526,7 +526,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 157,
+            "line" : 158,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = port"
           }
@@ -545,7 +545,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 158,
+            "line" : 159,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.srcAddr = hdr.ethernet.dstAddr"
           }
@@ -564,7 +564,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 159,
+            "line" : 160,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.dstAddr = dstAddr"
           }
@@ -606,7 +606,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 160,
+            "line" : 161,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
           }
@@ -614,7 +614,7 @@
       ]
     },
     {
-      "name" : "basic202",
+      "name" : "basic203",
       "id" : 6,
       "runtime_data" : [],
       "primitives" : [
@@ -628,7 +628,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 202,
+            "line" : 203,
             "column" : 12,
             "source_fragment" : "hdr.time.setValid()"
           }
@@ -647,7 +647,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 204,
+            "line" : 205,
             "column" : 12,
             "source_fragment" : "hdr.time.ingress_ts = standard_metadata.ingress_global_timestamp"
           }
@@ -666,7 +666,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 205,
+            "line" : 206,
             "column" : 12,
             "source_fragment" : "hdr.time.egress_ts = standard_metadata.egress_global_timestamp"
           }
@@ -685,7 +685,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 206,
+            "line" : 207,
             "column" : 12,
             "source_fragment" : "hdr.time.enq_ts = standard_metadata.enq_timestamp"
           }
@@ -704,7 +704,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 207,
+            "line" : 208,
             "column" : 12,
             "source_fragment" : "hdr.time.deq_ts = standard_metadata.deq_timedelta"
           }
@@ -718,7 +718,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 149,
+        "line" : 150,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
@@ -729,7 +729,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 163,
+            "line" : 164,
             "column" : 10,
             "source_fragment" : "ipv4_lpm"
           },
@@ -767,7 +767,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 180,
+            "line" : 181,
             "column" : 16,
             "source_fragment" : "drop()"
           },
@@ -796,7 +796,7 @@
           "id" : 2,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 182,
+            "line" : 183,
             "column" : 16,
             "source_fragment" : "drop()"
           },
@@ -825,7 +825,7 @@
           "id" : 3,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 187,
+            "line" : 188,
             "column" : 16,
             "source_fragment" : "drop()"
           },
@@ -857,7 +857,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 177,
+            "line" : 178,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid()"
           },
@@ -880,7 +880,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 179,
+            "line" : 180,
             "column" : 15,
             "source_fragment" : "hdr.ipv4.ttl == 0"
           },
@@ -906,7 +906,7 @@
           "id" : 2,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 181,
+            "line" : 182,
             "column" : 16,
             "source_fragment" : "standard_metadata.checksum_error == 1"
           },
@@ -932,7 +932,7 @@
           "id" : 3,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 184,
+            "line" : 185,
             "column" : 11,
             "source_fragment" : "hdr.ipv6.isValid()"
           },
@@ -955,7 +955,7 @@
           "id" : 4,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 186,
+            "line" : 187,
             "column" : 15,
             "source_fragment" : "hdr.ipv6.hop_lim == 0"
           },
@@ -983,18 +983,18 @@
       "id" : 1,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 195,
+        "line" : 196,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
       "init_table" : "node_13",
       "tables" : [
         {
-          "name" : "tbl_basic202",
+          "name" : "tbl_basic203",
           "id" : 4,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 202,
+            "line" : 203,
             "column" : 12,
             "source_fragment" : "hdr.time.setValid(); ..."
           },
@@ -1006,10 +1006,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [6],
-          "actions" : ["basic202"],
+          "actions" : ["basic203"],
           "base_default_next" : null,
           "next_tables" : {
-            "basic202" : null
+            "basic203" : null
           },
           "default_entry" : {
             "action_id" : 6,
@@ -1026,7 +1026,7 @@
           "id" : 5,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 200,
+            "line" : 201,
             "column" : 12,
             "source_fragment" : "hdr.time.isValid()"
           },
@@ -1042,7 +1042,7 @@
             }
           },
           "true_next" : null,
-          "false_next" : "tbl_basic202"
+          "false_next" : "tbl_basic203"
         }
       ]
     }
@@ -1053,7 +1053,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 226,
+        "line" : 227,
         "column" : 8,
         "source_fragment" : "update_checksum( ..."
       },
@@ -1079,7 +1079,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 125,
+        "line" : 126,
         "column" : 9,
         "source_fragment" : "verify_checksum( // adiciona 1 em standard_metadata.checksum_error se estiver erro ..."
       },

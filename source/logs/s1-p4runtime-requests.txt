@@ -1,10 +1,10 @@
 
-[2023-08-23 01:31:27.254] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2023-08-24 00:04:08.933] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
-Message too long (33232 bytes)! Skipping log...
+Message too long (33222 bytes)! Skipping log...
 ---
 
-[2023-08-23 01:31:27.267] /p4.v1.P4Runtime/Write
+[2023-08-24 00:04:08.950] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -25,7 +25,7 @@ updates {
 }
 ---
 
-[2023-08-23 01:31:27.273] /p4.v1.P4Runtime/Write
+[2023-08-24 00:04:08.955] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -60,7 +60,7 @@ updates {
 }
 ---
 
-[2023-08-23 01:31:27.290] /p4.v1.P4Runtime/Write
+[2023-08-24 00:04:08.962] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -82,81 +82,11 @@ updates {
           action_id: 28792405
           params {
             param_id: 1
-            value: "\010\000\000\000\002\""
+            value: "\010\000\000\000\002\000"
           }
           params {
             param_id: 2
             value: "\000\002"
-          }
-        }
-      }
-    }
-  }
-}
----
-
-[2023-08-23 01:31:27.295] /p4.v1.P4Runtime/Write
----
-election_id {
-  low: 1
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 37375156
-      match {
-        field_id: 1
-        lpm {
-          value: "\n\000\003\003"
-          prefix_len: 32
-        }
-      }
-      action {
-        action {
-          action_id: 28792405
-          params {
-            param_id: 1
-            value: "\010\000\000\000\003\000"
-          }
-          params {
-            param_id: 2
-            value: "\000\003"
-          }
-        }
-      }
-    }
-  }
-}
----
-
-[2023-08-23 01:31:27.300] /p4.v1.P4Runtime/Write
----
-election_id {
-  low: 1
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 37375156
-      match {
-        field_id: 1
-        lpm {
-          value: "\n\000\004\004"
-          prefix_len: 32
-        }
-      }
-      action {
-        action {
-          action_id: 28792405
-          params {
-            param_id: 1
-            value: "\010\000\000\000\004\000"
-          }
-          params {
-            param_id: 2
-            value: "\000\004"
           }
         }
       }
