@@ -6,6 +6,12 @@ const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_IPV6 = 0x86DD;
 const bit<16> TYPE_ARP = 0x806;
 
+const bit<8> TYPE_IPV4_ICMP = 0x01;
+
+
+const bit<8> ICMP_ECHO_REPLY = 0x00;
+
+
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
 *************************************************************************/
@@ -60,6 +66,34 @@ header tcp_t {
     bit<16> urgentPtr;
 }
 
+header udp_t {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<16> length_;
+    bit<16> checksum;
+}
+
+
+header arp_t {
+    bit<16> hrd; // Hardware Type
+    bit<16> pro; // Protocol Type
+    bit<8> hln; // Hardware Address Length
+    bit<8> pln; // Protocol Address Length
+    bit<16> op;  // Opcode
+    macAddr_t sha; // Sender Hardware Address
+    ip4Addr_t spa; // Sender Protocol Address
+    macAddr_t tha; // Target Hardware Address
+    ip4Addr_t tpa; // Target Protocol Address
+}
+
+
+
+header icmp_t {
+    bit<8>  type;
+    bit<8>  code;
+    bit<16> checksum;
+}
+
 header time_stamp_t {
 
     bit<48> ingress_ts; // carimbo de data/hora, em microssegundos, definido quando o pacote aparece na entrada
@@ -80,6 +114,8 @@ struct headers {
     ipv6_t       ipv6;
     tcp_t        tcp;
     time_stamp_t time;
+    arp_t        arp;
+    icmp_t      icmp;
 }
 
 /*************************************************************************
@@ -100,6 +136,7 @@ parser MyParser(packet_in packet,
         transition select(hdr.ethernet.etherType) {
             TYPE_IPV4: parse_ipv4;
             TYPE_IPV6: parse_ipv6;
+            TYPE_ARP: parse_arp;
             // arp
             default: accept;
         }
@@ -107,14 +144,24 @@ parser MyParser(packet_in packet,
 
     state parse_ipv4 { // ipv4
         packet.extract(hdr.ipv4);
-        //packet.extract(hdr.tcp); // APAGAR ESSA LINHA DEPOIS
-        transition accept;
+        transition select(hdr.ipv4.protocol){
+            TYPE_IPV4_ICMP: parse_icmp;
+            default: accept;
+        }
     }
     state parse_ipv6{ // ipv6
         packet.extract(hdr.ipv6);
         transition accept;
     }
 
+    state parse_arp{
+        packet.extract(hdr.arp);
+        transition accept;
+    }
+    state parse_icmp {
+        packet.extract(hdr.icmp);
+        transition accept;
+    }
 }
 
 /*************************************************************************
@@ -160,6 +207,21 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
+    ////////////////
+    action icmp_forward(){ // resposta de ping
+        standard_metadata.egress_spec = standard_metadata.ingress_port;
+        macAddr_t dstAddr_ether = hdr.ethernet.srcAddr;
+        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = dstAddr_ether;
+
+        ip4Addr_t srcAddr_ipv4 = hdr.ipv4.srcAddr;
+        hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
+        hdr.ipv4.dstAddr = srcAddr_ipv4;
+
+        //hdr.icmp.type = 0x08; rs loop
+        hdr.icmp.type = ICMP_ECHO_REPLY; 
+         
+    }
 
     table ipv4_lpm {
         key = {
@@ -171,16 +233,34 @@ control MyIngress(inout headers hdr,
             NoAction;
         }
         size = 1024;
-        default_action = drop();
+        //default_action = drop();
+       // default_action = NoAction();
     }
+
+    table icmp_exact {
+        key = {
+            hdr.ipv4.dstAddr: lpm;
+        }
+        actions = {
+            icmp_forward;
+            drop;
+        }
+        size = 1024;
+        //default_action = NoAction();
+    }
+
 
     apply {
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
             ipv4_lpm.apply();
+
             if(hdr.ipv4.ttl == 0) // subtrai e depois verifica, tem qu enviar mensagem de erro?
                 drop();
             if (standard_metadata.checksum_error == 1)
                 drop(); 
+
+            if(hdr.icmp.isValid())
+                icmp_exact.apply();
         }
         if(hdr.ipv6.isValid()) // procedimentos ipv6
             //ipv6_table.apply();
@@ -198,16 +278,16 @@ control MyEgress(inout headers hdr,
                  inout standard_metadata_t standard_metadata) {
     apply { 
 
-        if(!hdr.time.isValid()){ // cria um header no pacote com time
+        // if(!hdr.time.isValid()){ // cria um header no pacote com time
 
-            hdr.time.setValid();
+        //     hdr.time.setValid();
 
-            hdr.time.ingress_ts = standard_metadata.ingress_global_timestamp;
-            hdr.time.egress_ts = standard_metadata.egress_global_timestamp;
-            hdr.time.enq_ts = standard_metadata.enq_timestamp;
-            hdr.time.deq_ts = standard_metadata.deq_timedelta;
+        //     hdr.time.ingress_ts = standard_metadata.ingress_global_timestamp;
+        //     hdr.time.egress_ts = standard_metadata.egress_global_timestamp;
+        //     hdr.time.enq_ts = standard_metadata.enq_timestamp;
+        //     hdr.time.deq_ts = standard_metadata.deq_timedelta;
 
-        }
+        // }
 
         //   meta.time.ingress_ts = standard_metadata.ingress_global_timestamp;
         // meta.time.egress_ts = standard_metadata.egress_global_timestamp;
@@ -239,7 +319,16 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
               hdr.ipv4.dstAddr },
             hdr.ipv4.hdrChecksum,
             HashAlgorithm.csum16);
-    }
+    
+
+
+        update_checksum_with_payload(
+            hdr.icmp.isValid(),
+                { hdr.icmp.type,
+                  hdr.icmp.code },
+                hdr.icmp.checksum,
+                HashAlgorithm.csum16);
+     }
 }
 
 /*************************************************************************
@@ -250,6 +339,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
+        packet.emit(hdr.icmp);
         //packet.emit(hdr.tcp);
         //packet.emit(hdr.time);
     }
@@ -272,8 +362,11 @@ MyDeparser()
 /*************************************************************************
 ***********************  Comentarios add   *******************************
 *************************************************************************/
+
+
 /* RFC 1812
 
+ Fazer maquina de estado do parser no tcc
  Qual topologia?
  erro de checksum descarta o pacote // RFC 1812 item 4.2.2.5
 
@@ -281,7 +374,7 @@ IMPREMENTAR:
  - checksum verify
  - forwarding ipv6
  - Protocolo arp
- - icmp
+ - icmp e icmpv6
  - broadcast
 
 TESTAR:
