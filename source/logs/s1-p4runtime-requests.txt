@@ -1,10 +1,10 @@
 
-[2023-08-24 20:34:13.696] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2023-08-24 20:51:21.977] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
-Message too long (37154 bytes)! Skipping log...
+Message too long (39073 bytes)! Skipping log...
 ---
 
-[2023-08-24 20:34:13.703] /p4.v1.P4Runtime/Write
+[2023-08-24 20:51:21.984] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -25,7 +25,7 @@ updates {
 }
 ---
 
-[2023-08-24 20:34:13.706] /p4.v1.P4Runtime/Write
+[2023-08-24 20:51:21.987] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -60,7 +60,7 @@ updates {
 }
 ---
 
-[2023-08-24 20:34:13.709] /p4.v1.P4Runtime/Write
+[2023-08-24 20:51:22.010] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -95,7 +95,7 @@ updates {
 }
 ---
 
-[2023-08-24 20:34:13.712] /p4.v1.P4Runtime/Write
+[2023-08-24 20:51:22.015] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -130,7 +130,7 @@ updates {
 }
 ---
 
-[2023-08-24 20:34:13.715] /p4.v1.P4Runtime/Write
+[2023-08-24 20:51:22.018] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -139,7 +139,7 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 44288143
+      table_id: 37375156
       match {
         field_id: 1
         lpm {
@@ -149,7 +149,7 @@ updates {
       }
       action {
         action {
-          action_id: 21006855
+          action_id: 27854425
         }
       }
     }

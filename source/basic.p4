@@ -151,6 +151,7 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
+    bit<1> flag = 0;
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -163,6 +164,9 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+    }
+    action my_router( ){
+        flag = 1;
     }
     ////////////////
     action icmp_forward(){ // icmp para o roteador corrente
@@ -189,6 +193,7 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             ipv4_forward;
+            my_router;
             drop;
             NoAction;
         }
@@ -197,17 +202,6 @@ control MyIngress(inout headers hdr,
        // default_action = NoAction();
     }
 
-    table icmp_exact {
-        key = {
-            hdr.ipv4.dstAddr: lpm;
-        }
-        actions = {
-            icmp_forward;
-            drop;
-        }
-        size = 1024;
-        //default_action = NoAction(); // não faz nada se não for correspondente ao ip do roteador
-    }
  
     apply {
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
@@ -221,9 +215,10 @@ control MyIngress(inout headers hdr,
                 drop(); 
 
             if(hdr.icmp.isValid())
-                //icmp_exact.apply(); // if (ipv4_match.apply().hit)  se tiver acerto  ou .miss()
-                if(icmp_exact.apply().hit){ // icmp para o roteador
+
+                if(flag == 1){ // icmp para o roteador
                     if(hdr.icmp.type == ICMP_ECHO_REQUEST)
+                        icmp_forward();
                         icmp_ping();
                 }
         }
