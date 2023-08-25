@@ -3,8 +3,18 @@
 #include <v1model.p4>
 
 const bit<16> TYPE_IPV4 = 0x800;
-const bit<16> TYPE_IPV6 = 0x86DD;
+//const bit<16> TYPE_IPV6 = 0x86DD;
 const bit<16> TYPE_ARP = 0x806;
+
+
+const bit<16> ARP_HTYPE_ETHERNET = 0x0001;
+const bit<16> ARP_PTYPE_IPV4     = 0x0800;
+const bit<8>  ARP_HLEN_ETHERNET  = 6;  
+const bit<8>  ARP_PLEN_IPV4      = 4; 
+const bit<16> ARP_OPER_REQUEST   = 1; // arp.op operation
+const bit<16> ARP_OPER_REPLY     = 2;
+
+
 
 const bit<8> TYPE_IPV4_ICMP = 0x01;
 
@@ -12,6 +22,8 @@ const bit<8> TYPE_IPV4_ICMP = 0x01;
 const bit<8> ICMP_ECHO_REPLY = 0x00;
 const bit<8> ICMP_ECHO_REQUEST = 0x08;
 const bit<8> ICMP_TIME_EXCEEDED = 0x0B;
+
+
 
 
 /*************************************************************************
@@ -46,15 +58,15 @@ header ipv4_t {
 
 
 header arp_t {
-    bit<16> hrd; // Hardware Type
-    bit<16> pro; // Protocol Type
-    bit<8> hln; // Hardware Address Length
-    bit<8> pln; // Protocol Address Length
+    bit<16> hrd_type; // Hardware Type
+    bit<16> prot_type; // Protocol Type
+    bit<8> hlen; // Hardware Address Length
+    bit<8> plen; // Protocol Address Length
     bit<16> op;  // Opcode
-    macAddr_t sha; // Sender Hardware Address
-    ip4Addr_t spa; // Sender Protocol Address
-    macAddr_t tha; // Target Hardware Address
-    ip4Addr_t tpa; // Target Protocol Address
+    macAddr_t s_Add; // Sender Hardware Address
+    ip4Addr_t s_ip; // Sender Protocol Address
+    macAddr_t d_Add; // Target Hardware Address
+    ip4Addr_t d_ip; // Target Protocol Address
 }
 
 
@@ -202,6 +214,41 @@ control MyIngress(inout headers hdr,
        // default_action = NoAction();
     }
 
+    action arp_answer(macAddr_t addr) {
+
+        standard_metadata.egress_spec = standard_metadata.ingress_port;
+
+        //Ethernet
+        hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
+        hdr.ethernet.srcAddr = addr;
+
+        // ARP
+        hdr.arp.op = ARP_OPER_REPLY;
+       
+        ip4Addr_t send_ip = hdr.arp.s_ip;
+        hdr.arp.s_ip = hdr.arp.d_ip;
+        hdr.arp.d_ip = send_ip;
+
+        hdr.arp.d_Add = hdr.arp.s_Add;
+        hdr.arp.s_Add = addr;
+    }
+
+     //hdr.arp.d_ip: lpm;
+
+    table arp_exact {
+        key = {
+            hdr.arp.d_ip: lpm;
+        }
+        actions = {
+            arp_answer;
+            drop;
+            NoAction;
+        }
+
+        size = 1024;
+        //default_action = NoAction();
+    }
+
  
     apply {
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
@@ -221,6 +268,10 @@ control MyIngress(inout headers hdr,
                         icmp_forward();
                         icmp_ping();
                 }
+        }
+        if(hdr.arp.isValid()){
+            arp_exact.apply();
+
         }
         
     }
@@ -277,6 +328,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
+        packet.emit(hdr.arp);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.icmp);
         //packet.emit(hdr.tcp);

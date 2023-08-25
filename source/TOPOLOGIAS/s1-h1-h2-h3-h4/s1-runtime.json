@@ -77,6 +77,39 @@
       },
       "action_name": "MyIngress.my_router",
       "action_params": {}
+    },
+
+
+    {
+      "table": "MyIngress.arp_exact",
+      "match": {
+        "hdr.arp.d_ip": ["10.0.44.10", 32]
+      },
+      "action_name": "MyIngress.arp_answer",
+      "action_params": {
+        "addr": "08:00:00:00:04:00"
+      }
+    },
+    {
+      "table": "MyIngress.arp_exact",
+      "match": {
+        "hdr.arp.d_ip": ["10.0.33.10", 32]
+      },
+      "action_name": "MyIngress.arp_answer",
+      "action_params": {
+        "addr": "08:00:00:00:03:00"
+      }
+    },
+    {
+      "table": "MyIngress.arp_exact",
+      "match": {
+        "hdr.arp.d_ip": ["10.0.11.10", 32]
+      },
+      "action_name": "MyIngress.arp_answer",
+      "action_params": {
+        "addr": "08:00:00:00:01:00"
+      }
     }
+
   ]
 }

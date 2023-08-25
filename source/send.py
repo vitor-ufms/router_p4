@@ -3,7 +3,7 @@ import random
 import socket
 import sys
 
-from scapy.all import IP, TCP, Ether, get_if_hwaddr, get_if_list, sendp
+from scapy.all import IP, TCP, ARP, Ether, get_if_hwaddr, get_if_list, sendp
 
 
 def get_if():
@@ -34,7 +34,8 @@ def main():
 
     #pkt = pkt /IP(dst=addr, ttl=6) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
 
-    pkt = pkt /IP(dst=addr, ttl=6) / sys.argv[2]
+    #pkt = pkt /IP(dst=addr, ttl=6) / sys.argv[2]
+    pkt = pkt / ARP(op="who-has",pdst=addr)
 
     pkt.show2()
     sendp(pkt, iface=iface, verbose=False)

@@ -27,6 +27,29 @@ tables {
   }
   size: 1024
 }
+tables {
+  preamble {
+    id: 50101297
+    name: "MyIngress.arp_exact"
+    alias: "arp_exact"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.arp.d_ip"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 32524311
+  }
+  action_refs {
+    id: 25652968
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
 actions {
   preamble {
     id: 21257015
@@ -78,6 +101,18 @@ actions {
     id: 29380751
     name: "MyIngress.icmp_ping"
     alias: "icmp_ping"
+  }
+}
+actions {
+  preamble {
+    id: 32524311
+    name: "MyIngress.arp_answer"
+    alias: "arp_answer"
+  }
+  params {
+    id: 1
+    name: "addr"
+    bitwidth: 48
   }
 }
 type_info {

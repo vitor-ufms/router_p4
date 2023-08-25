@@ -1,10 +1,10 @@
 
-[2023-08-24 22:27:40.763] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2023-08-25 04:22:47.765] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
-Message too long (39145 bytes)! Skipping log...
+Message too long (47693 bytes)! Skipping log...
 ---
 
-[2023-08-24 22:27:40.777] /p4.v1.P4Runtime/Write
+[2023-08-25 04:22:47.838] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -25,7 +25,7 @@ updates {
 }
 ---
 
-[2023-08-24 22:27:40.781] /p4.v1.P4Runtime/Write
+[2023-08-25 04:22:47.859] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -60,7 +60,7 @@ updates {
 }
 ---
 
-[2023-08-24 22:27:40.785] /p4.v1.P4Runtime/Write
+[2023-08-25 04:22:47.881] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -95,7 +95,7 @@ updates {
 }
 ---
 
-[2023-08-24 22:27:40.788] /p4.v1.P4Runtime/Write
+[2023-08-25 04:22:47.922] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -130,7 +130,7 @@ updates {
 }
 ---
 
-[2023-08-24 22:27:40.791] /p4.v1.P4Runtime/Write
+[2023-08-25 04:22:47.944] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -165,7 +165,7 @@ updates {
 }
 ---
 
-[2023-08-24 22:27:40.795] /p4.v1.P4Runtime/Write
+[2023-08-25 04:22:47.975] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -192,7 +192,7 @@ updates {
 }
 ---
 
-[2023-08-24 22:27:40.799] /p4.v1.P4Runtime/Write
+[2023-08-25 04:22:47.996] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -219,7 +219,7 @@ updates {
 }
 ---
 
-[2023-08-24 22:27:40.802] /p4.v1.P4Runtime/Write
+[2023-08-25 04:22:48.017] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -239,6 +239,99 @@ updates {
       action {
         action {
           action_id: 27854425
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-08-25 04:22:48.039] /p4.v1.P4Runtime/Write
+---
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 50101297
+      match {
+        field_id: 1
+        lpm {
+          value: "\n\000,\n"
+          prefix_len: 32
+        }
+      }
+      action {
+        action {
+          action_id: 32524311
+          params {
+            param_id: 1
+            value: "\010\000\000\000\004\000"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-08-25 04:22:48.062] /p4.v1.P4Runtime/Write
+---
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 50101297
+      match {
+        field_id: 1
+        lpm {
+          value: "\n\000!\n"
+          prefix_len: 32
+        }
+      }
+      action {
+        action {
+          action_id: 32524311
+          params {
+            param_id: 1
+            value: "\010\000\000\000\003\000"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-08-25 04:22:48.094] /p4.v1.P4Runtime/Write
+---
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 50101297
+      match {
+        field_id: 1
+        lpm {
+          value: "\n\000\013\n"
+          prefix_len: 32
+        }
+      }
+      action {
+        action {
+          action_id: 32524311
+          params {
+            param_id: 1
+            value: "\010\000\000\000\001\000"
+          }
         }
       }
     }
