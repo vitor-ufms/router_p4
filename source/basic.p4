@@ -34,6 +34,8 @@ typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 
+
+
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
@@ -163,7 +165,13 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    bit<1> pkt_to_router = 0;
+    bit<1> PKT_TO_ROUTER = 0;
+    bit<1> FORWARD_ETHERNET = 1; // apagar
+
+    // testes
+    //register <bit<48>>(10) proxy_arp_mac; // para mac
+    //register <bit<32>>(10) Proxy_arp_ip; // para ip
+    //macAddr_t aux_reg;
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -173,12 +181,22 @@ control MyIngress(inout headers hdr,
 
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         standard_metadata.egress_spec = port;
+
+       
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+    
+        
     }
+    // action ipv4_forward_ttl(){
+    //     hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+    // }
     action my_router( ){
-        pkt_to_router = 1;
+        PKT_TO_ROUTER = 1;
+        // testes
+        //my_register.write(1,2); //index, value
+        //my_register.read(aux_reg, 1); // value index
     }
     ////////////////
     action icmp_forward(){ // icmp para o roteador corrente
@@ -211,7 +229,7 @@ control MyIngress(inout headers hdr,
         }
         size = 1024;
         //default_action = drop();
-       // default_action = NoAction();
+      //  default_action = NoAction(); // default enviar para rota default
     }
 
     action arp_answer(macAddr_t addr) {
@@ -231,9 +249,12 @@ control MyIngress(inout headers hdr,
 
         hdr.arp.d_Add = hdr.arp.s_Add;
         hdr.arp.s_Add = addr;
+
     }
 
-     //hdr.arp.d_ip: lpm;
+    action multicast() {
+        standard_metadata.mcast_grp = 1;
+    }
 
     table arp_exact {
         key = {
@@ -248,11 +269,32 @@ control MyIngress(inout headers hdr,
         size = 1024;
         //default_action = NoAction();
     }
+///////////////////////////////////////////////////////qq
+    action arp_forward(egressSpec_t port){
+
+        standard_metadata.egress_spec = port;
+
+    }
+    table arp_rp{
+        key = {
+            hdr.arp.d_ip: lpm;
+        }
+        actions = {
+            arp_forward;
+            drop;
+            NoAction;
+        }
+
+    size = 1024;
+    //default_action = NoAction();
+    }
 
  
     apply {
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
+
             ipv4_lpm.apply();
+           // ipv4_forward_ttl(); // icmp diminui o ttl?
 
             if(hdr.ipv4.ttl == 0){ // subtrai e depois verifica, tem qu enviar mensagem de erro?
                 drop();
@@ -263,14 +305,20 @@ control MyIngress(inout headers hdr,
 
             if(hdr.icmp.isValid())
 
-                if(pkt_to_router == 1){ // icmp para o roteador
+                if(PKT_TO_ROUTER == 1){ // icmp para o roteador
                     if(hdr.icmp.type == ICMP_ECHO_REQUEST)
                         icmp_forward();
                         icmp_ping();
                 }
-        }
-        if(hdr.arp.isValid()){
-            arp_exact.apply();
+        } else if(hdr.arp.isValid()){ // procedimentos arp
+            if(hdr.arp.op == ARP_OPER_REQUEST){
+                if(arp_exact.apply().miss){
+                    // salva os dados do pacote???
+                    multicast();
+                }
+            } else if(hdr.arp.op == ARP_OPER_REPLY){
+               arp_rp.apply(); // pode vir erro e set my router for 1
+            }
 
         }
         
@@ -284,7 +332,17 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {   }
+    
+
+    action drop() {
+        mark_to_drop(standard_metadata);
+    }
+
+    apply {
+        // Não enviar pacote para porta em que o pacote entrou em  Multicast
+        if (standard_metadata.egress_port == standard_metadata.ingress_port && standard_metadata.mcast_grp != 0)
+            drop();
+    }
 
 }
 
@@ -374,6 +432,9 @@ TESTAR:
  - checksum
  - forwanding 
 
+NOTE
+considero que o roteador conheçe quem fez o pedido de arp,
+preciso implementar algo que salve o mac e ip facil de pesquisar 
 
 */
 
