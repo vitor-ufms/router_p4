@@ -1,0 +1,26 @@
+{
+    "hosts": {
+        "h1": {"ip": "10.0.11.1/24", "mac": "08:00:00:00:01:11",
+               "commands":["route add default gw 10.0.11.10 dev eth0",
+                           "arp -i eth0 -s 10.0.11.10 08:00:00:00:01:00", "sysctl -w net.ipv6.conf.all.disable_ipv6=1",
+                           "sysctl -w net.ipv6.conf.default.disable_ipv6=1"]},
+        "h2": {"ip": "10.0.11.2/24", "mac": "08:00:00:00:02:22",
+               "commands":["route add default gw 10.0.11.10 dev eth0",
+                           "arp -i eth0 -s 10.0.11.10 08:00:00:00:01:00", "sysctl -w net.ipv6.conf.all.disable_ipv6=1",
+                           "sysctl -w net.ipv6.conf.default.disable_ipv6=1"]},
+        "h3": {"ip": "10.0.33.1/24", "mac": "08:00:00:00:03:33",
+                "commands":["route add default gw 10.0.33.10 dev eth0",
+                            "arp -i eth0 -s 10.0.33.10 08:00:00:00:03:00", "sysctl -w net.ipv6.conf.all.disable_ipv6=1",
+                            "sysctl -w net.ipv6.conf.default.disable_ipv6=1"]},                   
+        "h4": {"ip": "10.0.44.1/24", "mac": "08:00:00:00:04:44",
+                "commands":["route add default gw 10.0.44.10 dev eth0",
+                           "arp -i eth0 -s 10.0.44.10 08:00:00:00:04:00", "sysctl -w net.ipv6.conf.all.disable_ipv6=1",
+                           "sysctl -w net.ipv6.conf.default.disable_ipv6=1"]}      
+    },
+    "switches": {
+        "s1": { "runtime_json" : "TOPOLOGIAS/s1-h1-h2-h3-h4/s1-runtime.json" }
+    },
+    "links": [
+        ["h1", "s1-p1"], ["h2", "s1-p2"], ["h3", "s1-p3"], ["h4", "s1-p4"]
+    ]
+}

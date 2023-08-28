@@ -83,17 +83,12 @@ struct metadata {
     /* empty */
    // time_stamp_t time;
 }
-header payload_t{
-
-    varbit<888> data_ip;
-}
 
 struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
     arp_t        arp;
     icmp_t      icmp;
-    payload_t payload;
 }
 
 /*************************************************************************
@@ -121,11 +116,9 @@ parser MyParser(packet_in packet,
 
     state parse_ipv4 { // ipv4
         packet.extract(hdr.ipv4);
-        //packet.lookhead(hdr.payload.data_ip)
         transition select(hdr.ipv4.protocol){
             TYPE_IPV4_ICMP: parse_icmp;
-            //default: accept;
-            default: parse_payload;
+            default: accept;
         }
     }
     state parse_arp{
@@ -134,12 +127,6 @@ parser MyParser(packet_in packet,
     }
     state parse_icmp {
         packet.extract(hdr.icmp);
-        transition accept;
-    }
-    state parse_payload{
-        //packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - (bit<16>)hdr.ipv4.ihl) * 8));
-        packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - 20) * 8));
-        //b.extract(headers.ipv4options, (bit<32>)(((bit<16>)headers.ipv4.ihl - 5) * 32));
         transition accept;
     }
 }
@@ -301,48 +288,28 @@ control MyIngress(inout headers hdr,
     size = 1024;
     //default_action = NoAction();
     }
- ////////////////////  ACTION INTERNAS ////////////////////////////////////////
-    action new_icmp(bit<8> type, bit<8> code){
-        hdr.ipv4.protocol = TYPE_IPV4_ICMP;
-        hdr.ipv4.ttl = 38;
-        hdr.icmp.setValid();
-        hdr.icmp.type =  type;
-        hdr.icmp.code =  code;
 
-        hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
-    
-        hdr.ipv4.srcAddr = 0xAABBFF33; // ip da interface de entrada
-        
-    }
-
-
-
- ///////////////////////////////////////////////////////////////////////////////
  
     apply {
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
 
-            hdr.ipv4.ttl = hdr.ipv4.ttl -1;
-            if(hdr.ipv4.ttl == 5){ // subtrai e depois verifica, tem qu enviar mensagem de erro?
-                //drop();
-                //gerar um icmp code 11 iniciar o ttl
-                new_icmp(11, 0x00);
-            }  
-            ipv4_lpm.apply(); // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
-             // ipv4_forward_ttl(); // icmp diminui o ttl?
-   
+            ipv4_lpm.apply();
+           // ipv4_forward_ttl(); // icmp diminui o ttl?
+
+            if(hdr.ipv4.ttl == 0){ // subtrai e depois verifica, tem qu enviar mensagem de erro?
+                drop();
+                //gerar um icmp iniciar o ttl
+            }     
             if (standard_metadata.checksum_error == 1)
-                drop(); // 4.2.2.5 RFC 1812 
+                drop(); 
 
-            // if(hdr.icmp.isValid())
+            if(hdr.icmp.isValid())
 
-            //     if(PKT_TO_ROUTER == 1){ // icmp para o roteador
-            //         if(hdr.icmp.type == ICMP_ECHO_REQUEST)
-            //             icmp_forward();
-            //             icmp_ping();
-            //     }
-                // 4.3.2.1 icmp Tipos de mensagens desconhecidas  deve descartar o pacote
-
+                if(PKT_TO_ROUTER == 1){ // icmp para o roteador
+                    if(hdr.icmp.type == ICMP_ECHO_REQUEST)
+                        icmp_forward();
+                        icmp_ping();
+                }
         } else if(hdr.arp.isValid()){ // procedimentos arp
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 if(arp_exact.apply().miss){
