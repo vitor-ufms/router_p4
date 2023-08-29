@@ -32,7 +32,7 @@ def main():
 
     #pkt = pkt /IP(dst=addr) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
 
-    pkt = pkt /IP(dst=addr, ttl=8) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
+    pkt = pkt /IP(dst=addr, ttl=6) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
 
     #pkt = pkt /IP(dst=addr, ttl=6) / sys.argv[2]
     #pkt = pkt / ARP(op="who-has",pdst=addr)

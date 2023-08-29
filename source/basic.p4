@@ -81,11 +81,16 @@ header icmp_t {
 
 struct metadata {
     /* empty */
-   // time_stamp_t time;
 }
 header payload_t{
 
-    varbit<888> data_ip;
+    varbit<524120> data_ip; // tamanho máximo de um payload ip  2^16-1 = 65535 - 20 = 65515 bytes = 524120 bits
+}
+
+struct temp {
+    egressSpec_t port;
+    macAddr_t     mac;
+    ip4Addr_t     ip;
 }
 
 struct headers {
@@ -121,25 +126,27 @@ parser MyParser(packet_in packet,
 
     state parse_ipv4 { // ipv4
         packet.extract(hdr.ipv4);
-        //packet.lookhead(hdr.payload.data_ip)
         transition select(hdr.ipv4.protocol){
             TYPE_IPV4_ICMP: parse_icmp;
-            //default: accept;
             default: parse_payload;
+            //default: accept;
         }
     }
-    state parse_arp{
+
+    state parse_arp{ // ARP
         packet.extract(hdr.arp);
         transition accept;
     }
-    state parse_icmp {
+    state parse_icmp { // ICMP
         packet.extract(hdr.icmp);
         transition accept;
     }
-    state parse_payload{
+    state parse_payload{ // capitura o payload do cabeçalho ip 
+
         //packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - (bit<16>)hdr.ipv4.ihl) * 8));
-        packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - 20) * 8));
         //b.extract(headers.ipv4options, (bit<32>)(((bit<16>)headers.ipv4.ihl - 5) * 32));
+
+        packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - 20) * 8));      // considera tamanho fixo de cabeçalho ip  
         transition accept;
     }
 }
@@ -179,12 +186,12 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
 
     bit<1> PKT_TO_ROUTER = 0;
-    bit<1> FORWARD_ETHERNET = 1; // apagar
+    //register<bit<48>>(5) interface_mac; // mac(48) cada index é uma porta
+    register<bit<32>>(5) interface_ip; // ip(32)
+    macAddr_t aux_mac; ip4Addr_t aux_ip;
 
-    // testes
-    //register <bit<48>>(10) proxy_arp_mac; // para mac
-    //register <bit<32>>(10) Proxy_arp_ip; // para ip
-    //macAddr_t aux_reg;
+    temp forward = {0,0,0};
+
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -192,26 +199,43 @@ control MyIngress(inout headers hdr,
 
     //action NoAction() {}
 
-    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        standard_metadata.egress_spec = port;
 
-       
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    
-        
+
+/******************** Action for table  ipv4_lpm  ****************************/
+
+    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+        forward.port = port;
+        forward.mac = dstAddr;
+
+        //hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        //hdr.ethernet.dstAddr = dstAddr;
+        //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+            
     }
-    // action ipv4_forward_ttl(){
-    //     hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    // }
+
+
     action my_router( ){
         PKT_TO_ROUTER = 1;
-        // testes
-        //my_register.write(1,2); //index, value
-        //my_register.read(aux_reg, 1); // value index
     }
-    ////////////////
+
+
+    table ipv4_lpm {
+        key = {
+            hdr.ipv4.dstAddr: lpm;
+        }
+        actions = {
+            ipv4_forward;
+            my_router;
+            drop;
+            NoAction;
+        }
+        size = 1024;
+        //default_action = drop();
+      //  default_action = NoAction(); // default enviar para rota default
+    }
+
+/******************** Procedimentos para ICMP ****************************/
+
     action icmp_forward(){ // icmp para o roteador corrente
 
         standard_metadata.egress_spec = standard_metadata.ingress_port;
@@ -230,20 +254,7 @@ control MyIngress(inout headers hdr,
          
     }
 
-    table ipv4_lpm {
-        key = {
-            hdr.ipv4.dstAddr: lpm;
-        }
-        actions = {
-            ipv4_forward;
-            my_router;
-            drop;
-            NoAction;
-        }
-        size = 1024;
-        //default_action = drop();
-      //  default_action = NoAction(); // default enviar para rota default
-    }
+/******************** Action for table arp_exact  ****************************/
 
     action arp_answer(macAddr_t addr) {
 
@@ -282,7 +293,9 @@ control MyIngress(inout headers hdr,
         size = 1024;
         //default_action = NoAction();
     }
-///////////////////////////////////////////////////////qq
+
+/******************** Action da tabela arp_rp  ****************************/
+
     action arp_forward(egressSpec_t port){
 
         standard_metadata.egress_spec = port;
@@ -301,7 +314,9 @@ control MyIngress(inout headers hdr,
     size = 1024;
     //default_action = NoAction();
     }
- ////////////////////  ACTION INTERNAS ////////////////////////////////////////
+
+/******************** Action internos  ****************************/
+
     action new_icmp(bit<8> type, bit<8> code){
         hdr.ipv4.protocol = TYPE_IPV4_ICMP;
         hdr.ipv4.ttl = 38;
@@ -310,40 +325,65 @@ control MyIngress(inout headers hdr,
         hdr.icmp.code =  code;
 
         hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
-    
-        hdr.ipv4.srcAddr = 0xAABBFF33; // ip da interface de entrada
+
+        interface_ip.read(aux_ip, (bit<32>)standard_metadata.ingress_port);
+        //interface_ip.read(aux_ip, (bit<32>) 1);        
+        hdr.ipv4.srcAddr = aux_ip;
+        //hdr.ipv4.srcAddr = 0xAABBFF33; // ip da interface de entrada
         
     }
 
+    action subtrai_ttl(){
+
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+    }
+
+    action Addr_forward(macAddr_t dstAddr, egressSpec_t port) {
+        standard_metadata.egress_spec = port;
+
+        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = dstAddr;
+        //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+            
+    }
 
 
- ///////////////////////////////////////////////////////////////////////////////
  
     apply {
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
 
-            hdr.ipv4.ttl = hdr.ipv4.ttl -1;
-            if(hdr.ipv4.ttl == 5){ // subtrai e depois verifica, tem qu enviar mensagem de erro?
-                //drop();
-                //gerar um icmp code 11 iniciar o ttl
-                new_icmp(11, 0x00);
-            }  
-            ipv4_lpm.apply(); // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
-             // ipv4_forward_ttl(); // icmp diminui o ttl?
-   
-            if (standard_metadata.checksum_error == 1)
+            if (standard_metadata.checksum_error == 1){ 
                 drop(); // 4.2.2.5 RFC 1812 
+            
+            }else if(ipv4_lpm.apply().hit){ // match na tabela ipv4_lpm
 
-            // if(hdr.icmp.isValid())
+                if(PKT_TO_ROUTER == 0){ // 4.2.2.9 ip destino != do roteador
+                    subtrai_ttl(); // Precisa verificar se o pkt é para o roteador antes de diminuir ttl
+                    if(hdr.ipv4.ttl == 0){ // subtrai e depois verifica
+                        new_icmp(11, 0x00); //gerar um icmp code 11 iniciar o ttl
+                        forward.mac = hdr.ethernet.srcAddr;
+                        forward.port = standard_metadata.ingress_port;
+                    }
+                    Addr_forward(forward.mac, forward.port);
 
-            //     if(PKT_TO_ROUTER == 1){ // icmp para o roteador
-            //         if(hdr.icmp.type == ICMP_ECHO_REQUEST)
-            //             icmp_forward();
-            //             icmp_ping();
-            //     }
-                // 4.3.2.1 icmp Tipos de mensagens desconhecidas  deve descartar o pacote
+                }else{ // ip destino é o roteador
+                    if(hdr.icmp.isValid())  // icmp para o roteador
+                        if(hdr.icmp.type == ICMP_ECHO_REQUEST){
+                            icmp_forward();
+                            icmp_ping();
+                        } // }else if(hdr.icmp.type == ICMP_ECHO_REQUEST ){
+                        //     ;
+                        // } // continue
+                    
+                    // 4.3.2.1 icmp Tipos de mensagens desconhecidas  deve descartar o pacote
+                }
+            }else{   // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
 
-        } else if(hdr.arp.isValid()){ // procedimentos arp
+                ;
+                
+            }
+
+        }else if(hdr.arp.isValid()){ // procedimentos arp
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 if(arp_exact.apply().miss){
                     // salva os dados do pacote???
@@ -422,6 +462,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.arp);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.icmp);
+        packet.emit(hdr.payload);
         //packet.emit(hdr.tcp);
         //packet.emit(hdr.time);
     }
@@ -551,5 +592,26 @@ header udp_t {
     bit<16> dstPort;
     bit<16> length_;
     bit<16> checksum;
+
 }
+
+
+    // testes
+    //register <bit<48>>(10) proxy_arp_mac; // para mac
+    //register <bit<32>>(10) Proxy_arp_ip; // para ip
+    //macAddr_t aux_reg;
+
+    // testes
+    //my_register.write(1,2); //index, value
+    //my_register.read(aux_reg, 1); // value index
+
+    
+    // interface_mac.write(1,0x080000000100);
+    // interface_mac.write(2,0x080000000300);
+    // interface_mac.write(3,0x080000000400);
+
+    // interface_ip.write(1,0x0A000B0A);
+    // interface_ip.write(2,0x0A00210A);
+    // interface_ip.write(3,0x0A002C0A);
+
 */
