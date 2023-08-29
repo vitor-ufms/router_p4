@@ -114,13 +114,6 @@ actions {
 }
 actions {
   preamble {
-    id: 21006855
-    name: "MyIngress.icmp_forward"
-    alias: "icmp_forward"
-  }
-}
-actions {
-  preamble {
     id: 29380751
     name: "MyIngress.icmp_ping"
     alias: "icmp_ping"
@@ -184,21 +177,6 @@ actions {
     name: "MyEgress.drop"
     alias: "MyEgress.drop"
   }
-}
-registers {
-  preamble {
-    id: 377994730
-    name: "MyIngress.interface_mac"
-    alias: "interface_mac"
-  }
-  type_spec {
-    bitstring {
-      bit {
-        bitwidth: 48
-      }
-    }
-  }
-  size: 5
 }
 registers {
   preamble {

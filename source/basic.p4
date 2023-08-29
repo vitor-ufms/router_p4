@@ -78,6 +78,9 @@ header icmp_t {
     bit<8>  code;
     bit<16> checksum;
 }
+header icmp_te_t{ 
+    bit<32> Unused;
+}
 
 struct metadata {
     /* empty */
@@ -86,7 +89,9 @@ header payload_t{
 
     varbit<524120> data_ip; // tamanho máximo de um payload ip  2^16-1 = 65535 - 20 = 65515 bytes = 524120 bits
 }
-
+header header_8_t{
+    bit<64> data;
+}
 struct temp {
     egressSpec_t port;
     macAddr_t     mac;
@@ -97,8 +102,11 @@ struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
     arp_t        arp;
-    icmp_t      icmp;
-    payload_t payload;
+    icmp_t       icmp;
+    icmp_te_t    icmp_te;
+    ipv4_t       icmp_ip_header;
+    header_8_t   header_8;
+    payload_t    payload;
 }
 
 /*************************************************************************
@@ -126,6 +134,10 @@ parser MyParser(packet_in packet,
 
     state parse_ipv4 { // ipv4
         packet.extract(hdr.ipv4);
+
+        hdr.header_8.setValid();
+        hdr.header_8.data = packet.lookahead<bit<64>>();
+
         transition select(hdr.ipv4.protocol){
             TYPE_IPV4_ICMP: parse_icmp;
             default: parse_payload;
@@ -236,21 +248,15 @@ control MyIngress(inout headers hdr,
 
 /******************** Procedimentos para ICMP ****************************/
 
-    action icmp_forward(){ // icmp para o roteador corrente
 
-        standard_metadata.egress_spec = standard_metadata.ingress_port;
-        macAddr_t dstAddr_ether = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr_ether;
-
+    action icmp_ping(){ // respondendo ping
+        //hdr.icmp.type = 0x08; rs loop
+        // falta arrumar o ip 
+        hdr.icmp.type = ICMP_ECHO_REPLY;
         ip4Addr_t srcAddr_ipv4 = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
         hdr.ipv4.dstAddr = srcAddr_ipv4;
-
-    }
-    action icmp_ping(){
-        //hdr.icmp.type = 0x08; rs loop
-        hdr.icmp.type = ICMP_ECHO_REPLY; 
+ 
          
     }
 
@@ -318,18 +324,31 @@ control MyIngress(inout headers hdr,
 /******************** Action internos  ****************************/
 
     action new_icmp(bit<8> type, bit<8> code){
-        hdr.ipv4.protocol = TYPE_IPV4_ICMP;
-        hdr.ipv4.ttl = 38;
+        
+       // hdr.header_8.setValid();
+
+        hdr.icmp_ip_header.setValid();
+        hdr.icmp_ip_header = hdr.ipv4;
+
+        hdr.icmp_te.setValid();
+        hdr.icmp_te.Unused = 0x00;
+
+        hdr.payload.setInvalid();
         hdr.icmp.setValid();
         hdr.icmp.type =  type;
         hdr.icmp.code =  code;
 
+        hdr.ipv4.ttl = 38;
+        hdr.ipv4.totalLen = 52; // 20 + 20 + 4 + 8
+        hdr.ipv4.protocol = TYPE_IPV4_ICMP;
         hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
 
         interface_ip.read(aux_ip, (bit<32>)standard_metadata.ingress_port);
         //interface_ip.read(aux_ip, (bit<32>) 1);        
         hdr.ipv4.srcAddr = aux_ip;
         //hdr.ipv4.srcAddr = 0xAABBFF33; // ip da interface de entrada
+        // alter payload
+        //hdr.payload.data_ip = hdr.payload.data_ip[63:0];
         
     }
 
@@ -363,14 +382,23 @@ control MyIngress(inout headers hdr,
                         new_icmp(11, 0x00); //gerar um icmp code 11 iniciar o ttl
                         forward.mac = hdr.ethernet.srcAddr;
                         forward.port = standard_metadata.ingress_port;
+                        Addr_forward(forward.mac, forward.port);
+
+                    }else{
+                        hdr.header_8.setInvalid(); // SÓ USAR EM ICMP time exceeded
+                        Addr_forward(forward.mac, forward.port);
                     }
-                    Addr_forward(forward.mac, forward.port);
 
                 }else{ // ip destino é o roteador
+                    hdr.header_8.setInvalid(); // SÓ USAR EM ICMP
+
                     if(hdr.icmp.isValid())  // icmp para o roteador
                         if(hdr.icmp.type == ICMP_ECHO_REQUEST){
-                            icmp_forward();
+                            forward.port = standard_metadata.ingress_port;
+                            forward.mac = hdr.ethernet.srcAddr;
+                            Addr_forward(forward.mac, forward.port);
                             icmp_ping();
+
                         } // }else if(hdr.icmp.type == ICMP_ECHO_REQUEST ){
                         //     ;
                         // } // continue
@@ -384,6 +412,8 @@ control MyIngress(inout headers hdr,
             }
 
         }else if(hdr.arp.isValid()){ // procedimentos arp
+            hdr.header_8.setInvalid(); // SÓ USAR EM ICMP
+
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 if(arp_exact.apply().miss){
                     // salva os dados do pacote???
@@ -440,16 +470,21 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
               hdr.ipv4.dstAddr },
             hdr.ipv4.hdrChecksum,
             HashAlgorithm.csum16);
-    
 
+            update_checksum_with_payload( // verificar se pacote icmp foi alterado
+                hdr.icmp.isValid(),
+                    { hdr.icmp.type,
+                    hdr.icmp.code },
+                    hdr.icmp.checksum,
+                    HashAlgorithm.csum16);
 
-        update_checksum_with_payload( // verificar se pacote icmp foi alterado
-            hdr.icmp.isValid(),
-                { hdr.icmp.type,
-                  hdr.icmp.code },
-                hdr.icmp.checksum,
-                HashAlgorithm.csum16);
-     }
+            update_checksum_with_payload( // verificar se pacote icmp foi alterado
+                hdr.icmp_te.isValid(),
+                    { hdr.icmp.type,
+                    hdr.icmp.code,hdr.icmp_te, hdr.icmp_ip_header, hdr.header_8 },
+                    hdr.icmp.checksum,
+                    HashAlgorithm.csum16);
+    }
 }
 
 /*************************************************************************
@@ -462,6 +497,9 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.arp);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.icmp);
+        packet.emit(hdr.icmp_te);
+        packet.emit(hdr.icmp_ip_header);
+        packet.emit(hdr.header_8);
         packet.emit(hdr.payload);
         //packet.emit(hdr.tcp);
         //packet.emit(hdr.time);
