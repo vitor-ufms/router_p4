@@ -198,6 +198,8 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
 
     bit<1> PKT_TO_ROUTER = 0;
+    bit<1> ICMP_RM_HEAD_8 = 0;
+    
     //register<bit<48>>(5) interface_mac; // mac(48) cada index é uma porta
     register<bit<32>>(5) interface_ip; // ip(32)
     macAddr_t aux_mac; ip4Addr_t aux_ip;
@@ -211,25 +213,16 @@ control MyIngress(inout headers hdr,
 
     //action NoAction() {}
 
-
-
 /******************** Action for table  ipv4_lpm  ****************************/
 
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         forward.port = port;
         forward.mac = dstAddr;
-
-        //hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        //hdr.ethernet.dstAddr = dstAddr;
-        //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-            
     }
-
 
     action my_router( ){
         PKT_TO_ROUTER = 1;
     }
-
 
     table ipv4_lpm {
         key = {
@@ -242,12 +235,10 @@ control MyIngress(inout headers hdr,
             NoAction;
         }
         size = 1024;
-        //default_action = drop();
-      //  default_action = NoAction(); // default enviar para rota default
+      //  default_action = NoAction(); drop(); // default enviar para rota default
     }
 
 /******************** Procedimentos para ICMP ****************************/
-
 
     action icmp_ping(){ // respondendo ping
         //hdr.icmp.type = 0x08; rs loop
@@ -255,9 +246,7 @@ control MyIngress(inout headers hdr,
         hdr.icmp.type = ICMP_ECHO_REPLY;
         ip4Addr_t srcAddr_ipv4 = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
-        hdr.ipv4.dstAddr = srcAddr_ipv4;
- 
-         
+        hdr.ipv4.dstAddr = srcAddr_ipv4;         
     }
 
 /******************** Action for table arp_exact  ****************************/
@@ -279,7 +268,6 @@ control MyIngress(inout headers hdr,
 
         hdr.arp.d_Add = hdr.arp.s_Add;
         hdr.arp.s_Add = addr;
-
     }
 
     action multicast() {
@@ -295,7 +283,6 @@ control MyIngress(inout headers hdr,
             drop;
             NoAction;
         }
-
         size = 1024;
         //default_action = NoAction();
     }
@@ -305,8 +292,8 @@ control MyIngress(inout headers hdr,
     action arp_forward(egressSpec_t port){
 
         standard_metadata.egress_spec = port;
-
     }
+
     table arp_rp{
         key = {
             hdr.arp.d_ip: lpm;
@@ -348,8 +335,7 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.srcAddr = aux_ip;
         //hdr.ipv4.srcAddr = 0xAABBFF33; // ip da interface de entrada
         // alter payload
-        //hdr.payload.data_ip = hdr.payload.data_ip[63:0];
-        
+        //hdr.payload.data_ip = hdr.payload.data_ip[63:0];  // bit<32> a = (bit<32>)hdr.payload.data_ip;     
     }
 
     action subtrai_ttl(){
@@ -362,13 +348,11 @@ control MyIngress(inout headers hdr,
 
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
-        //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-            
+        //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;            
     }
-
-
  
     apply {
+
         if (hdr.ipv4.isValid()) { // procedimentos para ipv4
 
             if (standard_metadata.checksum_error == 1){ 
@@ -383,14 +367,12 @@ control MyIngress(inout headers hdr,
                         forward.mac = hdr.ethernet.srcAddr;
                         forward.port = standard_metadata.ingress_port;
                         Addr_forward(forward.mac, forward.port);
-
+                        ICMP_RM_HEAD_8 = 1;
                     }else{
-                        hdr.header_8.setInvalid(); // SÓ USAR EM ICMP time exceeded
-                        Addr_forward(forward.mac, forward.port);
+                        Addr_forward(forward.mac, forward.port); // Forwarding normal
                     }
 
                 }else{ // ip destino é o roteador
-                    hdr.header_8.setInvalid(); // SÓ USAR EM ICMP
 
                     if(hdr.icmp.isValid())  // icmp para o roteador
                         if(hdr.icmp.type == ICMP_ECHO_REQUEST){
@@ -412,7 +394,6 @@ control MyIngress(inout headers hdr,
             }
 
         }else if(hdr.arp.isValid()){ // procedimentos arp
-            hdr.header_8.setInvalid(); // SÓ USAR EM ICMP
 
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 if(arp_exact.apply().miss){
@@ -424,6 +405,9 @@ control MyIngress(inout headers hdr,
             }
 
         }
+
+        if(ICMP_RM_HEAD_8 == 0)
+            hdr.header_8.setInvalid(); // SÓ USAR EM ICMP
         
     }
 }
@@ -435,7 +419,6 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -446,7 +429,6 @@ control MyEgress(inout headers hdr,
         if (standard_metadata.egress_port == standard_metadata.ingress_port && standard_metadata.mcast_grp != 0)
             drop();
     }
-
 }
 
 /*************************************************************************
@@ -518,7 +500,6 @@ MyEgress(),
 MyComputeChecksum(),
 MyDeparser()
 ) main;
-
 
 /*************************************************************************
 ***********************  Comentarios add   *******************************
