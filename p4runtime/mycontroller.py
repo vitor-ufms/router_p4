@@ -10,7 +10,7 @@ import grpc
 # Probably there's a better way of doing this.
 sys.path.append(
     os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                 '../../utils/'))
+                 '../utils/'))
 import p4runtime_lib.bmv2
 import p4runtime_lib.helper
 from p4runtime_lib.switch import ShutdownAllSwitchConnections
@@ -78,7 +78,10 @@ def writeTunnelRules(p4info_helper, ingress_sw, egress_sw, tunnel_id,
         action_params={
             "port": SWITCH_TO_SWITCH_PORT
         })
-    ingress_sw.WriteTableEntry(table_entry)
+    print('###########33 ver entry')
+    ingress_sw.WriteTableEntry(table_entry, dry_run=True)
+    print('################## tchau entry')
+    
     print("Installed transit tunnel rule on %s" % ingress_sw.name)
 
     # 3) Tunnel Egress Rule

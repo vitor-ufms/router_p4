@@ -193,5 +193,52 @@ registers {
   }
   size: 5
 }
+digests {
+  preamble {
+    id: 400598298
+    name: "temp"
+    alias: "temp"
+  }
+  type_spec {
+    struct {
+      name: "temp"
+    }
+  }
+}
 type_info {
+  structs {
+    key: "temp"
+    value {
+      members {
+        name: "port"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 9
+            }
+          }
+        }
+      }
+      members {
+        name: "mac"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 48
+            }
+          }
+        }
+      }
+      members {
+        name: "ip"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 32
+            }
+          }
+        }
+      }
+    }
+  }
 }

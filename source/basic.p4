@@ -206,6 +206,8 @@ control MyIngress(inout headers hdr,
 
     temp forward = {0,0,0};
 
+    temp test_digest = {0,hdr.ethernet.srcAddr, 0}; // apagar
+
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -338,8 +340,7 @@ control MyIngress(inout headers hdr,
         //hdr.payload.data_ip = hdr.payload.data_ip[63:0];  // bit<32> a = (bit<32>)hdr.payload.data_ip;     
     }
 
-    action subtrai_ttl(){
-
+    action subtrai_ttl(){ 
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
@@ -351,9 +352,17 @@ control MyIngress(inout headers hdr,
         //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;            
     }
  
+
     apply {
 
-        if (hdr.ipv4.isValid()) { // procedimentos para ipv4
+        // testes sssssssssssssssssssssss
+        //if(hdr.ipv4.isValid())
+        digest(1, test_digest);
+        // @brief(bora briefafa)
+        // @description(teste bora fi)
+
+    // procedimentos para ipv4
+        if (hdr.ipv4.isValid()) { 
 
             if (standard_metadata.checksum_error == 1){ 
                 drop(); // 4.2.2.5 RFC 1812 
@@ -392,12 +401,11 @@ control MyIngress(inout headers hdr,
                 ;
                 
             }
-
-        }else if(hdr.arp.isValid()){ // procedimentos arp
+        // procedimentos arp
+        }else if(hdr.arp.isValid()){ 
 
             if(hdr.arp.op == ARP_OPER_REQUEST){
-                if(arp_exact.apply().miss){
-                    // salva os dados do pacote???
+                if(arp_exact.apply().miss){ // verifica sem tem o ip na tabela cache arp
                     multicast();
                 }
             } else if(hdr.arp.op == ARP_OPER_REPLY){
@@ -407,7 +415,7 @@ control MyIngress(inout headers hdr,
         }
 
         if(ICMP_RM_HEAD_8 == 0)
-            hdr.header_8.setInvalid(); // SÓ USAR EM ICMP
+            hdr.header_8.setInvalid(); // SÓ USAR EM ICMP copiar para metadado e depois validar no icmp
         
     }
 }

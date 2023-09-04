@@ -1,0 +1,4 @@
+table_add MyIngress.arp_exact arp_answer 10.0.11.10/32 => 00:11:22:33:44:55
+
+# mostra as entradas e correspondencia para a tabela
+table_dump MyIngress.arp_exact 
