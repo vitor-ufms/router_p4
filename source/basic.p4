@@ -71,31 +71,33 @@ header arp_t {
     ip4Addr_t d_ip; // Target Protocol Address
 }
 
-
-
 header icmp_t {
     bit<8>  type;
     bit<8>  code;
     bit<16> checksum;
 }
+
 header icmp_te_t{ 
     bit<32> Unused;
 }
 
-struct metadata {
-    /* empty */
+header header_8_t{
+    bit<64> data;
 }
+
 header payload_t{
 
     varbit<524120> data_ip; // tamanho máximo de um payload ip  2^16-1 = 65535 - 20 = 65515 bytes = 524120 bits
 }
-header header_8_t{
-    bit<64> data;
-}
+
 struct temp {
     egressSpec_t port;
     macAddr_t     mac;
     ip4Addr_t     ip;
+}
+
+struct metadata {
+    header_8_t header_8; 
 }
 
 struct headers {
@@ -126,7 +128,6 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             TYPE_IPV4: parse_ipv4;
-            //TYPE_IPV6: parse_ipv6;
             TYPE_ARP: parse_arp;
             default: accept;
         }
@@ -135,8 +136,8 @@ parser MyParser(packet_in packet,
     state parse_ipv4 { // ipv4
         packet.extract(hdr.ipv4);
 
-        hdr.header_8.setValid();
-        hdr.header_8.data = packet.lookahead<bit<64>>();
+        meta.header_8.setValid();
+        meta.header_8.data = packet.lookahead<bit<64>>();
 
         transition select(hdr.ipv4.protocol){
             TYPE_IPV4_ICMP: parse_icmp;
@@ -149,16 +150,15 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.arp);
         transition accept;
     }
+
     state parse_icmp { // ICMP
         packet.extract(hdr.icmp);
         transition accept;
     }
+
     state parse_payload{ // capitura o payload do cabeçalho ip 
-
-        //packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - (bit<16>)hdr.ipv4.ihl) * 8));
-        //b.extract(headers.ipv4options, (bit<32>)(((bit<16>)headers.ipv4.ihl - 5) * 32));
-
-        packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - 20) * 8));      // considera tamanho fixo de cabeçalho ip  
+        // considera tamanho fixo de cabeçalho ip
+        packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - 20) * 8));       
         transition accept;
     }
 }
@@ -198,8 +198,9 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
 
     bit<1> PKT_TO_ROUTER = 0;
-    bit<1> ICMP_RM_HEAD_8 = 0;
+    //bit<1> ICMP_RM_HEAD_8 = 0; // mudar depois
     
+    register<bit<8>>(1) controller_op; // registrador que conversa com o plano de controle
     //register<bit<48>>(5) interface_mac; // mac(48) cada index é uma porta
     register<bit<32>>(5) interface_ip; // ip(32)
     macAddr_t aux_mac; ip4Addr_t aux_ip;
@@ -376,7 +377,9 @@ control MyIngress(inout headers hdr,
                         forward.mac = hdr.ethernet.srcAddr;
                         forward.port = standard_metadata.ingress_port;
                         Addr_forward(forward.mac, forward.port);
-                        ICMP_RM_HEAD_8 = 1;
+                        hdr.header_8.setValid();
+                        hdr.header_8.data = meta.header_8.data;
+
                     }else{
                         Addr_forward(forward.mac, forward.port); // Forwarding normal
                     }
@@ -403,10 +406,12 @@ control MyIngress(inout headers hdr,
             }
         // procedimentos arp
         }else if(hdr.arp.isValid()){ 
+            controller_op.write(0, 2); // send a signal for the controller
 
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 if(arp_exact.apply().miss){ // verifica sem tem o ip na tabela cache arp
                     multicast();
+
                 }
             } else if(hdr.arp.op == ARP_OPER_REPLY){
                arp_rp.apply(); // pode vir erro e set my router for 1
@@ -414,8 +419,8 @@ control MyIngress(inout headers hdr,
 
         }
 
-        if(ICMP_RM_HEAD_8 == 0)
-            hdr.header_8.setInvalid(); // SÓ USAR EM ICMP copiar para metadado e depois validar no icmp
+        // if(ICMP_RM_HEAD_8 == 0)// mudar isso
+        //     hdr.header_8.setInvalid(); // SÓ USAR EM ICMP copiar para metadado e depois validar no icmp
         
     }
 }
@@ -640,5 +645,9 @@ header udp_t {
     // interface_ip.write(1,0x0A000B0A);
     // interface_ip.write(2,0x0A00210A);
     // interface_ip.write(3,0x0A002C0A);
+
+
+    //packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - (bit<16>)hdr.ipv4.ihl) * 8));
+    //b.extract(headers.ipv4options, (bit<32>)(((bit<16>)headers.ipv4.ihl - 5) * 32));
 
 */

@@ -26,7 +26,7 @@ def read_register(sw, register, idx, ptr = False):
     #print(stdout_str)
     return int(reg_val)
 
-def write_register(sw, register, idx, value, ptr = False): # name, index, value
+def write_register(sw, register, idx=0, value=0, ptr = False): # name, index, value
 
     input_str = "register_write %s %d %d \n" % (register, idx, value)
     if ptr:
@@ -94,14 +94,29 @@ def main():
     reg_val2 = read_register(sw, register='interface_ip', idx=0, ptr=True)
     print(reg_val2)
 
+    """
+        Use a register:"controller_op" with the index equal a 0.
+        op = 0: Nothing, wait!
+        op = 1: 
+        op = 2:
+        op = 3:
+        op = 4:
+
+    """
 
     while True:
-        reg_val2 = read_register(sw, register=reg, idx=0)
-        #print(reg_val2)
-        if(reg_val2 == 11):
-            print(" trava")
+        reg = 'controller_op'
+        op = read_register(sw, register=reg, idx=0)
+        if (op == 0):
+            continue
+        elif(op == 11):
+            print(" op = 1")
             write_register(sw,register=reg, idx=0, value=22)
-
+        elif (op == 2):
+            print('op = 2')
+        else:
+            print('Unknown command')
+        write_register(sw,register=reg, idx=0, value=0)
 main()
 
 

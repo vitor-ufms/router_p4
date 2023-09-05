@@ -180,6 +180,21 @@ actions {
 }
 registers {
   preamble {
+    id: 374076994
+    name: "MyIngress.controller_op"
+    alias: "controller_op"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 8
+      }
+    }
+  }
+  size: 1
+}
+registers {
+  preamble {
     id: 385467734
     name: "MyIngress.interface_ip"
     alias: "interface_ip"
