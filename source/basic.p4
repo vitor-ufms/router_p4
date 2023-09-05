@@ -2,10 +2,10 @@
 #include <core.p4>
 #include <v1model.p4>
 
+const bit<32> MAX_INTERFACE = 10;
+ 
 const bit<16> TYPE_IPV4 = 0x800;
-//const bit<16> TYPE_IPV6 = 0x86DD;
 const bit<16> TYPE_ARP = 0x806;
-
 
 const bit<16> ARP_HTYPE_ETHERNET = 0x0001;
 const bit<16> ARP_PTYPE_IPV4     = 0x0800;
@@ -14,16 +14,11 @@ const bit<8>  ARP_PLEN_IPV4      = 4;
 const bit<16> ARP_OPER_REQUEST   = 1; // arp.op operation
 const bit<16> ARP_OPER_REPLY     = 2;
 
-
-
 const bit<8> TYPE_IPV4_ICMP = 0x01;
-
 
 const bit<8> ICMP_ECHO_REPLY = 0x00;
 const bit<8> ICMP_ECHO_REQUEST = 0x08;
 const bit<8> ICMP_TIME_EXCEEDED = 0x0B;
-
-
 
 
 /*************************************************************************
@@ -33,8 +28,6 @@ const bit<8> ICMP_TIME_EXCEEDED = 0x0B;
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
-
-
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -56,8 +49,6 @@ header ipv4_t {
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
 }
-
-
 
 header arp_t {
     bit<16> hrd_type; // Hardware Type
@@ -90,14 +81,18 @@ header payload_t{
     varbit<524120> data_ip; // tamanho máximo de um payload ip  2^16-1 = 65535 - 20 = 65515 bytes = 524120 bits
 }
 
-struct temp {
-    egressSpec_t port;
-    macAddr_t     mac;
-    ip4Addr_t     ip;
+struct temp_t {
+    egressSpec_t  port_dst;
+    macAddr_t     mac_dst;
+    macAddr_t     mac_src;
+   //ip4Addr_t     ip_dst;
+   // ip4Addr_t     ip_scr;
 }
 
 struct metadata {
-    header_8_t header_8; 
+    header_8_t   header_8;
+    temp_t       forward_temp;
+    bit<1>       pkt_to_router;  
 }
 
 struct headers {
@@ -110,6 +105,7 @@ struct headers {
     header_8_t   header_8;
     payload_t    payload;
 }
+
 
 /*************************************************************************
 *********************** P A R S E R  ***********************************
@@ -163,6 +159,7 @@ parser MyParser(packet_in packet,
     }
 }
 
+
 /*************************************************************************
 ************   C H E C K S U M    V E R I F I C A T I O N   *************
 *************************************************************************/
@@ -197,34 +194,28 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    bit<1> PKT_TO_ROUTER = 0;
-    //bit<1> ICMP_RM_HEAD_8 = 0; // mudar depois
-    
     register<bit<8>>(1) controller_op; // registrador que conversa com o plano de controle
-    //register<bit<48>>(5) interface_mac; // mac(48) cada index é uma porta
-    register<bit<32>>(5) interface_ip; // ip(32)
+
+    //register<bit<48>>(MAX_INTERFACE) interface_mac; // mac(48) cada index é uma porta
+    register<bit<32>>(MAX_INTERFACE) interface_ip; // ip(32)
     macAddr_t aux_mac; ip4Addr_t aux_ip;
-
-    temp forward = {0,0,0};
-
-    temp test_digest = {0,hdr.ethernet.srcAddr, 0}; // apagar
-
 
     action drop() {
         mark_to_drop(standard_metadata);
     }
 
-    //action NoAction() {}
+    //action NoAction() {;}
 
 /******************** Action for table  ipv4_lpm  ****************************/
 
-    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        forward.port = port;
-        forward.mac = dstAddr;
+    action ipv4_forward(egressSpec_t port, macAddr_t scrAddr, macAddr_t dstAddr) {
+        meta.forward_temp.port_dst = port;
+        meta.forward_temp.mac_src = scrAddr;
+        meta.forward_temp.mac_dst = dstAddr;
     }
 
     action my_router( ){
-        PKT_TO_ROUTER = 1;
+        meta.pkt_to_router = 1;
     }
 
     table ipv4_lpm {
@@ -345,22 +336,15 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
-    action Addr_forward(macAddr_t dstAddr, egressSpec_t port) {
+    action conf_forward(egressSpec_t port, macAddr_t srcAddr, macAddr_t dstAddr) {
         standard_metadata.egress_spec = port;
 
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.srcAddr = srcAddr;
         hdr.ethernet.dstAddr = dstAddr;
         //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;            
-    }
- 
+    } 
 
-    apply {
-
-        // testes sssssssssssssssssssssss
-        //if(hdr.ipv4.isValid())
-        digest(1, test_digest);
-        // @brief(bora briefafa)
-        // @description(teste bora fi)
+    apply {   
 
     // procedimentos para ipv4
         if (hdr.ipv4.isValid()) { 
@@ -370,27 +354,27 @@ control MyIngress(inout headers hdr,
             
             }else if(ipv4_lpm.apply().hit){ // match na tabela ipv4_lpm
 
-                if(PKT_TO_ROUTER == 0){ // 4.2.2.9 ip destino != do roteador
+                if(meta.pkt_to_router == 0){ // 4.2.2.9 ip destino != do roteador
                     subtrai_ttl(); // Precisa verificar se o pkt é para o roteador antes de diminuir ttl
                     if(hdr.ipv4.ttl == 0){ // subtrai e depois verifica
                         new_icmp(11, 0x00); //gerar um icmp code 11 iniciar o ttl
-                        forward.mac = hdr.ethernet.srcAddr;
-                        forward.port = standard_metadata.ingress_port;
-                        Addr_forward(forward.mac, forward.port);
+                        meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
+                        meta.forward_temp.port_dst = standard_metadata.ingress_port;
+                        conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
                         hdr.header_8.setValid();
                         hdr.header_8.data = meta.header_8.data;
 
                     }else{
-                        Addr_forward(forward.mac, forward.port); // Forwarding normal
+                        conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst); // Forwarding normal
                     }
 
                 }else{ // ip destino é o roteador
 
                     if(hdr.icmp.isValid())  // icmp para o roteador
                         if(hdr.icmp.type == ICMP_ECHO_REQUEST){
-                            forward.port = standard_metadata.ingress_port;
-                            forward.mac = hdr.ethernet.srcAddr;
-                            Addr_forward(forward.mac, forward.port);
+                            meta.forward_temp.port_dst = standard_metadata.ingress_port;
+                            meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
+                            conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
                             icmp_ping();
 
                         } // }else if(hdr.icmp.type == ICMP_ECHO_REQUEST ){
@@ -425,6 +409,7 @@ control MyIngress(inout headers hdr,
     }
 }
 
+
 /*************************************************************************
 ****************  E G R E S S   P R O C E S S I N G   *******************
 *************************************************************************/
@@ -443,6 +428,7 @@ control MyEgress(inout headers hdr,
             drop();
     }
 }
+
 
 /*************************************************************************
 *************   C H E C K S U M    C O M P U T A T I O N   **************
@@ -482,6 +468,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
     }
 }
 
+
 /*************************************************************************
 ***********************  D E P A R S E R  *******************************
 *************************************************************************/
@@ -501,6 +488,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
+
 /*************************************************************************
 ***********************  S W I T C H  *******************************
 *************************************************************************/
@@ -513,6 +501,7 @@ MyEgress(),
 MyComputeChecksum(),
 MyDeparser()
 ) main;
+
 
 /*************************************************************************
 ***********************  Comentarios add   *******************************
@@ -649,5 +638,11 @@ header udp_t {
 
     //packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - (bit<16>)hdr.ipv4.ihl) * 8));
     //b.extract(headers.ipv4options, (bit<32>)(((bit<16>)headers.ipv4.ihl - 5) * 32));
+
+
+    //const bit<16> TYPE_IPV6 = 0x86DD;
+
+     //temp test_digest = {0,hdr.ethernet.srcAddr, 0}; // apagar
+     //digest(1, test_digest);
 
 */

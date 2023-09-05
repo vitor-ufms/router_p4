@@ -96,13 +96,18 @@ actions {
   }
   params {
     id: 1
-    name: "dstAddr"
-    bitwidth: 48
+    name: "port"
+    bitwidth: 9
   }
   params {
     id: 2
-    name: "port"
-    bitwidth: 9
+    name: "scrAddr"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "dstAddr"
+    bitwidth: 48
   }
 }
 actions {
@@ -166,9 +171,9 @@ actions {
 }
 actions {
   preamble {
-    id: 20705896
-    name: "MyIngress.Addr_forward"
-    alias: "Addr_forward"
+    id: 28085022
+    name: "MyIngress.conf_forward"
+    alias: "conf_forward"
   }
 }
 actions {
@@ -206,54 +211,7 @@ registers {
       }
     }
   }
-  size: 5
-}
-digests {
-  preamble {
-    id: 400598298
-    name: "temp"
-    alias: "temp"
-  }
-  type_spec {
-    struct {
-      name: "temp"
-    }
-  }
+  size: 10
 }
 type_info {
-  structs {
-    key: "temp"
-    value {
-      members {
-        name: "port"
-        type_spec {
-          bitstring {
-            bit {
-              bitwidth: 9
-            }
-          }
-        }
-      }
-      members {
-        name: "mac"
-        type_spec {
-          bitstring {
-            bit {
-              bitwidth: 48
-            }
-          }
-        }
-      }
-      members {
-        name: "ip"
-        type_spec {
-          bitstring {
-            bit {
-              bitwidth: 32
-            }
-          }
-        }
-      }
-    }
-  }
 }

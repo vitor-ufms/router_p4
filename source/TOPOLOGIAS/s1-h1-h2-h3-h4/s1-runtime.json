@@ -16,8 +16,9 @@
       },
       "action_name": "MyIngress.ipv4_forward",
       "action_params": {
-        "dstAddr": "08:00:00:00:01:11",
-        "port": 1
+        "port": 1,
+        "scrAddr": "08:00:00:00:01:00",
+        "dstAddr": "08:00:00:00:01:11"
       }
     },
     {
@@ -27,8 +28,9 @@
       },
       "action_name": "MyIngress.ipv4_forward",
       "action_params": {
-        "dstAddr": "08:00:00:00:02:22",
-        "port": 2
+        "port": 2,
+        "scrAddr": "08:00:00:00:01:00",
+        "dstAddr": "08:00:00:00:02:22"
       }
     },
     {
@@ -38,8 +40,9 @@
       },
       "action_name": "MyIngress.ipv4_forward",
       "action_params": {
-        "dstAddr": "08:00:00:00:03:33",
-        "port": 3
+        "port": 3,
+        "scrAddr": "08:00:00:00:03:00",
+        "dstAddr": "08:00:00:00:03:33"
       }
     },
     {
@@ -49,8 +52,9 @@
       },
       "action_name": "MyIngress.ipv4_forward",
       "action_params": {
-        "dstAddr": "08:00:00:00:04:44",
-        "port": 4
+        "port": 4,
+        "scrAddr": "08:00:00:00:04:00",
+        "dstAddr": "08:00:00:00:04:44"
       }
     },
 
