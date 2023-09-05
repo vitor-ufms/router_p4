@@ -96,18 +96,13 @@ actions {
   }
   params {
     id: 1
-    name: "port"
-    bitwidth: 9
+    name: "dstAddr"
+    bitwidth: 48
   }
   params {
     id: 2
-    name: "scrAddr"
-    bitwidth: 48
-  }
-  params {
-    id: 3
-    name: "dstAddr"
-    bitwidth: 48
+    name: "port"
+    bitwidth: 9
   }
 }
 actions {
@@ -115,6 +110,13 @@ actions {
     id: 27854425
     name: "MyIngress.my_router"
     alias: "my_router"
+  }
+}
+actions {
+  preamble {
+    id: 21006855
+    name: "MyIngress.icmp_forward"
+    alias: "icmp_forward"
   }
 }
 actions {
@@ -157,61 +159,10 @@ actions {
 }
 actions {
   preamble {
-    id: 31799903
-    name: "MyIngress.new_icmp"
-    alias: "new_icmp"
-  }
-}
-actions {
-  preamble {
-    id: 25484189
-    name: "MyIngress.subtrai_ttl"
-    alias: "subtrai_ttl"
-  }
-}
-actions {
-  preamble {
-    id: 28085022
-    name: "MyIngress.conf_forward"
-    alias: "conf_forward"
-  }
-}
-actions {
-  preamble {
     id: 20880156
     name: "MyEgress.drop"
     alias: "MyEgress.drop"
   }
-}
-registers {
-  preamble {
-    id: 374076994
-    name: "MyIngress.controller_op"
-    alias: "controller_op"
-  }
-  type_spec {
-    bitstring {
-      bit {
-        bitwidth: 8
-      }
-    }
-  }
-  size: 1
-}
-registers {
-  preamble {
-    id: 385467734
-    name: "MyIngress.interface_ip"
-    alias: "interface_ip"
-  }
-  type_spec {
-    bitstring {
-      bit {
-        bitwidth: 32
-      }
-    }
-  }
-  size: 10
 }
 type_info {
 }

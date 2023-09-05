@@ -1,0 +1,39 @@
+sniffing on eth0
+got a packet
+###[ Ethernet ]### 
+  dst       = 08:00:00:00:03:33
+  src       = 08:00:00:00:02:00
+  type      = IPv4
+###[ IP ]### 
+     version   = 4
+     ihl       = 5
+     tos       = 0x0
+     len       = 41
+     id        = 1
+     flags     = 
+     frag      = 0
+     ttl       = 3
+     proto     = tcp
+     chksum    = 0x9fcb
+     src       = 10.0.1.1
+     dst       = 10.0.3.3
+     \options   \
+###[ TCP ]### 
+        sport     = 65178
+        dport     = 1234
+        seq       = 0
+        ack       = 0
+        dataofs   = 5
+        reserved  = 0
+        flags     = S
+        window    = 8192
+        chksum    = 0x3371
+        urgptr    = 0
+        options   = []
+###[ Raw ]### 
+           load      = 'A'
+
+00000000: 08 00 00 00 03 33 08 00  00 00 02 00 08 00 45 00  .....3........E.
+00000010: 00 29 00 01 00 00 03 06  9F CB 0A 00 01 01 0A 00  .)..............
+00000020: 03 03 FE 9A 04 D2 00 00  00 00 00 00 00 00 50 02  ..............P.
+00000030: 20 00 33 71 00 00 41                               .3q..A

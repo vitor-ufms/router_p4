@@ -1,0 +1,92 @@
+Usage: SWITCH_NAME [options] <path to JSON config file>
+Options:
+  -h [ --help ]               Display this help message
+  -i [ --interface ] arg      <port-num>@<interface-name>: Attach network 
+                              interface <interface-name> as port <port-num> at 
+                              startup. Can appear multiple times
+  --pcap [=arg(=.)]           Generate pcap files for interfaces. Argument is 
+                              optional and is the directory where pcap files 
+                              should be written. If omitted, files will be 
+                              written in current directory.
+  --use-files arg             Read/write packets from files (interface X 
+                              corresponds to two files X_in.pcap and 
+                              X_out.pcap). Argument is the time to wait (in 
+                              seconds) before starting to process the packet 
+                              files.
+  --packet-in arg             Enable receiving packet on this (nanomsg) socket.
+                              The --interface options will be ignored.
+  --thrift-port arg           TCP port on which to run the Thrift runtime 
+                              server
+  --device-id arg             Device ID, used to identify the device in IPC 
+                              messages (default 0)
+  --nanolog arg               IPC socket to use for nanomsg pub/sub logs 
+                              (default: no nanomsg logging
+  --log-console               Enable logging on stdout
+  --log-file arg              Enable logging to given file
+  -L [ --log-level ] arg      Set log level, supported values are 'trace', 
+                              'debug', 'info', 'warn', 'error', off'; default 
+                              is 'trace'
+  --log-flush                 If used with '--log-file', the logger will flush 
+                              to disk after every log message
+  --notifications-addr arg    Specify the nanomsg address to use for 
+                              notifications (e.g. learning, ageing, ...); 
+                              default is ipc:///tmp/bmv2-<device-id>-notificati
+                              ons.ipc
+  --restore-state arg         Restore state from file
+  --dump-packet-data arg      Specify how many bytes of packet data to dump 
+                              upon receiving & sending a packet. We use the 
+                              logger to dump the packet data, with log level 
+                              'info', so make sure the log level you have set 
+                              does not exclude 'info' messages; default is 0, 
+                              which means that nothing is logged.
+  -v [ --version ]            Display version information
+  --json-version              Display max bmv2 JSON version supported in the 
+                              format <major>.<minor>; all bmv2 JSON versions 
+                              with the same <major> version number are also 
+                              supported.
+  --no-p4                     Enable the switch to start without an inout 
+                              configuration
+  --max-port-count arg (=512) Maximum number of interfaces that can be bound to
+                              the switch; this is not an upper bound on each 
+                              port number, which can be arbitrary. Depending on
+                              the target, this max value may or may not be 
+                              enforced.
+This target also comes with its own command line parser, make sure you separate general bmv2 options from, target specific options with '--'
+Target specific options:
+Target options:
+  --load-modules arg              Load the given .so files (comma-separated) as
+                                  modules. This is useful when you want to use 
+                                  dynamic libraries to provide extern type 
+                                  implementations at runtime.
+  --disable-swap                  Disable JSON swapping at runtime; this is not
+                                  recommended when using P4Runtime!
+  --grpc-server-addr arg          Bind gRPC server to given address [default is
+                                  0.0.0.0:9559]
+  --grpc-server-ssl               Enable SSL/TLS for gRPC server
+  --grpc-server-cacert arg        Path to pem file holding CA certificate to 
+                                  verify peer against
+  --grpc-server-cert arg          Path to pem file holding server certificate
+  --grpc-server-key arg           Path to pem file holding server key
+  --grpc-server-with-client-auth  Require client to have a valid certificate 
+                                  for mutual authentication
+  --cpu-port arg                  Choose a numerical value for the CPU port, it
+                                  will be used for packet-in / packet-out. Do 
+                                  not add an interface with this port number, 
+                                  and 0 is not a valid value. When using 
+                                  standard v1model.p4, this value must fit 
+                                  within 9 bits. If you do not use this 
+                                  command-line option, P4Runtime packet IO 
+                                  functionality will not be available: you will
+                                  not be able to receive / send packets using 
+                                  the P4Runtime StreamChannel bi-directional 
+                                  stream.
+  --drop-port arg                 Choose a numerical value for the drop port 
+                                  (default is 511). When using standard 
+                                  v1model.p4, this value must fit within 9 
+                                  bits. You will need to use this command-line 
+                                  option when you wish to use port 511 as a 
+                                  valid dataplane port or as the CPU port.
+  --dp-grpc-server-addr arg       Use a gRPC channel to inject and receive 
+                                  dataplane packets; bind this gRPC server to 
+                                  given address, e.g. 0.0.0.0:50052
+  --priority-queues arg           Number of priority queues (default is 1)
