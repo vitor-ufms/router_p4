@@ -81,18 +81,31 @@ def table_add(sw, table, action, val_in, val_out, ptr=False): #table_add MyIngre
     sw.stdin.write(input_str)
     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
 
+def init_reg(sw):
+    reg = 'interface_ip'
+    value_ip = ip_to_decimal('10.0.11.10')
+    write_register(sw,register=reg, idx=1, value=value_ip, ptr = True)
+    value_ip = ip_to_decimal('10.0.11.10')
+    write_register(sw,register=reg, idx=2, value=value_ip, ptr = True)
+    value_ip = ip_to_decimal('10.0.33.10')
+    write_register(sw,register=reg, idx=3, value=value_ip, ptr = True)
+    value_ip = ip_to_decimal('10.0.44.10')
+    write_register(sw,register=reg, idx=4, value=value_ip, ptr = True)
+
+    reg_val2 = read_register(sw, register='interface_ip', idx=1, ptr=True)
+    print(reg_val2)
+    reg_val = read_register(sw, register='interface_ip', idx=2, ptr=True)
+    print(reg_val)
+    reg_val = read_register(sw, register='interface_ip', idx=3, ptr=True)
+    print(reg_val)
+    reg_val = read_register(sw, register='interface_ip', idx=4, ptr=True)
+    print(reg_val)
+
 def main():
     sw = connection()
 
     reg = 'interface_ip'
-
-    reg_val = read_register(sw, register='interface_ip', idx=0, ptr=True)
-    print(reg_val)
-
-    write_register(sw,register=reg, idx=0, value=111, ptr = True)
-
-    reg_val2 = read_register(sw, register='interface_ip', idx=0, ptr=True)
-    print(reg_val2)
+    init_reg(sw)
 
     """
         Use a register:"controller_op" with the index equal a 0.

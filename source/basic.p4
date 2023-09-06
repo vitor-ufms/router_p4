@@ -320,7 +320,7 @@ control MyIngress(inout headers hdr,
         hdr.icmp.code =  code;
 
         hdr.ipv4.ttl = 38;
-        hdr.ipv4.totalLen = 52; // 20 + 20 + 4 + 8
+        hdr.ipv4.totalLen = 56; // 20 + 20 + 4 + 4 + 8
         hdr.ipv4.protocol = TYPE_IPV4_ICMP;
         hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
 
@@ -355,8 +355,9 @@ control MyIngress(inout headers hdr,
             }else if(ipv4_lpm.apply().hit){ // match na tabela ipv4_lpm
 
                 if(meta.pkt_to_router == 0){ // 4.2.2.9 ip destino != do roteador
-                    subtrai_ttl(); // Precisa verificar se o pkt é para o roteador antes de diminuir ttl
-                    if(hdr.ipv4.ttl == 0){ // subtrai e depois verifica
+                   
+                    if((hdr.ipv4.ttl -1) == 0){ // subtrai e depois verifica
+                        hdr.ipv4.ttl = 1; // APAGAR
                         new_icmp(11, 0x00); //gerar um icmp code 11 iniciar o ttl
                         meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
                         meta.forward_temp.port_dst = standard_metadata.ingress_port;
@@ -365,6 +366,7 @@ control MyIngress(inout headers hdr,
                         hdr.header_8.data = meta.header_8.data;
 
                     }else{
+                        subtrai_ttl(); // Precisa verificar se o pkt é para o roteador antes de diminuir ttl
                         conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst); // Forwarding normal
                     }
 
@@ -462,7 +464,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
             update_checksum_with_payload( // verificar se pacote icmp foi alterado
                 hdr.icmp_te.isValid(),
                     { hdr.icmp.type,
-                    hdr.icmp.code,hdr.icmp_te, hdr.icmp_ip_header, hdr.header_8 },
+                    hdr.icmp.code, hdr.icmp_te, hdr.icmp_ip_header, hdr.header_8 },
                     hdr.icmp.checksum,
                     HashAlgorithm.csum16);
     }
@@ -578,7 +580,6 @@ preciso implementar algo que salve o mac e ip facil de pesquisar
         // meta.time.egress_ts = standard_metadata.egress_global_timestamp;
         // meta.time.enq_ts = standard_metadata.enq_timestamp;
         // meta.time.deq_ts = standard_metadata.deq_timedelta;
-
 
 
         header ipv6_t {
