@@ -19,6 +19,7 @@ const bit<8> TYPE_IPV4_ICMP = 0x01;
 const bit<8> ICMP_ECHO_REPLY = 0x00;
 const bit<8> ICMP_ECHO_REQUEST = 0x08;
 const bit<8> ICMP_TIME_EXCEEDED = 0x0B;
+const bit<8> ICMP_DESTINATION_UNREACHABLE = 0X03;
 
 
 /*************************************************************************
@@ -68,7 +69,7 @@ header icmp_t {
     bit<16> checksum;
 }
 
-header icmp_te_t{ 
+header icmp_un_t{ 
     bit<32> Unused;
 }
 
@@ -100,7 +101,7 @@ struct headers {
     ipv4_t       ipv4;
     arp_t        arp;
     icmp_t       icmp;
-    icmp_te_t    icmp_te;
+    icmp_un_t    icmp_un;
     ipv4_t       icmp_ip_header;
     header_8_t   header_8;
     payload_t    payload;
@@ -311,15 +312,15 @@ control MyIngress(inout headers hdr,
         hdr.icmp_ip_header.setValid();
         hdr.icmp_ip_header = hdr.ipv4;
 
-        hdr.icmp_te.setValid();
-        hdr.icmp_te.Unused = 0x00;
+        hdr.icmp_un.setValid(); // ?
+        hdr.icmp_un.Unused = 0x00;
 
         hdr.payload.setInvalid();
         hdr.icmp.setValid();
         hdr.icmp.type =  type;
         hdr.icmp.code =  code;
 
-        hdr.ipv4.ttl = 38;
+        hdr.ipv4.ttl = 64; //4.3.2.2 deve originar um novo ttl
         hdr.ipv4.totalLen = 56; // 20 + 20 + 4 + 4 + 8
         hdr.ipv4.protocol = TYPE_IPV4_ICMP;
         hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
@@ -357,8 +358,7 @@ control MyIngress(inout headers hdr,
                 if(meta.pkt_to_router == 0){ // 4.2.2.9 ip destino != do roteador
                    
                     if((hdr.ipv4.ttl -1) == 0){ // subtrai e depois verifica
-                        hdr.ipv4.ttl = 1; // APAGAR
-                        new_icmp(11, 0x00); //gerar um icmp code 11 iniciar o ttl
+                        new_icmp(ICMP_TIME_EXCEEDED, 0x00); //gerar um icmp code 11 iniciar o ttl
                         meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
                         meta.forward_temp.port_dst = standard_metadata.ingress_port;
                         conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
@@ -372,25 +372,31 @@ control MyIngress(inout headers hdr,
 
                 }else{ // ip destino é o roteador
 
-                    if(hdr.icmp.isValid())  // icmp para o roteador
+                    if(hdr.icmp.isValid()){  // icmp para o roteador
                         if(hdr.icmp.type == ICMP_ECHO_REQUEST){
                             meta.forward_temp.port_dst = standard_metadata.ingress_port;
                             meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
                             conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
                             icmp_ping();
 
-                        } // }else if(hdr.icmp.type == ICMP_ECHO_REQUEST ){
-                        //     ;
-                        // } // continue
-                    
-                    // 4.3.2.1 icmp Tipos de mensagens desconhecidas  deve descartar o pacote
+                        }else if(hdr.icmp.type == ICMP_ECHO_REPLY ){
+                             ;
+                        }else{
+                            drop(); // ICMP 4.3.2.1 Tipos de mensagens desconhecidas, descarta o pacote 
+                        }
+                    }
                 }
             }else{   // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
 
-                ;
+                new_icmp(ICMP_DESTINATION_UNREACHABLE, 0x00); //gerar um icmp code 11 iniciar o ttl
+                meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
+                meta.forward_temp.port_dst = standard_metadata.ingress_port;
+                conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
+                hdr.header_8.setValid();
+                hdr.header_8.data = meta.header_8.data;
                 
             }
-        // procedimentos arp
+// procedimentos arp
         }else if(hdr.arp.isValid()){ 
             controller_op.write(0, 2); // send a signal for the controller
 
@@ -462,9 +468,9 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
                     HashAlgorithm.csum16);
 
             update_checksum_with_payload( // verificar se pacote icmp foi alterado
-                hdr.icmp_te.isValid(),
+                hdr.icmp_un.isValid(),
                     { hdr.icmp.type,
-                    hdr.icmp.code, hdr.icmp_te, hdr.icmp_ip_header, hdr.header_8 },
+                    hdr.icmp.code, hdr.icmp_un, hdr.icmp_ip_header, hdr.header_8 },
                     hdr.icmp.checksum,
                     HashAlgorithm.csum16);
     }
@@ -481,7 +487,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.arp);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.icmp);
-        packet.emit(hdr.icmp_te);
+        packet.emit(hdr.icmp_un);
         packet.emit(hdr.icmp_ip_header);
         packet.emit(hdr.header_8);
         packet.emit(hdr.payload);
