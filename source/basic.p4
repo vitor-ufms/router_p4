@@ -201,8 +201,12 @@ control MyIngress(inout headers hdr,
     register<bit<32>>(MAX_INTERFACE) interface_ip; // ip(32)
     macAddr_t aux_mac; ip4Addr_t aux_ip;
 
+
     action drop() {
         mark_to_drop(standard_metadata);
+    }
+    action multicast() {
+        standard_metadata.mcast_grp = 1;
     }
 
     //action NoAction() {;}
@@ -233,16 +237,6 @@ control MyIngress(inout headers hdr,
       //  default_action = NoAction(); drop(); // default enviar para rota default
     }
 
-/******************** Procedimentos para ICMP ****************************/
-
-    action icmp_ping(){ // respondendo ping
-        //hdr.icmp.type = 0x08; rs loop
-        // falta arrumar o ip 
-        hdr.icmp.type = ICMP_ECHO_REPLY;
-        ip4Addr_t srcAddr_ipv4 = hdr.ipv4.srcAddr;
-        hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
-        hdr.ipv4.dstAddr = srcAddr_ipv4;         
-    }
 
 /******************** Action for table arp_exact  ****************************/
 
@@ -263,10 +257,6 @@ control MyIngress(inout headers hdr,
 
         hdr.arp.d_Add = hdr.arp.s_Add;
         hdr.arp.s_Add = addr;
-    }
-
-    action multicast() {
-        standard_metadata.mcast_grp = 1;
     }
 
     table arp_exact {
@@ -304,33 +294,38 @@ control MyIngress(inout headers hdr,
     }
 
 /******************** Action internos  ****************************/
+/******** Procedimentos para ICMP *****************/
+
+    action icmp_ping(){ // respondendo ping
+
+        hdr.icmp.type = ICMP_ECHO_REPLY;
+        ip4Addr_t srcAddr_ipv4 = hdr.ipv4.srcAddr;
+        hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
+        hdr.ipv4.dstAddr = srcAddr_ipv4;         
+    }
 
     action new_icmp(bit<8> type, bit<8> code){
         
        // hdr.header_8.setValid();
-
-        hdr.icmp_ip_header.setValid();
-        hdr.icmp_ip_header = hdr.ipv4;
-
-        hdr.icmp_un.setValid(); // ?
-        hdr.icmp_un.Unused = 0x00;
-
         hdr.payload.setInvalid();
         hdr.icmp.setValid();
         hdr.icmp.type =  type;
         hdr.icmp.code =  code;
+
+        hdr.icmp_un.setValid(); // ?
+        hdr.icmp_un.Unused = 0x00;
+
+        hdr.icmp_ip_header.setValid();
+        hdr.icmp_ip_header = hdr.ipv4; // copia cabeçalho ipv4
 
         hdr.ipv4.ttl = 64; //4.3.2.2 deve originar um novo ttl
         hdr.ipv4.totalLen = 56; // 20 + 20 + 4 + 4 + 8
         hdr.ipv4.protocol = TYPE_IPV4_ICMP;
         hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
 
-        interface_ip.read(aux_ip, (bit<32>)standard_metadata.ingress_port);
-        //interface_ip.read(aux_ip, (bit<32>) 1);        
+        interface_ip.read(aux_ip, (bit<32>)standard_metadata.ingress_port);       
         hdr.ipv4.srcAddr = aux_ip;
-        //hdr.ipv4.srcAddr = 0xAABBFF33; // ip da interface de entrada
-        // alter payload
-        //hdr.payload.data_ip = hdr.payload.data_ip[63:0];  // bit<32> a = (bit<32>)hdr.payload.data_ip;     
+       
     }
 
     action subtrai_ttl(){ 
