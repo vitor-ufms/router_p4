@@ -81,7 +81,7 @@ def table_add(sw, table, action, val_in, val_out, ptr=False): #table_add MyIngre
     sw.stdin.write(input_str)
     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
 
-def init_reg(sw):
+def init_reg(sw): 
     reg = 'interface_ip'
     value_ip = ip_to_decimal('10.0.11.10')
     write_register(sw,register=reg, idx=1, value=value_ip, ptr = True)
