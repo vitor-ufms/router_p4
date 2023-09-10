@@ -390,7 +390,7 @@ control MyIngress(inout headers hdr,
                 hdr.header_8.setValid();
                 hdr.header_8.data = meta.header_8.data;
                 
-            }
+            }  
 // procedimentos arp
         }else if(hdr.arp.isValid()){ 
             controller_op.write(0, 2); // send a signal for the controller
