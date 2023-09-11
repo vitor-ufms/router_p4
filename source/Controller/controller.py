@@ -101,16 +101,24 @@ def init_reg(sw):
     reg_val = read_register(sw, register='interface_ip', idx=4, ptr=True)
     print(reg_val)
 
+def init_table(sw):
+    #MyIngress.arp_exact arp_answer 10.0.11.10/32 => 00:11:22:33:44:55
+    table = 'MyIngress.ipv4_lpm'; action = 'ipv4_forward'
+    v_in = '10.0.11.1/32' ; v_out='5 00:11:22:33:44:55 00:11:22:33:44:55'
+    table_add(sw, table, action, v_in, v_out)
+    sw.stdout.readline().strip() # Entry has been added  with handle x
+
 def main():
     sw = connection()
 
     reg = 'interface_ip'
     init_reg(sw)
+    init_table(sw)
 
     """
         Use a register:"controller_op" with the index equal a 0.
         op = 0: Nothing, wait!
-        op = 1: 
+        op = 1: Reply ARP
         op = 2:
         op = 3:
         op = 4:

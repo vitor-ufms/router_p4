@@ -143,11 +143,11 @@ registers {
   type_spec {
     bitstring {
       bit {
-        bitwidth: 8
+        bitwidth: 64
       }
     }
   }
-  size: 1
+  size: 3
 }
 registers {
   preamble {

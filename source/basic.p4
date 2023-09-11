@@ -195,8 +195,8 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    register<bit<8>>(1) controller_op; // registrador que conversa com o plano de controle
-
+    register<bit<64>>(3) controller_op; // registrador que conversa com o plano de controle
+    // 0- flag; 1 ip ; 2 mac
     //register<bit<48>>(MAX_INTERFACE) interface_mac; // mac(48) cada index é uma porta
     register<bit<32>>(MAX_INTERFACE) interface_ip; // ip(32)
     macAddr_t aux_mac; ip4Addr_t aux_ip;
@@ -205,9 +205,6 @@ control MyIngress(inout headers hdr,
     action drop() {
         mark_to_drop(standard_metadata);
     }
-    // action multicast() {
-    //     standard_metadata.mcast_grp = 1;
-    // }
 
     //action NoAction() {;}
 
@@ -373,12 +370,15 @@ control MyIngress(inout headers hdr,
             }  
 // procedimentos arp
         }else if(hdr.arp.isValid()){ 
-            controller_op.write(0, 2); // send a signal for the controller
-
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 arp_exact.apply(); // verifica sem tem o ip na tabela cache arp
             } else if(hdr.arp.op == ARP_OPER_REPLY){
-               ;//arp_rp.apply(); // pode vir erro e set my router for 1
+                //if(hdr.arp.d_ip == ){ // meu ip
+                    controller_op.write(1, (bit<64>) hdr.arp.s_ip); // ip
+                    controller_op.write(2, (bit<64>) hdr.arp.s_Add); // mac
+                    controller_op.write(0, 1); // send a signal for the controller
+                    drop();
+               // }
             }
 
         }
@@ -479,7 +479,7 @@ MyDeparser()
 
 
 /* RFC 1812
-
+ resolve pb do registrador com tabela no inicio do ingress
  Fazer maquina de estado do parser no tcc
  Qual topologia?
  erro de checksum descarta o pacote // RFC 1812 item 4.2.2.5
