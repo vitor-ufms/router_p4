@@ -198,7 +198,8 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    register<bit<64>>(3) controller_op; // registrador que conversa com o plano de controle
+    register<bit<64>>(4) controller_op; // registrador que conversa com o plano de controle
+    // 0 - flag; 1 - ip; 2 - mac; 3 - port
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -393,6 +394,7 @@ control MyIngress(inout headers hdr,
                 if(hdr.arp.d_ip == meta.forward_temp.ip_ingress ){ // meu ip
                     controller_op.write(1, (bit<64>) hdr.arp.s_ip); // ip
                     controller_op.write(2, (bit<64>) hdr.arp.s_Add); // mac
+                    controller_op.write(3,(bit<64>) standard_metadata.ingress_port); //port
                     controller_op.write(0, 1); // send a signal for the controller
                     drop();
                 }
