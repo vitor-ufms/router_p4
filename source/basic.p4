@@ -272,26 +272,6 @@ control MyIngress(inout headers hdr,
         //default_action = NoAction();
     }
 
-/******************** Action da tabela arp_rp  ****************************/
-
-    action arp_forward(egressSpec_t port){
-
-        standard_metadata.egress_spec = port;
-    }
-
-    table arp_rp{
-        key = {
-            hdr.arp.d_ip: lpm;
-        }
-        actions = {
-            arp_forward;
-            drop;
-            NoAction;
-        }
-
-    size = 1024;
-    //default_action = NoAction();
-    }
 
 /******************** Action internos  ****************************/
 /******** Procedimentos para ICMP *****************/
@@ -396,18 +376,12 @@ control MyIngress(inout headers hdr,
             controller_op.write(0, 2); // send a signal for the controller
 
             if(hdr.arp.op == ARP_OPER_REQUEST){
-                if(arp_exact.apply().miss){ // verifica sem tem o ip na tabela cache arp
-                   ; //multicast();
-
-                }
+                arp_exact.apply(); // verifica sem tem o ip na tabela cache arp
             } else if(hdr.arp.op == ARP_OPER_REPLY){
-               arp_rp.apply(); // pode vir erro e set my router for 1
+               ;//arp_rp.apply(); // pode vir erro e set my router for 1
             }
 
         }
-
-        // if(ICMP_RM_HEAD_8 == 0)// mudar isso
-        //     hdr.header_8.setInvalid(); // SÓ USAR EM ICMP copiar para metadado e depois validar no icmp
         
     }
 }
@@ -421,15 +395,8 @@ control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
 
-    // action drop() {
-    //     mark_to_drop(standard_metadata);
-    // }
-
      apply { }
-    //     // Não enviar pacote para porta em que o pacote entrou em  Multicast
-    //     if (standard_metadata.egress_port == standard_metadata.ingress_port && standard_metadata.mcast_grp != 0)
-    //         drop();
-    // }
+
 }
 
 

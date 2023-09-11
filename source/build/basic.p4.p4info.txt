@@ -50,29 +50,6 @@ tables {
   }
   size: 1024
 }
-tables {
-  preamble {
-    id: 45379703
-    name: "MyIngress.arp_rp"
-    alias: "arp_rp"
-  }
-  match_fields {
-    id: 1
-    name: "hdr.arp.d_ip"
-    bitwidth: 32
-    match_type: LPM
-  }
-  action_refs {
-    id: 19475782
-  }
-  action_refs {
-    id: 25652968
-  }
-  action_refs {
-    id: 21257015
-  }
-  size: 1024
-}
 actions {
   preamble {
     id: 21257015
@@ -127,18 +104,6 @@ actions {
     id: 1
     name: "addr"
     bitwidth: 48
-  }
-}
-actions {
-  preamble {
-    id: 19475782
-    name: "MyIngress.arp_forward"
-    alias: "arp_forward"
-  }
-  params {
-    id: 1
-    name: "port"
-    bitwidth: 9
   }
 }
 actions {
