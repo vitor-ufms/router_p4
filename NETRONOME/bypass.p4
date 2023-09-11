@@ -82,7 +82,7 @@ header payload_t{
     varbit<524120> data_ip; // tamanho máximo de um payload ip  2^16-1 = 65535 - 20 = 65515 bytes = 524120 bits
 }
 
-struct temp_t {
+header temp_t {
     egressSpec_t  port_dst;
     macAddr_t     mac_dst;
     macAddr_t     mac_src;
@@ -202,7 +202,8 @@ control MyIngress(inout headers hdr,
     // 0 - flag; 1 - ip; 2 - mac; 3 - port
 
     action drop() {
-        mark_to_drop(standard_metadata);
+        //mark_to_drop(standard_metadata);
+        mark_to_drop( );
     }
 
     //action NoAction() {;}
@@ -495,7 +496,11 @@ MyDeparser()
 /*************************************************************************
 ***********************  Comentarios add   *******************************
 *************************************************************************/
+/*  
+        mudei o tamanho da porta
 
+
+*/
 
 /*
 #include <core.p4>
