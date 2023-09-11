@@ -205,9 +205,9 @@ control MyIngress(inout headers hdr,
     action drop() {
         mark_to_drop(standard_metadata);
     }
-    action multicast() {
-        standard_metadata.mcast_grp = 1;
-    }
+    // action multicast() {
+    //     standard_metadata.mcast_grp = 1;
+    // }
 
     //action NoAction() {;}
 
@@ -397,7 +397,7 @@ control MyIngress(inout headers hdr,
 
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 if(arp_exact.apply().miss){ // verifica sem tem o ip na tabela cache arp
-                    multicast();
+                   ; //multicast();
 
                 }
             } else if(hdr.arp.op == ARP_OPER_REPLY){
@@ -421,15 +421,15 @@ control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
 
-    action drop() {
-        mark_to_drop(standard_metadata);
-    }
+    // action drop() {
+    //     mark_to_drop(standard_metadata);
+    // }
 
-    apply {
-        // Não enviar pacote para porta em que o pacote entrou em  Multicast
-        if (standard_metadata.egress_port == standard_metadata.ingress_port && standard_metadata.mcast_grp != 0)
-            drop();
-    }
+     apply { }
+    //     // Não enviar pacote para porta em que o pacote entrou em  Multicast
+    //     if (standard_metadata.egress_port == standard_metadata.ingress_port && standard_metadata.mcast_grp != 0)
+    //         drop();
+    // }
 }
 
 
@@ -518,12 +518,10 @@ MyDeparser()
  erro de checksum descarta o pacote // RFC 1812 item 4.2.2.5
 
 IMPREMENTAR:
- - checksum verify
- - forwarding ipv6
+ - checksum verify e update
  - Protocolo arp
- - icmp e icmpv6
+ - terminar icmp
  - broadcast
- - tamanho variado de pacote ip 
 
 TESTAR:
  - ttl
