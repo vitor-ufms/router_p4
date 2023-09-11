@@ -119,6 +119,54 @@
       "action_params": {
         "addr": "08:00:00:00:01:00"
       }
-    }    
+    },
+    
+    
+
+
+    {
+      "table": "MyIngress.pre_proc",
+      "match": {
+        "standard_metadata.ingress_port": 1
+      },
+      "action_name": "MyIngress.set_temp",
+      "action_params": {
+        "mac_ingress": "08:00:00:00:01:00",
+        "ip_ingress" : "10.0.11.10"
+      }
+    }, 
+    {
+      "table": "MyIngress.pre_proc",
+      "match": {
+        "standard_metadata.ingress_port": 2
+      },
+      "action_name": "MyIngress.set_temp",
+      "action_params": {
+        "mac_ingress": "08:00:00:00:02:00",
+        "ip_ingress" : "10.0.22.10"
+      }
+    }, 
+    {
+      "table": "MyIngress.pre_proc",
+      "match": {
+        "standard_metadata.ingress_port": 3
+      },
+      "action_name": "MyIngress.set_temp",
+      "action_params": {
+        "mac_ingress": "08:00:00:00:03:00",
+        "ip_ingress" : "10.0.33.10"
+      }
+    },
+    {
+      "table": "MyIngress.pre_proc",
+      "match": {
+        "standard_metadata.ingress_port": 4
+      },
+      "action_name": "MyIngress.set_temp",
+      "action_params": {
+        "mac_ingress": "08:00:00:00:04:00",
+        "ip_ingress" : "10.0.44.10"
+      }
+    }  
   ]  
 }

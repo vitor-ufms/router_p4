@@ -112,8 +112,8 @@ def main():
     sw = connection()
 
     reg = 'interface_ip'
-    init_reg(sw)
-    init_table(sw)
+    #init_reg(sw) // usar reg somente para sinal
+    #init_table(sw)
 
     """
         Use a register:"controller_op" with the index equal a 0.

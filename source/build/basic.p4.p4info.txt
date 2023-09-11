@@ -50,6 +50,29 @@ tables {
   }
   size: 1024
 }
+tables {
+  preamble {
+    id: 39799877
+    name: "MyIngress.pre_proc"
+    alias: "pre_proc"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24247434
+  }
+  action_refs {
+    id: 25652968
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 10
+}
 actions {
   preamble {
     id: 21257015
@@ -108,6 +131,23 @@ actions {
 }
 actions {
   preamble {
+    id: 24247434
+    name: "MyIngress.set_temp"
+    alias: "set_temp"
+  }
+  params {
+    id: 1
+    name: "mac_ingress"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "ip_ingress"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
     id: 29380751
     name: "MyIngress.icmp_ping"
     alias: "icmp_ping"
@@ -148,21 +188,6 @@ registers {
     }
   }
   size: 3
-}
-registers {
-  preamble {
-    id: 385467734
-    name: "MyIngress.interface_ip"
-    alias: "interface_ip"
-  }
-  type_spec {
-    bitstring {
-      bit {
-        bitwidth: 32
-      }
-    }
-  }
-  size: 10
 }
 type_info {
 }

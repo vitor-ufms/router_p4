@@ -86,7 +86,10 @@ struct temp_t {
     egressSpec_t  port_dst;
     macAddr_t     mac_dst;
     macAddr_t     mac_src;
-   //ip4Addr_t     ip_dst;
+
+    ip4Addr_t     ip_ingress; 
+    macAddr_t     mac_ingress; 
+
    // ip4Addr_t     ip_scr;
 }
 
@@ -196,11 +199,6 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
 
     register<bit<64>>(3) controller_op; // registrador que conversa com o plano de controle
-    // 0- flag; 1 ip ; 2 mac
-    //register<bit<48>>(MAX_INTERFACE) interface_mac; // mac(48) cada index é uma porta
-    register<bit<32>>(MAX_INTERFACE) interface_ip; // ip(32)
-    macAddr_t aux_mac; ip4Addr_t aux_ip;
-
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -269,6 +267,24 @@ control MyIngress(inout headers hdr,
         //default_action = NoAction();
     }
 
+/********************** pre proc ************************************/
+    action set_temp(macAddr_t mac_ingress,ip4Addr_t ip_ingress ){
+        meta.forward_temp.ip_ingress = ip_ingress;
+        meta.forward_temp.mac_ingress = mac_ingress;
+    }
+
+    table pre_proc {
+        key = {
+           standard_metadata.ingress_port : exact;
+        }
+        actions = {
+            set_temp;
+            drop;
+            NoAction;
+        }
+        size = 10;
+        //default_action = NoAction();
+    }
 
 /******************** Action internos  ****************************/
 /******** Procedimentos para ICMP *****************/
@@ -300,8 +316,7 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.protocol = TYPE_IPV4_ICMP;
         hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
 
-        interface_ip.read(aux_ip, (bit<32>)standard_metadata.ingress_port);       
-        hdr.ipv4.srcAddr = aux_ip;
+        hdr.ipv4.srcAddr = meta.forward_temp.ip_ingress;
        
     }
 
@@ -317,7 +332,9 @@ control MyIngress(inout headers hdr,
         //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;            
     } 
 
-    apply {   
+    apply {  
+
+        pre_proc.apply(); 
 
     // procedimentos para ipv4
         if (hdr.ipv4.isValid()) { 
@@ -479,7 +496,7 @@ MyDeparser()
 
 
 /* RFC 1812
- resolve pb do registrador com tabela no inicio do ingress
+ arrumar myrouter;
  Fazer maquina de estado do parser no tcc
  Qual topologia?
  erro de checksum descarta o pacote // RFC 1812 item 4.2.2.5
