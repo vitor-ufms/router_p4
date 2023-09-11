@@ -389,13 +389,13 @@ control MyIngress(inout headers hdr,
         }else if(hdr.arp.isValid()){ 
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 arp_exact.apply(); // verifica sem tem o ip na tabela cache arp
-            } else if(hdr.arp.op == ARP_OPER_REPLY){
-                //if(hdr.arp.d_ip == ){ // meu ip
+            } else if(hdr.arp.op == ARP_OPER_REPLY){ // falta testar essa funçãooooooo
+                if(hdr.arp.d_ip == meta.forward_temp.ip_ingress ){ // meu ip
                     controller_op.write(1, (bit<64>) hdr.arp.s_ip); // ip
                     controller_op.write(2, (bit<64>) hdr.arp.s_Add); // mac
                     controller_op.write(0, 1); // send a signal for the controller
                     drop();
-               // }
+                }
             }
 
         }
