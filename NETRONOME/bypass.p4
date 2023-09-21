@@ -459,7 +459,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
                     HashAlgorithm.csum16);
 
             update_checksum_with_payload( // verificar se pacote icmp foi alterado
-                hdr.icmp_un.isValid(),
+                hdr.icmp_un.isValid(), // problema aqui
                     { hdr.icmp.type,
                     hdr.icmp.code, hdr.icmp_un, hdr.icmp_ip_header, hdr.header_8 },
                     hdr.icmp.checksum,
