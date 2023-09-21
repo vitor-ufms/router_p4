@@ -79,7 +79,7 @@ header header_8_t{
 
 header payload_t{
 
-    varbit<524120> data_ip; // tamanho máximo de um payload ip  2^16-1 = 65535 - 20 = 65515 bytes = 524120 bits
+    varbit<200> data_ip; // tamanho máximo de um payload ip  2^16-1 = 65535 - 20 = 65515 bytes = 524120 bits
 }
 
 header temp_t {
