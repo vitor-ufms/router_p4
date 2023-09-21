@@ -82,7 +82,7 @@ header payload_t{
     varbit<524120> data_ip; // tamanho máximo de um payload ip  2^16-1 = 65535 - 20 = 65515 bytes = 524120 bits
 }
 
-header temp_t {
+struct temp_t {
     egressSpec_t  port_dst;
     macAddr_t     mac_dst;
     macAddr_t     mac_src;
