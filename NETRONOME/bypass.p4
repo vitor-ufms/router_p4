@@ -129,6 +129,7 @@ parser MyParser(packet_in packet,
         transition select(hdr.ethernet.etherType) {
             TYPE_IPV4: parse_ipv4;
             TYPE_ARP: parse_arp;
+            0x1111: parse_error;
             default: accept;
         }
     }
@@ -161,6 +162,14 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.payload, (bit<32>) ((hdr.ipv4.totalLen - 20) * 8));       
         transition accept;
     }
+
+    /// resolução de problema de header, não é para entrar neste estado, somente para smartinic compilar
+    state parse_error{
+        packet.extract(hdr.icmp_un);
+        packet.extract(hdr.icmp_ip_header);
+        packet.extract(hdr.header_8);
+    }
+ 
 }
 
 
@@ -498,7 +507,9 @@ MyDeparser()
 *************************************************************************/
 /*  
         mudei o tamanho da porta
-
+        icmp_un
+        icmp_ip_header
+        header_8
 
 */
 
