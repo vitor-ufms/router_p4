@@ -1,6 +1,7 @@
 /* -*- P4_16 -*- */
 #include <core.p4>
 #include <v1model.p4>
+#define CPU_PORT 510
 
 const bit<32> MAX_INTERFACE = 10;
  
@@ -29,6 +30,20 @@ const bit<8> ICMP_DESTINATION_UNREACHABLE = 0X03;
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
+
+@controller_header("packet_out")
+header packet_out_header_t {
+    bit<8>  opcode;
+    bit<8>  reserved1;
+    bit<32> operand0;
+}
+
+@controller_header("packet_in")
+header packet_in_header_t {
+    bit<8>   opcode;
+    bit<32> operand0;
+    bit<32> operand1;
+}
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -108,6 +123,8 @@ struct headers {
     ipv4_t       icmp_ip_header;
     header_8_t   header_8;
     payload_t    payload;
+    packet_in_header_t  packet_in;
+    packet_out_header_t packet_out;
 }
 
 
@@ -386,7 +403,7 @@ control MyIngress(inout headers hdr,
                 hdr.header_8.data = meta.header_8.data;
                 
             }  
-// procedimentos arp
+        // procedimentos arp
         }else if(hdr.arp.isValid()){ 
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 arp_exact.apply(); // verifica sem tem o ip na tabela cache arp
@@ -401,7 +418,9 @@ control MyIngress(inout headers hdr,
             }
 
         }
-        
+        hdr.packet_in.isValid();
+        hdr.packet_in.opcode = 2;
+        standard_metadata.egress_spec = CPU_PORT;
     }
 }
 

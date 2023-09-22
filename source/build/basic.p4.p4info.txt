@@ -174,6 +174,52 @@ actions {
     alias: "conf_forward"
   }
 }
+controller_packet_metadata {
+  preamble {
+    id: 76689799
+    name: "packet_out"
+    alias: "packet_out"
+    annotations: "@controller_header(\"packet_out\")"
+  }
+  metadata {
+    id: 1
+    name: "opcode"
+    bitwidth: 8
+  }
+  metadata {
+    id: 2
+    name: "reserved1"
+    bitwidth: 8
+  }
+  metadata {
+    id: 3
+    name: "operand0"
+    bitwidth: 32
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 81826293
+    name: "packet_in"
+    alias: "packet_in"
+    annotations: "@controller_header(\"packet_in\")"
+  }
+  metadata {
+    id: 1
+    name: "opcode"
+    bitwidth: 8
+  }
+  metadata {
+    id: 2
+    name: "operand0"
+    bitwidth: 32
+  }
+  metadata {
+    id: 3
+    name: "operand1"
+    bitwidth: 32
+  }
+}
 registers {
   preamble {
     id: 374076994
