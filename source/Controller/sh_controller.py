@@ -20,11 +20,13 @@ sh.setup(
 print("teste")
 
 # pktin = sh.PacketIn()
-# pktlist = []
-# pktin.sniff(lambda p: pktlist.append(p), timeout=10)
-# print(pktlist[0])
+# for i in range(10):
+#     pktlist = []
+#     pktin.sniff(lambda p: pktlist.append(p), timeout=2)
+#     print(pktlist)
+#     print("    ", i)
 
-#pktout = sh.PacketOut()
+
 
 pkt = Ether(dst='00:00:00:00:00:00')
 pktout = sh.PacketOut()
@@ -33,6 +35,7 @@ pktout.metadata['opcode'] = '2'
 pktout.metadata['operand0'] =  '2'  #'%d' % (idx_int)
 pktout.metadata['operand1'] = '0'
 pktout.send()
+
 
 #te = sh.read_table_entries()
 #te = sh.tables()

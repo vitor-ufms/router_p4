@@ -351,9 +351,11 @@ control MyIngress(inout headers hdr,
     } 
 
     apply {  
-        if(standard_metadata.ingress_port == CPU_PORT){
-            controller_op.write(0, 4); // send a signal for the controller
-        }
+
+        // verify if pakcet is controller
+        // if(standard_metadata.ingress_port == CPU_PORT){
+        //     controller_op.write(0, 4); // send a signal for the controller
+        // }       
 
         pre_proc.apply(); 
 
@@ -421,9 +423,10 @@ control MyIngress(inout headers hdr,
             }
 
         }
-        hdr.packet_in.isValid();
-        hdr.packet_in.opcode = 2;
-        standard_metadata.egress_spec = CPU_PORT;
+        // send packet for controller
+        // hdr.packet_in.isValid();
+        // hdr.packet_in.opcode = 2;
+        // standard_metadata.egress_spec = CPU_PORT;
     }
 }
 
@@ -652,5 +655,9 @@ header udp_t {
 
      //temp test_digest = {0,hdr.ethernet.srcAddr, 0}; // apagar
      //digest(1, test_digest);
+
+     use 
+     digest(1, standard_metadata.ingress_port);
+        //extern void digest<T>(in bit<32> receiver, in T data);`
 
 */
