@@ -18,15 +18,21 @@ sh.setup(
     #config=sh.FwdPipeConfig(p4info, bmv2_json)
 )
 print("teste")
-pktin = sh.PacketIn()
 
-pktlist = []
-pktin.sniff(lambda p: print(p), timeout=None)
-print(pktlist)
+# pktin = sh.PacketIn()
+# pktlist = []
+# pktin.sniff(lambda p: pktlist.append(p), timeout=10)
+# print(pktlist[0])
 
 #pktout = sh.PacketOut()
 
-#a = sh.PacketIn()
+pkt = Ether(dst='00:00:00:00:00:00')
+pktout = sh.PacketOut()
+pktout.payload = bytes(pkt)
+pktout.metadata['opcode'] = '2'
+pktout.metadata['operand0'] =  '2'  #'%d' % (idx_int)
+pktout.metadata['operand1'] = '0'
+pktout.send()
 
 #te = sh.read_table_entries()
 #te = sh.tables()

@@ -111,7 +111,7 @@ def init_table(sw):
 def main():
     sw = connection()
 
-    reg = 'interface_ip'
+    #reg = 'interface_ip'
     #init_reg(sw) // usar reg somente para sinal
     #init_table(sw)
 
@@ -135,6 +135,10 @@ def main():
             write_register(sw,register=reg, idx=0, value=22)
         elif (op == 2):
             print('op = 2')
+        elif (op == 4):
+            print('op = 4 cpu_port')
+        elif (op == 5):
+            print('op = 5')
         else:
             print('Unknown command')
         write_register(sw,register=reg, idx=0, value=0)

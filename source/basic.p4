@@ -34,8 +34,8 @@ typedef bit<32> ip4Addr_t;
 @controller_header("packet_out")
 header packet_out_header_t {
     bit<8>  opcode;
-    bit<8>  reserved1;
     bit<32> operand0;
+    bit<32> operand1;
 }
 
 @controller_header("packet_in")
@@ -351,6 +351,9 @@ control MyIngress(inout headers hdr,
     } 
 
     apply {  
+        if(standard_metadata.ingress_port == CPU_PORT){
+            controller_op.write(0, 4); // send a signal for the controller
+        }
 
         pre_proc.apply(); 
 

@@ -188,12 +188,12 @@ controller_packet_metadata {
   }
   metadata {
     id: 2
-    name: "reserved1"
-    bitwidth: 8
+    name: "operand0"
+    bitwidth: 32
   }
   metadata {
     id: 3
-    name: "operand0"
+    name: "operand1"
     bitwidth: 32
   }
 }
