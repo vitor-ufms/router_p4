@@ -5,7 +5,7 @@ import sys
 
 from scapy.all import IP, TCP, ARP, Ether, get_if_hwaddr, get_if_list, sendp
 
-
+  
 def get_if():
     ifs=get_if_list()
     iface=None # "h1-eth0"
