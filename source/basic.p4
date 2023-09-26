@@ -411,13 +411,21 @@ control MyIngress(inout headers hdr,
         // procedimentos arp
         }else if(hdr.arp.isValid()){ 
             if(hdr.arp.op == ARP_OPER_REQUEST){
-                arp_exact.apply(); // verifica sem tem o ip na tabela cache arp
+                if(arp_exact.apply().miss){// verifica sem tem o ip na tabela cache arp
+                    // sem correspondencia na tabela, chamar o controlador
+                    controller_op.write(1, (bit<64>) hdr.arp.s_ip); // ip
+                    controller_op.write(2, (bit<64>) hdr.arp.s_Add); // mac
+                    controller_op.write(3,(bit<64>) standard_metadata.ingress_port); //port
+                    controller_op.write(0, 1); // send a signal for the controller
+                    drop();
+
+                }
             } else if(hdr.arp.op == ARP_OPER_REPLY){ // falta testar essa funçãooooooo
                 if(hdr.arp.d_ip == meta.forward_temp.ip_ingress ){ // meu ip
                     controller_op.write(1, (bit<64>) hdr.arp.s_ip); // ip
                     controller_op.write(2, (bit<64>) hdr.arp.s_Add); // mac
                     controller_op.write(3,(bit<64>) standard_metadata.ingress_port); //port
-                    controller_op.write(0, 1); // send a signal for the controller
+                    controller_op.write(0, 2); // send a signal for the controller
                     drop();
                 }
             }

@@ -85,7 +85,14 @@
       "action_name": "MyIngress.my_router",
       "action_params": {}
     },
-
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.22.10", 32]
+      },
+      "action_name": "MyIngress.my_router",
+      "action_params": {}
+    },
 
 
 
@@ -108,6 +115,16 @@
       "action_name": "MyIngress.arp_answer",
       "action_params": {
         "addr": "08:00:00:00:03:00"
+      }
+    },
+    {
+      "table": "MyIngress.arp_exact",
+      "match": {
+        "hdr.arp.d_ip": ["10.0.22.10", 32]
+      },
+      "action_name": "MyIngress.arp_answer",
+      "action_params": {
+        "addr": "08:00:00:00:02:00"
       }
     },
     {

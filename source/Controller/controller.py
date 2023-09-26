@@ -123,6 +123,21 @@ def init_table(sw):
     table_add(sw, table, action, v_in, v_out)
     sw.stdout.readline().strip() # Entry has been added  with handle x
 
+def packet_out():
+    pkt = Ether(dst='00:00:00:00:00:00')
+    pktout = sh.PacketOut()
+    pktout.payload = bytes(pkt)
+    pktout.metadata['opcode'] = '2'
+    pktout.metadata['operand0'] =  '2'  #'%d' % (idx_int)
+    pktout.metadata['operand1'] = '0'
+    pktout.send()
+
+def arp_request_miss():
+    print("arp request miss")
+
+def arp_request_reply():
+    print("arp_request_reply ")
+
 def main():
     sw = connection()
     connection_sh()
@@ -146,11 +161,15 @@ def main():
         op = read_register(sw, register=reg, idx=0)
         if (op == 0):
             continue
-        elif(op == 11):
-            print(" op = 1")
-            write_register(sw,register=reg, idx=0, value=22)
+        elif (op == 1):
+            print('op = 1')
+            arp_request_miss() #request sem correspondencia na tabela
         elif (op == 2):
             print('op = 2')
+            arp_request_reply() #reply para o roteador
+        elif(op == 11):
+            print(" op = 11")
+            write_register(sw,register=reg, idx=0, value=22)
         elif (op == 4):
             print('op = 4 cpu_port')
         elif (op == 5):
