@@ -1,7 +1,11 @@
 
 
-import subprocess
-import ipaddress
+import subprocess, ipaddress
+
+import p4runtime_sh.shell as sh
+from p4runtime_sh.shell import p4runtime_pb2 as p4runtime_proto
+import random, socket, sys
+from scapy.all import IP, TCP, ARP, Ether, get_if_hwaddr, get_if_list, sendp
 
 def connection(thrift_port = 9090):
     sw = subprocess.Popen(['simple_switch_CLI', '--thrift-port', str(thrift_port)], \
@@ -10,6 +14,17 @@ def connection(thrift_port = 9090):
     sw.stdout.readline().strip() # Done
     sw.stdout.readline().strip() # Control utility for runtime P4 table manipulation
     return sw
+
+def connection_sh():
+    p4info = './../build/basic.p4.p4info.txt'
+    bmv2_json = './../build/basic.json'
+    sh.setup(
+        device_id=0,
+        grpc_addr='localhost:50051',
+        election_id=(0, 1), # (high, low)
+        #config=sh.FwdPipeConfig(p4info, bmv2_json)
+    )
+    #return sh
 
 def read_register(sw, register, idx, ptr = False):
     input_str = "register_read %s %d \n" % (register, idx)
@@ -110,6 +125,7 @@ def init_table(sw):
 
 def main():
     sw = connection()
+    connection_sh()
 
     #reg = 'interface_ip'
     #init_reg(sw) // usar reg somente para sinal
