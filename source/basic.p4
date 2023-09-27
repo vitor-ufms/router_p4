@@ -113,10 +113,11 @@ struct temp_t {
 }
 
 struct metadata {
+    //@field_list(1)
     header_8_t   header_8;
     temp_t       forward_temp;
     bit<1>       pkt_to_router;
-    bit<1>       encaminhamento;
+    bit<4>       encaminhamento;
 }
 
 struct headers {
@@ -390,12 +391,22 @@ control MyIngress(inout headers hdr,
                    
                     if((hdr.ipv4.ttl -1) == 0){ // subtrai e depois verifica
                         new_icmp(ICMP_TIME_EXCEEDED, 0x00); //gerar um icmp code 11 iniciar o ttl
-                        meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
-                        meta.forward_temp.port_dst = standard_metadata.ingress_port;/// precisa passar na tabela de encaminhamento antes de voltar
+                        //meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
+                        //meta.forward_temp.port_dst = standard_metadata.ingress_port;/// precisa passar na tabela de encaminhamento antes de voltar
                         //conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
-                        meta.encaminhamento = 1;
+                        
+                        //meta.forward_temp.port_dst =  standard_metadata.ingress_port;
+                        //meta.forward_temp.ip_dst = hdr.ipv4.dstAddr;
+                        
+                        //standard_metadata.egress_spec = standard_metadata.ingress_port;
+                        //hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
+                        //hdr.ethernet.srcAddr = meta.forward_temp.mac_ingress;                      
+                        
+                        meta.encaminhamento = 2;
                         hdr.header_8.setValid();
                         hdr.header_8.data = meta.header_8.data;
+
+                       // resubmit_preserving_field_list(1);
 
                     }else{
                         subtrai_ttl(); // Precisa verificar se o pkt é para o roteador antes de diminuir ttl
@@ -408,10 +419,14 @@ control MyIngress(inout headers hdr,
 
                     if(hdr.icmp.isValid()){  // icmp para o roteador
                         if(hdr.icmp.type == ICMP_ECHO_REQUEST){
-                            meta.forward_temp.port_dst = standard_metadata.ingress_port;
-                            meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
+                            //meta.forward_temp.port_dst = standard_metadata.ingress_port;
+                            //meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
                             //conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
-                            meta.encaminhamento = 1;
+                            standard_metadata.egress_spec = standard_metadata.ingress_port;
+                            hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
+                            hdr.ethernet.srcAddr = meta.forward_temp.mac_ingress;
+
+                            meta.encaminhamento = 0 ;
                             icmp_ping();
 
                         }else if(hdr.icmp.type == ICMP_ECHO_REPLY ){
@@ -424,10 +439,14 @@ control MyIngress(inout headers hdr,
             }else{   // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
 
                 new_icmp(ICMP_DESTINATION_UNREACHABLE, 0x00); //gerar um icmp code 11 iniciar o ttl
-                meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
-                meta.forward_temp.port_dst = standard_metadata.ingress_port;
+                //meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
+                //meta.forward_temp.port_dst = standard_metadata.ingress_port;
                 //conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
-                meta.encaminhamento = 1;
+                standard_metadata.egress_spec = standard_metadata.ingress_port;
+                hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
+                hdr.ethernet.srcAddr = meta.forward_temp.mac_ingress;
+                
+                meta.encaminhamento = 0;
                 hdr.header_8.setValid();
                 hdr.header_8.data = meta.header_8.data;
                 
@@ -479,7 +498,13 @@ control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
 
-     apply { }
+     apply {
+
+        if( meta.encaminhamento == 2){
+            recirculate_preserving_field_list(0);
+        }
+
+      }
 
 }
 
