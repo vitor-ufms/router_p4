@@ -280,10 +280,14 @@ control MyIngress(inout headers hdr,
         hdr.arp.s_Add = addr;
     }
 
-    action arp_query(macAddr_t scrAddr, macAddr_t dstAddr){
+    action arp_query(macAddr_t srcAddr, macAddr_t dstAddr){
 
-        meta.forward_temp.mac_src = scrAddr;
+        meta.forward_temp.mac_src = srcAddr;
         meta.forward_temp.mac_dst = dstAddr;
+
+        standard_metadata.egress_spec = meta.forward_temp.port_dst;
+        hdr.ethernet.srcAddr = srcAddr;
+        hdr.ethernet.dstAddr = dstAddr;
     
     }
 

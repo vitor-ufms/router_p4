@@ -149,7 +149,7 @@
       },
       "action_name": "MyIngress.arp_query",
       "action_params": {
-        "scrAddr": "08:00:00:00:01:00",
+        "srcAddr": "08:00:00:00:01:00",
         "dstAddr": "08:00:00:00:01:11"
       }
     },
@@ -160,7 +160,7 @@
       },
       "action_name": "MyIngress.arp_query",
       "action_params": {
-        "scrAddr": "08:00:00:00:02:00",
+        "srcAddr": "08:00:00:00:02:00",
         "dstAddr": "08:00:00:00:02:22"
       }
     },
@@ -171,7 +171,7 @@
       },
       "action_name": "MyIngress.arp_query",
       "action_params": {
-        "scrAddr": "08:00:00:00:03:00",
+        "srcAddr": "08:00:00:00:03:00",
         "dstAddr": "08:00:00:00:03:33"
       }
     },
@@ -182,7 +182,7 @@
       },
       "action_name": "MyIngress.arp_query",
       "action_params": {
-        "scrAddr": "08:00:00:00:04:00",
+        "srcAddr": "08:00:00:00:04:00",
         "dstAddr": "08:00:00:00:04:44"
       }
     }

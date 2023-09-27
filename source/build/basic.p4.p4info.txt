@@ -127,7 +127,7 @@ actions {
   }
   params {
     id: 1
-    name: "scrAddr"
+    name: "srcAddr"
     bitwidth: 48
   }
   params {
