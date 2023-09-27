@@ -35,12 +35,12 @@ tables {
   }
   match_fields {
     id: 1
-    name: "hdr.arp.d_ip"
+    name: "meta.forward_temp.ip_dst"
     bitwidth: 32
     match_type: LPM
   }
   action_refs {
-    id: 32524311
+    id: 30131879
   }
   action_refs {
     id: 25652968
@@ -101,13 +101,8 @@ actions {
   }
   params {
     id: 2
-    name: "scrAddr"
-    bitwidth: 48
-  }
-  params {
-    id: 3
-    name: "dstAddr"
-    bitwidth: 48
+    name: "ip_dst"
+    bitwidth: 32
   }
 }
 actions {
@@ -123,9 +118,21 @@ actions {
     name: "MyIngress.arp_answer"
     alias: "arp_answer"
   }
+}
+actions {
+  preamble {
+    id: 30131879
+    name: "MyIngress.arp_query"
+    alias: "arp_query"
+  }
   params {
     id: 1
-    name: "addr"
+    name: "scrAddr"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "dstAddr"
     bitwidth: 48
   }
 }
@@ -165,13 +172,6 @@ actions {
     id: 25484189
     name: "MyIngress.subtrai_ttl"
     alias: "subtrai_ttl"
-  }
-}
-actions {
-  preamble {
-    id: 28085022
-    name: "MyIngress.conf_forward"
-    alias: "conf_forward"
   }
 }
 controller_packet_metadata {
