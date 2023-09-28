@@ -35,17 +35,17 @@ typedef bit<32> ip4Addr_t;
 
 @controller_header("packet_out")
 header packet_out_header_t {
-    bit<8>  opcode;
-    bit<32> operand0;
-    bit<32> operand1;
+    bit<32>  opcodes;
+    bit<32> operand0s;
+    bit<32> operand1s;
 }
 
-@controller_header("packet_in")
-header packet_in_header_t {
-    bit<8>   opcode;
-    bit<32> operand0;
-    bit<32> operand1;
-}
+// @controller_header("packet_in")
+// header packet_in_header_t {
+//     bit<16>   opcode;
+//     // bit<32> operand0;
+//     // bit<32> operand1;
+// }
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -129,7 +129,7 @@ struct headers {
     ipv4_t       icmp_ip_header;
     header_8_t   header_8;
     payload_t    payload;
-    packet_in_header_t  packet_in;
+   // packet_in_header_t  packet_in;
     packet_out_header_t packet_out;
 }
 
@@ -483,8 +483,20 @@ control MyIngress(inout headers hdr,
         }
         // send packet for controller
         // hdr.packet_in.isValid();
-        // hdr.packet_in.opcode = 2;
-        // standard_metadata.egress_spec = CPU_PORT;
+        // hdr.packet_in.opcode = 0xFFFF;
+        // hdr.packet_in.operand0 = 7;
+        // hdr.packet_in.operand1 = 1;
+
+        // send packet for controller
+        // hdr.packet_out.isValid();
+        // hdr.packet_out.opcode = 0;
+        // hdr.packet_out.operand0 = 360;
+        // hdr.packet_out.operand1 = 8;
+        
+        //if(standard_metadata.ingress_port != CPU_PORT)
+        //hdr.ethernet.dstAddr = 0xFF00FFFF0000;
+        hdr.ethernet.srcAddr = 0xFF0000FFFFFF;
+        standard_metadata.egress_spec = CPU_PORT;
 
     }// apply
 }
@@ -554,6 +566,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
+        //packet.emit(hdr.packet_in);
         packet.emit(hdr.ethernet);
         packet.emit(hdr.arp);
         packet.emit(hdr.ipv4);
@@ -562,6 +575,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.icmp_ip_header);
         packet.emit(hdr.header_8);
         packet.emit(hdr.payload);
+       // packet.emit(hdr.packet_in);
         //packet.emit(hdr.tcp);
         //packet.emit(hdr.time);
     }
