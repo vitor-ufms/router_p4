@@ -391,12 +391,7 @@ control MyIngress(inout headers hdr,
                    
                     if((hdr.ipv4.ttl -1) == 0){ // subtrai e depois verifica
                         new_icmp(ICMP_TIME_EXCEEDED, 0x00); //gerar um icmp code 11 iniciar o ttl
-                        //meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
-                        //meta.forward_temp.port_dst = standard_metadata.ingress_port;/// precisa passar na tabela de encaminhamento antes de voltar
-                        //conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
                         
-                        //meta.forward_temp.port_dst =  standard_metadata.ingress_port;
-                        //meta.forward_temp.ip_dst = hdr.ipv4.dstAddr;
                         
                         //standard_metadata.egress_spec = standard_metadata.ingress_port;
                         //hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
@@ -457,11 +452,13 @@ control MyIngress(inout headers hdr,
         if( meta.encaminhamento == 1 && meta.pkt_to_router == 0 ){
             if(arp_exact.apply().miss){// configura o mac 
                 // ip sem mac, chamar controlador
-                controller_op.write(1, (bit<64>) hdr.arp.s_ip); // ip
-                controller_op.write(2, (bit<64>) hdr.arp.s_Add); // mac
-                controller_op.write(3,(bit<64>) standard_metadata.ingress_port); //port
+                
+                controller_op.write(1, (bit<64>) meta.forward_temp.port_dst); // porta de saída
+                controller_op.write(2, (bit<64>) meta.forward_temp.ip_dst); // ip de destino
+                //controller_op.write(3,(bit<64>) standard_metadata.ingress_port); //mac de saída
                 controller_op.write(0, 1); // send a signal for the controller
-                drop();
+                standard_metadata.egress_spec = CPU_PORT; // pacote vai para o controlador para ser salvo
+                //drop();
             }
         }
 
@@ -495,8 +492,8 @@ control MyIngress(inout headers hdr,
         
         //if(standard_metadata.ingress_port != CPU_PORT)
         //hdr.ethernet.dstAddr = 0xFF00FFFF0000;
-        hdr.ethernet.srcAddr = 0xFF0000FFFFFF;
-        standard_metadata.egress_spec = CPU_PORT;
+       // hdr.ethernet.srcAddr = 0xFF0000FFFFFF;
+        //standard_metadata.egress_spec = CPU_PORT;
 
     }// apply
 }

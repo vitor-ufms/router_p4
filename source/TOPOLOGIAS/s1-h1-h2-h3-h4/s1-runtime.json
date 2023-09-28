@@ -45,7 +45,7 @@
     {
       "table": "MyIngress.ipv4_lpm",
       "match": {
-        "hdr.ipv4.dstAddr": ["10.0.44.0", 32]
+        "hdr.ipv4.dstAddr": ["10.0.44.0", 24]
       },
       "action_name": "MyIngress.ipv4_forward",
       "action_params": {
@@ -174,17 +174,9 @@
         "srcAddr": "08:00:00:00:03:00",
         "dstAddr": "08:00:00:00:03:33"
       }
-    },
-    {
-      "table": "MyIngress.arp_exact",
-      "match": {
-        "meta.forward_temp.ip_dst": ["10.0.44.1", 32]
-      },
-      "action_name": "MyIngress.arp_query",
-      "action_params": {
-        "srcAddr": "08:00:00:00:04:00",
-        "dstAddr": "08:00:00:00:04:44"
-      }
     }
+
+
+
   ]  
 }

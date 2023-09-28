@@ -85,9 +85,9 @@ def decimal_to_mac(decimal_value, ptr=False):
         print("end mac: ", mac_address)
     return mac_address
 
-def table_add(sw, table, action, val_in, val_out, ptr=False): #table_add MyIngress.arp_exact arp_answer 10.0.11.10/32 => 00:11:22:33:44:55
+def table_add(sw, table, action, val_in, val_out, ptr=False, clean=0): #table_add MyIngress.arp_exact arp_answer 10.0.11.10/32 => 00:11:22:33:44:55
     
-    input_str = "table_add %s %s => %s %s \n" % (table, action, val_in, val_out)
+    input_str = "table_add %s %s %s => %s \n" % (table, action, val_in, val_out)
     
     if ptr:
         print(input_str[0:-1])
@@ -95,6 +95,8 @@ def table_add(sw, table, action, val_in, val_out, ptr=False): #table_add MyIngre
     # Envie os dados de entrada para o processo e capture a saída
     sw.stdin.write(input_str)
     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+    for i in range(clean):
+        sw.stdout.readline().strip()
 
 def init_reg(sw): 
     reg = 'interface_ip'
@@ -135,12 +137,35 @@ def packet_out():
 def arp_request_miss():
     print("arp request miss")
 
-def arp_request_reply():
-    print("arp_request_reply ")
+def arp_request(pkt_in, sw):
+    print("arp_request")
+    try:
+        pk = pkt_in.packet_in_queue.get(block=True, timeout=3)
+        #print(pk.packet.payload)
+    except:
+        print('NAO RECEBEU O PACOTE ###########################33')
+    packet_bytes = pk.packet.payload
+    eth_packet = Ether(packet_bytes)
+    eth_packet.show()
+
+    reg = 'controller_op'
+    por_dst = read_register(sw, register=reg, idx=1)
+    ip_dst = decimal_to_ip(read_register(sw, register=reg, idx=2))
+
+    print(por_dst,decimal_to_ip(ip_dst))
+    ip = f'{ip_dst}/32'
+
+    # TODO criar arp request para a interface
+    mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
+    print(mac)
+    table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
+
+    # TODO Após resposta enviar o pacote que está na fila
 
 def main():
     sw = connection()
     connection_sh()
+    pkt_in = sh.PacketIn()
 
     #reg = 'interface_ip'
     #init_reg(sw) // usar reg somente para sinal
@@ -149,8 +174,8 @@ def main():
     """
         Use a register:"controller_op" with the index equal a 0.
         op = 0: Nothing, wait!
-        op = 1: Reply ARP
-        op = 2:
+        op = 1: Sem mac
+        op = 2: Reply ARP
         op = 3:
         op = 4:
 
@@ -163,10 +188,10 @@ def main():
             continue
         elif (op == 1):
             print('op = 1')
-            arp_request_miss() #request sem correspondencia na tabela
+            arp_request(pkt_in, sw) #reply para o roteador
         elif (op == 2):
             print('op = 2')
-            arp_request_reply() #reply para o roteador
+            arp_request_miss() #request sem correspondencia na tabela
         elif(op == 11):
             print(" op = 11")
             write_register(sw,register=reg, idx=0, value=22)

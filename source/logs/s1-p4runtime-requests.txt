@@ -1,10 +1,10 @@
 
-[2023-09-28 15:51:11.446] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2023-09-28 20:13:14.788] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
-Message too long (115153 bytes)! Skipping log...
+Message too long (111502 bytes)! Skipping log...
 ---
 
-[2023-09-28 15:51:11.468] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.806] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -25,7 +25,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.474] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.810] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -60,7 +60,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.479] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.816] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -95,7 +95,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.483] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.821] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -130,7 +130,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.487] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.825] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -144,7 +144,7 @@ updates {
         field_id: 1
         lpm {
           value: "\n\000,\000"
-          prefix_len: 32
+          prefix_len: 24
         }
       }
       action {
@@ -165,7 +165,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.490] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.854] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -192,7 +192,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.493] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.858] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -219,7 +219,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.497] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.861] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -246,7 +246,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.501] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.864] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -273,7 +273,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.508] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.868] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -307,7 +307,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.515] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.872] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -341,7 +341,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.520] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.876] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -375,7 +375,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.526] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.879] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -409,7 +409,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.531] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.883] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -444,7 +444,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.536] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.887] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -479,7 +479,7 @@ updates {
 }
 ---
 
-[2023-09-28 15:51:11.541] /p4.v1.P4Runtime/Write
+[2023-09-28 20:13:14.890] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -506,41 +506,6 @@ updates {
           params {
             param_id: 2
             value: "\010\000\000\000\0033"
-          }
-        }
-      }
-    }
-  }
-}
----
-
-[2023-09-28 15:51:11.547] /p4.v1.P4Runtime/Write
----
-election_id {
-  low: 1
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 50101297
-      match {
-        field_id: 1
-        lpm {
-          value: "\n\000,\001"
-          prefix_len: 32
-        }
-      }
-      action {
-        action {
-          action_id: 30131879
-          params {
-            param_id: 1
-            value: "\010\000\000\000\004\000"
-          }
-          params {
-            param_id: 2
-            value: "\010\000\000\000\004D"
           }
         }
       }
