@@ -7,6 +7,9 @@ from p4runtime_sh.shell import p4runtime_pb2 as p4runtime_proto
 import random, socket, sys
 from scapy.all import IP, TCP, ARP, Ether, get_if_hwaddr, get_if_list, sendp
 
+
+queue_arp = []
+
 def connection(thrift_port = 9090):
     sw = subprocess.Popen(['simple_switch_CLI', '--thrift-port', str(thrift_port)], \
                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -98,6 +101,12 @@ def table_add(sw, table, action, val_in, val_out, ptr=False, clean=0): #table_ad
     for i in range(clean):
         sw.stdout.readline().strip()
 
+# limpa todas as entradas da tabela - não testado
+def table_clear(sw,table): 
+    input_str = "table_clear %s \n" % table
+    sw.stdin.write(input_str)
+    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+
 def init_reg(sw): 
     reg = 'interface_ip'
     value_ip = ip_to_decimal('10.0.11.10')
@@ -144,23 +153,29 @@ def arp_request(pkt_in, sw):
         #print(pk.packet.payload)
     except:
         print('NAO RECEBEU O PACOTE ###########################33')
-    packet_bytes = pk.packet.payload
-    eth_packet = Ether(packet_bytes)
-    eth_packet.show()
+        
+    else: # só executa se não tiver erro
+        packet_bytes = pk.packet.payload
+        queue_arp.append(packet_bytes)
+        print(queue_arp)
+        #eth_packet = Ether(packet_bytes)
+        #eth_packet.show()
 
-    reg = 'controller_op'
-    por_dst = read_register(sw, register=reg, idx=1)
-    ip_dst = decimal_to_ip(read_register(sw, register=reg, idx=2))
+        reg = 'controller_op'
+        por_dst = read_register(sw, register=reg, idx=1)
+        ip_dst = decimal_to_ip(read_register(sw, register=reg, idx=2))
 
-    print(por_dst,decimal_to_ip(ip_dst))
-    ip = f'{ip_dst}/32'
+        print(por_dst,decimal_to_ip(ip_dst))
+        ip = f'{ip_dst}/32'
 
-    # TODO criar arp request para a interface
-    mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
-    print(mac)
-    table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
+        # TODO criar arp request para a interface
+        mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
+        print(mac)
+        table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
 
-    # TODO Após resposta enviar o pacote que está na fila
+        # TODO Após resposta enviar o pacote que está na fila
+    # finally:
+	#     print('Aqui sempre vai printar')
 
 def main():
     sw = connection()
