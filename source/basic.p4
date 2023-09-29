@@ -35,17 +35,17 @@ typedef bit<32> ip4Addr_t;
 
 @controller_header("packet_out")
 header packet_out_header_t {
-    bit<32>  opcodes;
-    bit<32> operand0s;
-    bit<32> operand1s;
+    bit<8>  opcode;
+    //bit<32> operand0s;
+    //bit<32> operand1s;
 }
 
-// @controller_header("packet_in")
-// header packet_in_header_t {
-//     bit<16>   opcode;
+@controller_header("packet_in")
+header packet_in_header_t {
+    bit<16>   opcode;
 //     // bit<32> operand0;
 //     // bit<32> operand1;
-// }
+}
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -130,7 +130,7 @@ struct headers {
     header_8_t   header_8;
     payload_t    payload;
    // packet_in_header_t  packet_in;
-    packet_out_header_t packet_out;
+   // packet_out_header_t packet_out;
 }
 
 
@@ -373,9 +373,12 @@ control MyIngress(inout headers hdr,
     apply {  
 
         // verify if pakcet is controller
-        // if(standard_metadata.ingress_port == CPU_PORT){
-        //     controller_op.write(0, 4); // send a signal for the controller
-        // }       
+        if(standard_metadata.ingress_port == CPU_PORT){
+            controller_op.write(0, 11); // send a signal for the controller
+        }  
+        // if(hdr.packet_out.isValid()){
+        //     controller_op.write(0, 11); // send a signal for the controller
+        // }     
 
         pre_proc.apply(); 
 
@@ -466,7 +469,12 @@ control MyIngress(inout headers hdr,
         if(hdr.arp.isValid()){ 
             if(hdr.arp.op == ARP_OPER_REQUEST){
                 if(hdr.arp.d_ip == meta.forward_temp.ip_ingress) // request para o roteador na porta certa
-                    arp_answer(meta.forward_temp.mac_ingress);                    
+                    arp_answer(meta.forward_temp.mac_ingress); 
+                if(standard_metadata.ingress_port == CPU_PORT){   // roteador fez o request no plano de controle
+                    // tudo pronto, só mandar na porta certa
+                    standard_metadata.egress_spec = 2;
+                    controller_op.write(0, 12); // send a signal for the controller
+                }
             } else if(hdr.arp.op == ARP_OPER_REPLY){ // falta testar essa funçãooooooo
                 if(hdr.arp.d_ip == meta.forward_temp.ip_ingress ){ // meu ip
                     controller_op.write(1, (bit<64>) hdr.arp.s_ip); // ip

@@ -101,6 +101,24 @@ def table_add(sw, table, action, val_in, val_out, ptr=False, clean=0): #table_ad
     for i in range(clean):
         sw.stdout.readline().strip()
 
+# table_dump_entry_from_key <table name> <match fields>
+def table_from_key(sw, table, key, clean=0, ptr = False):
+    input_str = "table_dump_entry_from_key %s %d \n" % (table, key)
+    sw.stdin.write(input_str)
+    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+    for i in range(clean):
+        sw.stdout.readline().strip()
+    
+    stdout_str = sw.stdout.readline().strip()
+    print(stdout_str)
+    mac_hex = stdout_str.split('- ', 1)[1].split(',', 1)[0]
+
+    print(mac_hex)
+    mac_formatado = ":".join([mac_hex[i:i+2] for i in range(0, len(mac_hex), 2)]) # fomata uma string em hexa para o foramato mac
+    print(mac_formatado)
+
+    return mac_formatado
+
 # limpa todas as entradas da tabela - não testado
 def table_clear(sw,table): 
     input_str = "table_clear %s \n" % table
@@ -134,53 +152,67 @@ def init_table(sw):
     table_add(sw, table, action, v_in, v_out)
     sw.stdout.readline().strip() # Entry has been added  with handle x
 
-def packet_out():
-    pkt = Ether(dst='00:00:00:00:00:00')
-    pktout = sh.PacketOut()
-    pktout.payload = bytes(pkt)
-    pktout.metadata['opcode'] = '2'
-    pktout.metadata['operand0'] =  '2'  #'%d' % (idx_int)
-    pktout.metadata['operand1'] = '0'
-    pktout.send()
+def packet_out_request(sw, por_dst,ip_dst):
+    # qual o mac da interface de saída?
+    mac = table_from_key(sw,'pre_proc', por_dst, clean=3)
 
-def arp_request_miss():
-    print("arp request miss")
+    pkt = Ether(src=mac, dst='ff:ff:ff:ff:ff:ff')
+    pkt = pkt / ARP(op="who-has",hwsrc=mac, pdst=ip_dst)
+    #pktout = sh.PacketOut()
+    pkt.show()
+    pkt_out.payload = bytes(pkt)
+    #pkt_out.metadata['opcode'] = '22'
+    #pktout.metadata['operand0'] =  '2'  #'%d' % (idx_int)
+    #pktout.metadata['operand1'] = '0'
+    pkt_out.send()
+    print('foi o pacote para o plano de dados: ',len(pkt))
 
-def arp_request(pkt_in, sw):
+def arp_reply(sw,ip_dst):
+    print("arp reply")
+    ip = f'{ip_dst}/32'
+
+    # TODO criar arp request para a interface
+    mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
+    print(mac)
+    #table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
+    # TODO enviar os pacote na lista
+
+
+# recebe um pacote que não tem correspondência na tabela ARP, salva o  pacote e abre uma chamada ARP request
+def arp_request(sw, reg = 'controller_op'):
     print("arp_request")
     try:
         pk = pkt_in.packet_in_queue.get(block=True, timeout=3)
         #print(pk.packet.payload)
     except:
-        print('NAO RECEBEU O PACOTE ###########################33')
+        print('NAO RECEBEU O PACOTE ###########################')
         
     else: # só executa se não tiver erro
         packet_bytes = pk.packet.payload
+        print('tamanho do pacote recebido: ', len(packet_bytes))
         queue_arp.append(packet_bytes)
-        print(queue_arp)
+        #print(queue_arp)
         #eth_packet = Ether(packet_bytes)
         #eth_packet.show()
 
-        reg = 'controller_op'
         por_dst = read_register(sw, register=reg, idx=1)
         ip_dst = decimal_to_ip(read_register(sw, register=reg, idx=2))
 
         print(por_dst,decimal_to_ip(ip_dst))
-        ip = f'{ip_dst}/32'
+        packet_out_request(sw, por_dst, ip_dst)        
 
-        # TODO criar arp request para a interface
-        mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
-        print(mac)
-        table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
-
-        # TODO Após resposta enviar o pacote que está na fila
     # finally:
 	#     print('Aqui sempre vai printar')
 
 def main():
     sw = connection()
     connection_sh()
+    
+    global pkt_out
+    global pkt_in 
+    pkt_out = sh.PacketOut()
     pkt_in = sh.PacketIn()
+    
 
     #reg = 'interface_ip'
     #init_reg(sw) // usar reg somente para sinal
@@ -190,7 +222,7 @@ def main():
         Use a register:"controller_op" with the index equal a 0.
         op = 0: Nothing, wait!
         op = 1: Sem mac
-        op = 2: Reply ARP
+        op = 2: Reply ARP para o roteador
         op = 3:
         op = 4:
 
@@ -203,27 +235,22 @@ def main():
             continue
         elif (op == 1):
             print('op = 1')
-            arp_request(pkt_in, sw) #reply para o roteador
+            write_register(sw,register=reg, idx=0, value=0)
+            arp_request(sw) # roteador gera um request
         elif (op == 2):
             print('op = 2')
-            arp_request_miss() #request sem correspondencia na tabela
+            arp_reply() #reply para o roteador
         elif(op == 11):
-            print(" op = 11")
+            print(" op = 11  ativo packet out")
             write_register(sw,register=reg, idx=0, value=22)
         elif (op == 4):
             print('op = 4 cpu_port')
-        elif (op == 5):
-            print('op = 5')
+        elif (op == 12):
+            print('op = 12 request router')
         else:
             print('Unknown command')
         write_register(sw,register=reg, idx=0, value=0)
 main()
-
-
-
-
-
-
 
 
 

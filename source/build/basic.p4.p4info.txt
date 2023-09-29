@@ -183,18 +183,21 @@ controller_packet_metadata {
   }
   metadata {
     id: 1
-    name: "opcodes"
-    bitwidth: 32
+    name: "opcode"
+    bitwidth: 8
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 81826293
+    name: "packet_in"
+    alias: "packet_in"
+    annotations: "@controller_header(\"packet_in\")"
   }
   metadata {
-    id: 2
-    name: "operand0s"
-    bitwidth: 32
-  }
-  metadata {
-    id: 3
-    name: "operand1s"
-    bitwidth: 32
+    id: 1
+    name: "opcode"
+    bitwidth: 16
   }
 }
 registers {
