@@ -90,4 +90,26 @@ for i in range(10):
 # te.action['<name>'] = '<value>'
 # te.insert()
 
+        #pktinfo['payload'] # em bytes
+        #print(pktinfo['metadata']['opcode'])
+
 sh.teardown()
+
+
+def mac_to_decimal(mac_address, ptr=False):
+    # Remove os dois pontos da string do endereço MAC, se houver
+    mac_address = mac_address.replace(":", "")
+    # Converte o endereço MAC hexadecimal em decimal
+    decimal_value = int(mac_address, 16)
+    if ptr:
+        print("Valor do mac em decimal: ", decimal_value)
+    return decimal_value
+
+def decimal_to_mac(decimal_value, ptr=False):
+    # Converte o valor decimal em uma string hexadecimal
+    hex_value = format(decimal_value, '012X')  # 012X garante 12 dígitos hexadecimais
+    # Adiciona os dois pontos para formatar o endereço MAC
+    mac_address = ':'.join([hex_value[i:i+2] for i in range(0, len(hex_value), 2)])
+    if ptr:
+        print("end mac: ", mac_address)
+    return mac_address

@@ -35,16 +35,18 @@ typedef bit<32> ip4Addr_t;
 
 @controller_header("packet_out")
 header packet_out_header_t {
-    bit<8>  opcode;
-    //bit<32> operand0s;
-    //bit<32> operand1s;
+    bit<8>   opcode;
+    bit<32> operand0;
+    bit<32> operand1;
+    bit<32> operand2;
 }
 
 @controller_header("packet_in")
 header packet_in_header_t {
-    bit<16>   opcode;
-//     // bit<32> operand0;
-//     // bit<32> operand1;
+    bit<8>   opcode;
+    bit<32> operand0;
+    bit<48> operand1;
+    bit<48> operand2;
 }
 
 header ethernet_t {
@@ -129,8 +131,8 @@ struct headers {
     ipv4_t       icmp_ip_header;
     header_8_t   header_8;
     payload_t    payload;
-   // packet_in_header_t  packet_in;
-   // packet_out_header_t packet_out;
+    packet_in_header_t  packet_in;
+    packet_out_header_t packet_out;
 }
 
 
@@ -143,7 +145,22 @@ parser MyParser(packet_in packet,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
 
+    // state start {
+    //     transition parse_ethernet;
+    // }
+
     state start {
+        transition check_cpu;
+    }
+    state check_cpu{
+        transition select(standard_metadata.ingress_port){
+            CPU_PORT : parse_controller;
+            default : parse_ethernet;
+        }
+    }
+    
+    state parse_controller{
+        packet.extract(hdr.packet_out);
         transition parse_ethernet;
     }
 
@@ -456,10 +473,15 @@ control MyIngress(inout headers hdr,
             if(arp_exact.apply().miss){// configura o mac 
                 // ip sem mac, chamar controlador
                 
-                controller_op.write(1, (bit<64>) meta.forward_temp.port_dst); // porta de saída
-                controller_op.write(2, (bit<64>) meta.forward_temp.ip_dst); // ip de destino
+                //controller_op.write(1, (bit<64>) meta.forward_temp.port_dst); // porta de saída
+                //controller_op.write(2, (bit<64>) meta.forward_temp.ip_dst); // ip de destino
                 //controller_op.write(3,(bit<64>) standard_metadata.ingress_port); //mac de saída
                 controller_op.write(0, 1); // send a signal for the controller
+                hdr.packet_in.setValid();
+                hdr.packet_in.opcode = 1;
+                hdr.packet_in.operand0 = (bit<32>) meta.forward_temp.port_dst; 
+                hdr.packet_in.operand1 =  (bit<48>) meta.forward_temp.ip_dst;
+
                 standard_metadata.egress_spec = CPU_PORT; // pacote vai para o controlador para ser salvo
                 //drop();
             }
@@ -472,16 +494,20 @@ control MyIngress(inout headers hdr,
                     arp_answer(meta.forward_temp.mac_ingress); 
                 if(standard_metadata.ingress_port == CPU_PORT){   // roteador fez o request no plano de controle
                     // tudo pronto, só mandar na porta certa
-                    standard_metadata.egress_spec = 2;
-                    controller_op.write(0, 12); // send a signal for the controller
+                    standard_metadata.egress_spec = (bit<9>) hdr.packet_out.operand0;
+                    controller_op.write(0, 12); // send a signal for the controller, só para teste
                 }
             } else if(hdr.arp.op == ARP_OPER_REPLY){ // falta testar essa funçãooooooo
                 if(hdr.arp.d_ip == meta.forward_temp.ip_ingress ){ // meu ip
-                    controller_op.write(1, (bit<64>) hdr.arp.s_ip); // ip
-                    controller_op.write(2, (bit<64>) hdr.arp.s_Add); // mac
-                    controller_op.write(3,(bit<64>) standard_metadata.ingress_port); //port
+                    hdr.packet_in.setValid();
+                    hdr.packet_in.opcode = 2;
+                    hdr.packet_in.operand0 = (bit<32>) hdr.arp.s_ip; 
+                    hdr.packet_in.operand1 = hdr.arp.s_Add;
+                    hdr.packet_in.operand2 = hdr.arp.d_Add;
+                   
                     controller_op.write(0, 2); // send a signal for the controller
-                    drop();
+                    standard_metadata.egress_spec = CPU_PORT;
+                    //drop();
                 }
             }
 
@@ -571,7 +597,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        //packet.emit(hdr.packet_in);
+        packet.emit(hdr.packet_in);
         packet.emit(hdr.ethernet);
         packet.emit(hdr.arp);
         packet.emit(hdr.ipv4);
@@ -743,5 +769,17 @@ header udp_t {
      use 
      digest(1, standard_metadata.ingress_port);
         //extern void digest<T>(in bit<32> receiver, in T data);`
+
+*/
+
+
+/*
+se tiver flag de cabeçalho de @packet_in, ele será lida no controlador, se não colocar nada nesse header
+e depois emitir primeiro no deparser mesmo assim o controlador vai ler os primeiros campo do pacote como
+packet_in, se não tiver flag @packet_in o controlador considera tudo como pacote.
+vai ler cabelho achando que é packet_in.
+
+Na flag @packet_out o controlador coloca o cabeçalho no começo do pacote, logo é necessário ler primeiro o 
+packet out no parser e ( não testei) depois ler o restante do pacote
 
 */

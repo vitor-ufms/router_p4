@@ -1,14 +1,38 @@
+# Vitor Hugo dos Santos Duarte
+#
 
-
-import subprocess, ipaddress
+import subprocess, ipaddress, time
+from threading import Thread
 
 import p4runtime_sh.shell as sh
 from p4runtime_sh.shell import p4runtime_pb2 as p4runtime_proto
 import random, socket, sys
 from scapy.all import IP, TCP, ARP, Ether, get_if_hwaddr, get_if_list, sendp
+import p4runtime_shell_utils as p4rtutil
 
 
+p4info = './../build/basic.p4.p4info.txt'
+bmv2_json = './../build/basic.json'
+
+p4info_data = p4rtutil.read_p4info_txt_file(p4info)
+p4info_obj_map = p4rtutil.make_p4info_obj_map(p4info_data)
+cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_obj_map, "packet_in")
+
+# list with queued packages
 queue_arp = []
+CLEAR_TABLE = 1
+TIME_CLEAR_TABLE = 20
+
+#Thd1 = Thread(target=email,args=[EMAIL, PASSWORD]) # Cria uma thread
+# limpa todas as entradas da tabela - não testado
+def table_clear(sw,table):
+    while CLEAR_TABLE: 
+        time.sleep(TIME_CLEAR_TABLE) # segundos
+        print('limpando... ',table)
+        input_str = "table_clear %s \n" % table
+        sw.stdin.write(input_str)
+        sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+
 
 def connection(thrift_port = 9090):
     sw = subprocess.Popen(['simple_switch_CLI', '--thrift-port', str(thrift_port)], \
@@ -19,8 +43,6 @@ def connection(thrift_port = 9090):
     return sw
 
 def connection_sh():
-    p4info = './../build/basic.p4.p4info.txt'
-    bmv2_json = './../build/basic.json'
     sh.setup(
         device_id=0,
         grpc_addr='localhost:50051',
@@ -69,24 +91,13 @@ def decimal_to_ip(decimal_value, ptr=False):
     if ptr:
         print("Endereço IP:", ip_str)
     return ip_str
+def mac_hex_to_mac_format(mac_hex):
+    mac_formatado = ":".join([mac_hex[i:i+2] for i in range(0, len(mac_hex), 2)]) # fomata uma string em hexa para o foramato mac
+    return mac_formatado
 
-def mac_to_decimal(mac_address, ptr=False):
-    # Remove os dois pontos da string do endereço MAC, se houver
-    mac_address = mac_address.replace(":", "")
-    # Converte o endereço MAC hexadecimal em decimal
-    decimal_value = int(mac_address, 16)
-    if ptr:
-        print("Valor do mac em decimal: ", decimal_value)
-    return decimal_value
-
-def decimal_to_mac(decimal_value, ptr=False):
-    # Converte o valor decimal em uma string hexadecimal
-    hex_value = format(decimal_value, '012X')  # 012X garante 12 dígitos hexadecimais
-    # Adiciona os dois pontos para formatar o endereço MAC
-    mac_address = ':'.join([hex_value[i:i+2] for i in range(0, len(hex_value), 2)])
-    if ptr:
-        print("end mac: ", mac_address)
-    return mac_address
+def ip_hex_to_ip_format(ip_hex):
+    ip_formatado = ".".join(str(int(ip_hex[i:i+2], 16)) for i in range(0, len(ip_hex), 2)) 
+    return ip_formatado
 
 def table_add(sw, table, action, val_in, val_out, ptr=False, clean=0): #table_add MyIngress.arp_exact arp_answer 10.0.11.10/32 => 00:11:22:33:44:55
     
@@ -110,22 +121,17 @@ def table_from_key(sw, table, key, clean=0, ptr = False):
         sw.stdout.readline().strip()
     
     stdout_str = sw.stdout.readline().strip()
-    print(stdout_str)
+    #print(stdout_str)
     mac_hex = stdout_str.split('- ', 1)[1].split(',', 1)[0]
+    ip_hex = stdout_str.split(', ', 1)[1]
 
-    print(mac_hex)
-    mac_formatado = ":".join([mac_hex[i:i+2] for i in range(0, len(mac_hex), 2)]) # fomata uma string em hexa para o foramato mac
-    print(mac_formatado)
+    mac_formatado = mac_hex_to_mac_format(mac_hex)
+    ip_formatado = ip_hex_to_ip_format(ip_hex)
 
-    return mac_formatado
+    return mac_formatado, ip_formatado
 
-# limpa todas as entradas da tabela - não testado
-def table_clear(sw,table): 
-    input_str = "table_clear %s \n" % table
-    sw.stdin.write(input_str)
-    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
 
-def init_reg(sw): 
+def init_reg(sw): # não usa mais essa lógica
     reg = 'interface_ip'
     value_ip = ip_to_decimal('10.0.11.10')
     write_register(sw,register=reg, idx=1, value=value_ip, ptr = True)
@@ -154,29 +160,17 @@ def init_table(sw):
 
 def packet_out_request(sw, por_dst,ip_dst):
     # qual o mac da interface de saída?
-    mac = table_from_key(sw,'pre_proc', por_dst, clean=3)
+    a = table_from_key(sw,'pre_proc', por_dst, clean=3) # a[0]= mac a[1]= ip
 
-    pkt = Ether(src=mac, dst='ff:ff:ff:ff:ff:ff')
-    pkt = pkt / ARP(op="who-has",hwsrc=mac, pdst=ip_dst)
-    #pktout = sh.PacketOut()
-    pkt.show()
+    pkt = Ether(src=a[0], dst='ff:ff:ff:ff:ff:ff')
+    pkt = pkt / ARP(op="who-has", hwsrc=a[0], psrc=a[1], pdst=ip_dst)
+    
+    #pkt.show() # pacote que será enviado
     pkt_out.payload = bytes(pkt)
-    #pkt_out.metadata['opcode'] = '22'
-    #pktout.metadata['operand0'] =  '2'  #'%d' % (idx_int)
+    pkt_out.metadata['operand0'] = str(por_dst) ## interface 
+
     #pktout.metadata['operand1'] = '0'
     pkt_out.send()
-    print('foi o pacote para o plano de dados: ',len(pkt))
-
-def arp_reply(sw,ip_dst):
-    print("arp reply")
-    ip = f'{ip_dst}/32'
-
-    # TODO criar arp request para a interface
-    mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
-    print(mac)
-    #table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
-    # TODO enviar os pacote na lista
-
 
 # recebe um pacote que não tem correspondência na tabela ARP, salva o  pacote e abre uma chamada ARP request
 def arp_request(sw, reg = 'controller_op'):
@@ -189,20 +183,50 @@ def arp_request(sw, reg = 'controller_op'):
         
     else: # só executa se não tiver erro
         packet_bytes = pk.packet.payload
-        print('tamanho do pacote recebido: ', len(packet_bytes))
-        queue_arp.append(packet_bytes)
-        #print(queue_arp)
         #eth_packet = Ether(packet_bytes)
-        #eth_packet.show()
+        
+        #eth_packet.show() # pacote que entrou
+        pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
+        
+        #por_dst = read_register(sw, register=reg, idx=1)
+        #ip_dst = decimal_to_ip(read_register(sw, register=reg, idx=2))
 
-        por_dst = read_register(sw, register=reg, idx=1)
-        ip_dst = decimal_to_ip(read_register(sw, register=reg, idx=2))
+        port_dst = pktinfo['metadata']['operand0']
+        ip_dst = pktinfo['metadata']['operand1']
 
-        print(por_dst,decimal_to_ip(ip_dst))
-        packet_out_request(sw, por_dst, ip_dst)        
+        list = []
+        list.append(ip_dst)
+        list.append(packet_bytes) # lis[ip_dst da interface, pacote]
+        queue_arp.append(list) # adiciona na lista o pacote
 
-    # finally:
-	#     print('Aqui sempre vai printar')
+        #print(por_dst,decimal_to_ip(ip_dst))
+        packet_out_request(sw, port_dst, ip_dst)   
+
+
+def arp_reply(sw):
+    print("arp_reply")
+    try:
+        pk = pkt_in.packet_in_queue.get(block=True, timeout=3)
+        #print(pk.packet.payload)
+    except:
+        print('NAO RECEBEU O PACOTE ###########################')
+        
+    else: # só executa se não tiver erro
+        pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
+        #pktinfo['payload'] # em bytes
+        ip_src = pktinfo['metadata']['operand0']
+        mac_src = pktinfo['metadata']['operand1']
+        my_mac = pktinfo['metadata']['operand2']
+        
+        ip = f'{ip_src}/32'
+
+        #mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
+        mac =  f'{my_mac} {mac_src}'
+        table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
+        for pkt_env in queue_arp:
+            if pkt_env[0] == ip_src:
+                pkt_out.payload = pkt_env[1]
+                pkt_out.send()
 
 def main():
     sw = connection()
@@ -213,6 +237,8 @@ def main():
     pkt_out = sh.PacketOut()
     pkt_in = sh.PacketIn()
     
+    Thd1 = Thread(target=table_clear, args=[sw,'arp_exact']) # Cria uma thread para rodar o backend
+    Thd1.start()
 
     #reg = 'interface_ip'
     #init_reg(sw) // usar reg somente para sinal
@@ -239,7 +265,8 @@ def main():
             arp_request(sw) # roteador gera um request
         elif (op == 2):
             print('op = 2')
-            arp_reply() #reply para o roteador
+            write_register(sw,register=reg, idx=0, value=0)
+            arp_reply(sw) #reply para o roteador
         elif(op == 11):
             print(" op = 11  ativo packet out")
             write_register(sw,register=reg, idx=0, value=22)

@@ -186,6 +186,21 @@ controller_packet_metadata {
     name: "opcode"
     bitwidth: 8
   }
+  metadata {
+    id: 2
+    name: "operand0"
+    bitwidth: 32
+  }
+  metadata {
+    id: 3
+    name: "operand1"
+    bitwidth: 32
+  }
+  metadata {
+    id: 4
+    name: "operand2"
+    bitwidth: 32
+  }
 }
 controller_packet_metadata {
   preamble {
@@ -197,7 +212,22 @@ controller_packet_metadata {
   metadata {
     id: 1
     name: "opcode"
-    bitwidth: 16
+    bitwidth: 8
+  }
+  metadata {
+    id: 2
+    name: "operand0"
+    bitwidth: 32
+  }
+  metadata {
+    id: 3
+    name: "operand1"
+    bitwidth: 48
+  }
+  metadata {
+    id: 4
+    name: "operand2"
+    bitwidth: 48
   }
 }
 registers {
