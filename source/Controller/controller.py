@@ -267,12 +267,13 @@ def main():
             print('op = 2')
             write_register(sw,register=reg, idx=0, value=0)
             arp_reply(sw) #reply para o roteador
-        elif(op == 11):
+            
+        elif(op == 11): # test
             print(" op = 11  ativo packet out")
             write_register(sw,register=reg, idx=0, value=22)
-        elif (op == 4):
+        elif (op == 4): # test
             print('op = 4 cpu_port')
-        elif (op == 12):
+        elif (op == 12):# test
             print('op = 12 request router')
         else:
             print('Unknown command')
