@@ -1,7 +1,7 @@
 # Vitor Hugo dos Santos Duarte
 #
 
-import subprocess, ipaddress, time
+import subprocess, ipaddress, time, sys
 from threading import Thread
 
 import p4runtime_sh.shell as sh
@@ -173,60 +173,61 @@ def packet_out_request(sw, por_dst,ip_dst):
     pkt_out.send()
 
 # recebe um pacote que não tem correspondência na tabela ARP, salva o  pacote e abre uma chamada ARP request
-def arp_request(sw, reg = 'controller_op'):
+def arp_request(sw, pktinfo, packet_bytes, reg = 'controller_op'):
     print("arp_request")
-    try:
-        pk = pkt_in.packet_in_queue.get(block=True, timeout=3)
-        #print(pk.packet.payload)
-    except:
-        print('NAO RECEBEU O PACOTE ###########################')
+    # try:
+    #     pk = pkt_in.packet_in_queue.get(block=True, timeout=3)
+    #     #print(pk.packet.payload)
+    # except:
+    #     print('NAO RECEBEU O PACOTE ###########################')
         
-    else: # só executa se não tiver erro
-        packet_bytes = pk.packet.payload
-        #eth_packet = Ether(packet_bytes)
+    # else: # só executa se não tiver erro
+    #     packet_bytes = pk.packet.payload
+    #     #eth_packet = Ether(packet_bytes)
         
-        #eth_packet.show() # pacote que entrou
-        pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
+    #     #eth_packet.show() # pacote que entrou
+    #     pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
         
         #por_dst = read_register(sw, register=reg, idx=1)
         #ip_dst = decimal_to_ip(read_register(sw, register=reg, idx=2))
 
-        port_dst = pktinfo['metadata']['operand0']
-        ip_dst = pktinfo['metadata']['operand1']
+    port_dst = pktinfo['metadata']['operand0']
+    ip_dst = pktinfo['metadata']['operand1']
 
-        list = []
-        list.append(ip_dst)
-        list.append(packet_bytes) # lis[ip_dst da interface, pacote]
-        queue_arp.append(list) # adiciona na lista o pacote
+    list = []
+    list.append(ip_dst)
+    list.append(packet_bytes) # lis[ip_dst da interface, pacote]
+    queue_arp.append(list) # adiciona na lista o pacote
 
-        #print(por_dst,decimal_to_ip(ip_dst))
-        packet_out_request(sw, port_dst, ip_dst)   
+    #print(por_dst,decimal_to_ip(ip_dst))
+    packet_out_request(sw, port_dst, ip_dst)   
 
 
-def arp_reply(sw):
+def arp_reply(sw, pktinfo):
     print("arp_reply")
-    try:
-        pk = pkt_in.packet_in_queue.get(block=True, timeout=3)
-        #print(pk.packet.payload)
-    except:
-        print('NAO RECEBEU O PACOTE ###########################')
+    # try:
+    #     pk = pkt_in.packet_in_queue.get(block=True, timeout=3)
+    #     #print(pk.packet.payload)
+    # except:
+    #     print('NAO RECEBEU O PACOTE ###########################')
         
-    else: # só executa se não tiver erro
-        pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
-        #pktinfo['payload'] # em bytes
-        ip_src = pktinfo['metadata']['operand0']
-        mac_src = pktinfo['metadata']['operand1']
-        my_mac = pktinfo['metadata']['operand2']
-        
-        ip = f'{ip_src}/32'
+    # else: # só executa se não tiver erro
+    #pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
+    #pktinfo['payload'] # em bytes
 
-        #mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
-        mac =  f'{my_mac} {mac_src}'
-        table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
-        for pkt_env in queue_arp:
-            if pkt_env[0] == ip_src:
-                pkt_out.payload = pkt_env[1]
-                pkt_out.send()
+    ip_src = pktinfo['metadata']['operand0']
+    mac_src = pktinfo['metadata']['operand1']
+    my_mac = pktinfo['metadata']['operand2']
+    
+    ip = f'{ip_src}/32'
+
+    #mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
+    mac =  f'{my_mac} {mac_src}'
+    table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
+    for pkt_env in queue_arp:
+        if pkt_env[0] == ip_src:
+            pkt_out.payload = pkt_env[1]
+            pkt_out.send()
 
 def main():
     sw = connection()
@@ -239,6 +240,8 @@ def main():
     
     Thd1 = Thread(target=table_clear, args=[sw,'arp_exact']) # Cria uma thread para rodar o backend
     Thd1.start()
+    
+    reg = 'controller_op'
 
     #reg = 'interface_ip'
     #init_reg(sw) // usar reg somente para sinal
@@ -253,32 +256,64 @@ def main():
         op = 4:
 
     """
-
     while True:
-        reg = 'controller_op'
-        op = read_register(sw, register=reg, idx=0)
-        if (op == 0):
-            continue
-        elif (op == 1):
-            print('op = 1')
-            write_register(sw,register=reg, idx=0, value=0)
-            arp_request(sw) # roteador gera um request
-        elif (op == 2):
-            print('op = 2')
-            write_register(sw,register=reg, idx=0, value=0)
-            arp_reply(sw) #reply para o roteador
+        try:
+            pk = pkt_in.packet_in_queue.get(block=True, timeout=None)
+            #print(pk.packet.payload)
+        except:
+            print('NAO RECEBEU O PACOTE ###########################')
+            CLEAR_TABLE = 0
+            sys.exit()
             
-        elif(op == 11): # test
-            print(" op = 11  ativo packet out")
-            write_register(sw,register=reg, idx=0, value=22)
-        elif (op == 4): # test
-            print('op = 4 cpu_port')
-        elif (op == 12):# test
-            print('op = 12 request router')
-        else:
-            print('Unknown command')
-        write_register(sw,register=reg, idx=0, value=0)
+        else: # só executa se não tiver erro
+            packet_bytes = pk.packet.payload
+            #eth_packet = Ether(packet_bytes)
+            
+            #eth_packet.show() # pacote que entrou
+            pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
+            op = pktinfo['metadata']['opcode']
+            if (op == 0):
+                continue
+            elif (op == 1):
+                print('op = 1')
+                write_register(sw,register=reg, idx=0, value=0)
+                arp_request(sw, pktinfo, packet_bytes) # roteador gera um request
+            elif (op == 2):
+                print('op = 2')
+                write_register(sw,register=reg, idx=0, value=0)
+                arp_reply(sw, pktinfo) #reply para o roteador
+            else:
+                print('unknown command')
 main()
+
+
+
+
+    # while True:
+    #     reg = 'controller_op'
+    #     op = read_register(sw, register=reg, idx=0)
+    #     if (op == 0):
+    #         continue
+    #     elif (op == 1):
+    #         print('op = 1')
+    #         write_register(sw,register=reg, idx=0, value=0)
+    #         arp_request(sw) # roteador gera um request
+    #     elif (op == 2):
+    #         print('op = 2')
+    #         write_register(sw,register=reg, idx=0, value=0)
+    #         arp_reply(sw) #reply para o roteador
+            
+    #     elif(op == 11): # test
+    #         print(" op = 11  ativo packet out")
+    #         write_register(sw,register=reg, idx=0, value=22)
+    #     elif (op == 4): # test
+    #         print('op = 4 cpu_port')
+    #     elif (op == 12):# test
+    #         print('op = 12 request router')
+    #     else:
+    #         print('Unknown command')
+    #     write_register(sw,register=reg, idx=0, value=0)
+#main()
 
 
 
