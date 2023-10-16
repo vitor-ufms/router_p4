@@ -273,6 +273,7 @@ def main():
             pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
             op = pktinfo['metadata']['opcode']
             if (op == 0):
+                print('test op 0')
                 continue
             elif (op == 1):
                 print('op = 1')
@@ -282,6 +283,8 @@ def main():
                 print('op = 2')
                 write_register(sw,register=reg, idx=0, value=0)
                 arp_reply(sw, pktinfo) #reply para o roteador
+            elif (op == 3):
+                print('op 3')
             else:
                 print('unknown command')
 main()
@@ -314,14 +317,6 @@ main()
     #         print('Unknown command')
     #     write_register(sw,register=reg, idx=0, value=0)
 #main()
-
-
-
-
-
-
-
-
 
 
 
