@@ -7,7 +7,7 @@ from threading import Thread
 import p4runtime_sh.shell as sh
 from p4runtime_sh.shell import p4runtime_pb2 as p4runtime_proto
 import random, socket, sys
-from scapy.all import IP, TCP, ARP, Ether, get_if_hwaddr, get_if_list, sendp
+from scapy.all import IP, TCP, ARP, Ether, get_if_hwaddr, get_if_list, sendp, UDP, RIP, RIPEntry
 import p4runtime_shell_utils as p4rtutil
 
 
@@ -21,7 +21,9 @@ cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_ob
 # list with queued packages
 queue_arp = []
 CLEAR_TABLE = 1
+RIP_ON  = 1
 TIME_CLEAR_TABLE = 20
+TIME_RIP = 30
 
 #Thd1 = Thread(target=email,args=[EMAIL, PASSWORD]) # Cria uma thread
 # limpa todas as entradas da tabela - não testado
@@ -229,6 +231,32 @@ def arp_reply(sw, pktinfo):
             pkt_out.payload = pkt_env[1]
             pkt_out.send()
 
+
+def rip(sw):
+    print('rip')
+    while RIP_ON:
+        time.sleep(TIME_RIP) # segundos
+        
+
+def rip_request(packet_bytes):
+    print('rip request recebido')
+    eth_packet = Ether(packet_bytes)
+            
+    #eth_packet.show() # pacote que entrou
+    if (eth_packet[UDP].dport == 520 and eth_packet[RIP].version == 2) :
+        
+        pkt =  Ether()
+        rip_packet = RIP( cmd=2, version=2)
+        rip_entry = RIPEntry(AF=2, addr="192.0.11.0", mask="255.255.255.0", nextHop="10.0.0.10", metric=1)
+        rip_entry2 = RIPEntry(AF=2, addr="192.0.22.0", mask="255.255.0.0", metric=10)
+        pkt = pkt / IP(dst="224.0.0.9", ttl=6)/ UDP(sport=520, dport=520)/ rip_packet / rip_entry/ rip_entry2
+
+        pkt_out.payload = bytes(pkt)
+       # pkt_out.metadata['operand0'] = str(por_dst) ## interface 
+
+        #pktout.metadata['operand1'] = '0'
+       # pkt_out.send()
+
 def main():
     sw = connection()
     connection_sh()
@@ -240,6 +268,9 @@ def main():
     
     Thd1 = Thread(target=table_clear, args=[sw,'arp_exact']) # Cria uma thread para rodar o backend
     Thd1.start()
+
+    Thd_rip = Thread(target=rip, args=[sw]) # Cria uma thread para rodar o backend
+    Thd_rip.start()
     
     reg = 'controller_op'
 
@@ -285,8 +316,9 @@ def main():
                 arp_reply(sw, pktinfo) #reply para o roteador
             elif (op == 3):
                 print('op 3')
+                rip_request(packet_bytes)
             else:
-                print('unknown command')
+                print('unknown command: ', op)
 main()
 
 

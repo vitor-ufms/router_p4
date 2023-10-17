@@ -24,6 +24,7 @@ const bit<8> ICMP_ECHO_REQUEST = 0x08;
 const bit<8> ICMP_TIME_EXCEEDED = 0x0B;
 const bit<8> ICMP_DESTINATION_UNREACHABLE = 0X03;
 
+const bit<8> TYPE_IPV4_UDP   = 0x11;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -451,19 +452,29 @@ control MyIngress(inout headers hdr,
                         }
                     }
                 }
-            }else{   // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
+            }else{   
 
-                new_icmp(ICMP_DESTINATION_UNREACHABLE, 0x00); //gerar um icmp code 11 iniciar o ttl
-                //meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
-                //meta.forward_temp.port_dst = standard_metadata.ingress_port;
-                //conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
-                standard_metadata.egress_spec = standard_metadata.ingress_port;
-                hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-                hdr.ethernet.srcAddr = meta.forward_temp.mac_ingress;
-                
-                meta.encaminhamento = 0;
-                hdr.header_8.setValid();
-                hdr.header_8.data = meta.header_8.data;
+                if(hdr.ipv4.dstAddr == 0xE0000009 && hdr.ipv4.protocol == TYPE_IPV4_UDP  ){ // 224.0.0.9 multicast, pode ser rip
+
+                    standard_metadata.egress_spec = CPU_PORT;
+                    meta.pkt_to_router = 1;
+
+                    hdr.packet_in.setValid();
+                    hdr.packet_in.opcode = 3;
+                    hdr.packet_in.operand0 = (bit<32>) hdr.ipv4.srcAddr; 
+                    //hdr.packet_in.operand1 =  (bit<48>) meta.forward_temp.ip_dst;
+
+                }else{ // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
+
+                    new_icmp(ICMP_DESTINATION_UNREACHABLE, 0x00); //gerar um icmp code 11 iniciar o ttl
+                    standard_metadata.egress_spec = standard_metadata.ingress_port;
+                    hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
+                    hdr.ethernet.srcAddr = meta.forward_temp.mac_ingress;
+                    
+                    meta.encaminhamento = 0;
+                    hdr.header_8.setValid();
+                    hdr.header_8.data = meta.header_8.data;
+                }
                 
             }  
         }
