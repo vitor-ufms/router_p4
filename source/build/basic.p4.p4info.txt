@@ -104,6 +104,11 @@ actions {
     name: "ip_dst"
     bitwidth: 32
   }
+  params {
+    id: 3
+    name: "metric"
+    bitwidth: 32
+  }
 }
 actions {
   preamble {

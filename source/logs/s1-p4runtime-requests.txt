@@ -1,10 +1,10 @@
 
-[2023-10-19 22:41:00.250] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2023-10-20 20:44:54.039] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
-Message too long (121770 bytes)! Skipping log...
+Message too long (120381 bytes)! Skipping log...
 ---
 
-[2023-10-19 22:41:00.295] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.059] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -25,7 +25,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.300] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.064] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -53,6 +53,10 @@ updates {
             param_id: 2
             value: "\013\000\000\001"
           }
+          params {
+            param_id: 3
+            value: "\000\000\000\001"
+          }
         }
       }
     }
@@ -60,7 +64,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.305] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.080] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -88,6 +92,10 @@ updates {
             param_id: 2
             value: "\026\000\000\001"
           }
+          params {
+            param_id: 3
+            value: "\000\000\000\001"
+          }
         }
       }
     }
@@ -95,7 +103,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.310] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.084] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -123,6 +131,10 @@ updates {
             param_id: 2
             value: "\n\000\000\013"
           }
+          params {
+            param_id: 3
+            value: "\000\000\000\001"
+          }
         }
       }
     }
@@ -130,7 +142,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.315] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.089] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -157,7 +169,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.319] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.093] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -184,7 +196,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.324] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.098] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -211,7 +223,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.328] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.102] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -245,7 +257,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.334] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.107] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -279,7 +291,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.345] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.111] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -313,7 +325,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.350] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.115] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -348,7 +360,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.356] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.120] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1
@@ -383,7 +395,7 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.361] /p4.v1.P4Runtime/Write
+[2023-10-20 20:44:54.126] /p4.v1.P4Runtime/Write
 ---
 election_id {
   low: 1

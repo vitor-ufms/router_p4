@@ -250,7 +250,7 @@ control MyIngress(inout headers hdr,
 
 /******************** Action for table  ipv4_lpm  ****************************/
 
-    action ipv4_forward(egressSpec_t port, ip4Addr_t ip_dst) {
+    action ipv4_forward(egressSpec_t port, ip4Addr_t ip_dst, bit<32> metric) {
         meta.forward_temp.port_dst = port;
         meta.forward_temp.ip_dst = ip_dst;
         //meta.forward_temp.mac_src = scrAddr;
@@ -391,9 +391,9 @@ control MyIngress(inout headers hdr,
     apply {  
 
         // verify if pakcet is controller
-        if(standard_metadata.ingress_port == CPU_PORT){
-            controller_op.write(0, 11); // send a signal for the controller
-        }  
+        // if(standard_metadata.ingress_port == CPU_PORT){
+        //     controller_op.write(0, 11); // send a signal for the controller
+        // }  
         // if(hdr.packet_out.isValid()){
         //     controller_op.write(0, 11); // send a signal for the controller
         // }     
@@ -462,7 +462,8 @@ control MyIngress(inout headers hdr,
                     hdr.packet_in.setValid();
                     hdr.packet_in.opcode = 3;
                     hdr.packet_in.operand0 = (bit<32>) hdr.ipv4.srcAddr; 
-                    //hdr.packet_in.operand1 =  (bit<48>) meta.forward_temp.ip_dst;
+                    hdr.packet_in.operand1 =  (bit<48>) meta.forward_temp.ip_ingress;
+                    
 
                 }else{ // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
 
