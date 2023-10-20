@@ -1,11 +1,12 @@
 
-[2023-10-19 22:41:00.250] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2023-10-19 22:41:00.381] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
-Message too long (121770 bytes)! Skipping log...
+Message too long (121783 bytes)! Skipping log...
 ---
 
-[2023-10-19 22:41:00.295] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.405] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -25,8 +26,9 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.300] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.409] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -38,7 +40,7 @@ updates {
       match {
         field_id: 1
         lpm {
-          value: "\013\000\000\000"
+          value: "!\000\000\000"
           prefix_len: 8
         }
       }
@@ -51,7 +53,7 @@ updates {
           }
           params {
             param_id: 2
-            value: "\013\000\000\001"
+            value: "!\000\000\001"
           }
         }
       }
@@ -60,8 +62,9 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.305] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.414] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -73,7 +76,7 @@ updates {
       match {
         field_id: 1
         lpm {
-          value: "\026\000\000\000"
+          value: ",\000\000\000"
           prefix_len: 8
         }
       }
@@ -86,7 +89,7 @@ updates {
           }
           params {
             param_id: 2
-            value: "\026\000\000\001"
+            value: ",\000\000\001"
           }
         }
       }
@@ -95,8 +98,9 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.310] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.419] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -121,7 +125,7 @@ updates {
           }
           params {
             param_id: 2
-            value: "\n\000\000\013"
+            value: "\n\000\000\n"
           }
         }
       }
@@ -130,8 +134,9 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.315] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.424] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -143,7 +148,7 @@ updates {
       match {
         field_id: 1
         lpm {
-          value: "\013\000\000\n"
+          value: "!\000\000\n"
           prefix_len: 32
         }
       }
@@ -157,8 +162,9 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.319] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.429] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -170,7 +176,7 @@ updates {
       match {
         field_id: 1
         lpm {
-          value: "\026\000\000\n"
+          value: ",\000\000\n"
           prefix_len: 32
         }
       }
@@ -184,8 +190,9 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.324] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.433] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -197,7 +204,7 @@ updates {
       match {
         field_id: 1
         lpm {
-          value: "\n\000\000\n"
+          value: "\n\000\000\013"
           prefix_len: 32
         }
       }
@@ -211,8 +218,9 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.328] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.438] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -232,11 +240,11 @@ updates {
           action_id: 24247434
           params {
             param_id: 1
-            value: "\010\000\000\000\001\000"
+            value: "\010\000\000\000\003\000"
           }
           params {
             param_id: 2
-            value: "\013\000\000\n"
+            value: "!\000\000\n"
           }
         }
       }
@@ -245,8 +253,9 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.334] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.444] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -266,11 +275,11 @@ updates {
           action_id: 24247434
           params {
             param_id: 1
-            value: "\010\000\000\000\002\000"
+            value: "\010\000\000\000\004\000"
           }
           params {
             param_id: 2
-            value: "\026\000\000\n"
+            value: ",\000\000\n"
           }
         }
       }
@@ -279,8 +288,9 @@ updates {
 }
 ---
 
-[2023-10-19 22:41:00.345] /p4.v1.P4Runtime/Write
+[2023-10-19 22:41:00.449] /p4.v1.P4Runtime/Write
 ---
+device_id: 1
 election_id {
   low: 1
 }
@@ -300,116 +310,119 @@ updates {
           action_id: 24247434
           params {
             param_id: 1
-            value: "\010\000\000\000\020\000"
-          }
-          params {
-            param_id: 2
-            value: "\n\000\000\n"
-          }
-        }
-      }
-    }
-  }
-}
----
-
-[2023-10-19 22:41:00.350] /p4.v1.P4Runtime/Write
----
-election_id {
-  low: 1
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 50101297
-      match {
-        field_id: 1
-        lpm {
-          value: "\013\000\000\001"
-          prefix_len: 32
-        }
-      }
-      action {
-        action {
-          action_id: 30131879
-          params {
-            param_id: 1
-            value: "\010\000\000\000\001\000"
-          }
-          params {
-            param_id: 2
-            value: "\010\000\000\000\001\021"
-          }
-        }
-      }
-    }
-  }
-}
----
-
-[2023-10-19 22:41:00.356] /p4.v1.P4Runtime/Write
----
-election_id {
-  low: 1
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 50101297
-      match {
-        field_id: 1
-        lpm {
-          value: "\026\000\000\001"
-          prefix_len: 32
-        }
-      }
-      action {
-        action {
-          action_id: 30131879
-          params {
-            param_id: 1
-            value: "\010\000\000\000\002\000"
-          }
-          params {
-            param_id: 2
-            value: "\010\000\000\000\002\""
-          }
-        }
-      }
-    }
-  }
-}
----
-
-[2023-10-19 22:41:00.361] /p4.v1.P4Runtime/Write
----
-election_id {
-  low: 1
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 50101297
-      match {
-        field_id: 1
-        lpm {
-          value: "\n\000\000\013"
-          prefix_len: 32
-        }
-      }
-      action {
-        action {
-          action_id: 30131879
-          params {
-            param_id: 1
-            value: "\010\000\000\000\020\000"
-          }
-          params {
-            param_id: 2
             value: "\010\000\000\000\021\000"
+          }
+          params {
+            param_id: 2
+            value: "\n\000\000\013"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-10-19 22:41:00.455] /p4.v1.P4Runtime/Write
+---
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 50101297
+      match {
+        field_id: 1
+        lpm {
+          value: ",\000\000\001"
+          prefix_len: 32
+        }
+      }
+      action {
+        action {
+          action_id: 30131879
+          params {
+            param_id: 1
+            value: "\010\000\000\000\004\000"
+          }
+          params {
+            param_id: 2
+            value: "\010\000\000\000\004D"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-10-19 22:41:00.461] /p4.v1.P4Runtime/Write
+---
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 50101297
+      match {
+        field_id: 1
+        lpm {
+          value: "!\000\000\001"
+          prefix_len: 32
+        }
+      }
+      action {
+        action {
+          action_id: 30131879
+          params {
+            param_id: 1
+            value: "\010\000\000\000\003\000"
+          }
+          params {
+            param_id: 2
+            value: "\010\000\000\000\0033"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2023-10-19 22:41:00.466] /p4.v1.P4Runtime/Write
+---
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 50101297
+      match {
+        field_id: 1
+        lpm {
+          value: "\n\000\000\n"
+          prefix_len: 32
+        }
+      }
+      action {
+        action {
+          action_id: 30131879
+          params {
+            param_id: 1
+            value: "\010\000\000\000\021\000"
+          }
+          params {
+            param_id: 2
+            value: "\010\000\000\000\020\000"
           }
         }
       }

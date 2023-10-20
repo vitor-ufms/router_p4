@@ -508,13 +508,13 @@ control MyIngress(inout headers hdr,
                     standard_metadata.egress_spec = (bit<9>) hdr.packet_out.operand0;
                     controller_op.write(0, 12); // send a signal for the controller, só para teste
                 }
-            } else if(hdr.arp.op == ARP_OPER_REPLY){ // falta testar essa funçãooooooo
-                if(hdr.arp.d_ip == meta.forward_temp.ip_ingress ){ // meu ip
+            } else if(hdr.arp.op == ARP_OPER_REPLY){  
+                if(hdr.arp.d_ip == meta.forward_temp.ip_ingress ){ // meu ip, reply para o roteador
                     hdr.packet_in.setValid();
                     hdr.packet_in.opcode = 2;
-                    hdr.packet_in.operand0 = (bit<32>) hdr.arp.s_ip; 
-                    hdr.packet_in.operand1 = hdr.arp.s_Add;
-                    hdr.packet_in.operand2 = hdr.arp.d_Add;
+                    hdr.packet_in.operand0 = (bit<32>) hdr.arp.s_ip; // ip que enviou
+                    hdr.packet_in.operand1 = hdr.arp.s_Add; // mac send
+                    hdr.packet_in.operand2 = hdr.arp.d_Add; // mac dst
                    
                     controller_op.write(0, 2); // send a signal for the controller
                     standard_metadata.egress_spec = CPU_PORT;

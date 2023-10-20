@@ -1,5 +1,5 @@
 # Vitor Hugo dos Santos Duarte
-#
+# sudo ifconfig eth0 11.0.0.12 netmask 255.0.0.0 ;  sudo ifconfig eth0 up
 
 import subprocess, ipaddress, time, sys
 from threading import Thread
@@ -7,7 +7,7 @@ from threading import Thread
 import p4runtime_sh.shell as sh
 from p4runtime_sh.shell import p4runtime_pb2 as p4runtime_proto
 import random, socket, sys
-from scapy.all import IP, TCP, ARP, Ether, get_if_hwaddr, get_if_list, sendp, UDP, RIP, RIPEntry
+from scapy.all import IP, TCP, ARP, Ether, get_if_hwaddr, get_if_list, sendp, UDP, RIP, RIPEntry, ICMP
 import p4runtime_shell_utils as p4rtutil
 
 
@@ -22,13 +22,15 @@ cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_ob
 queue_arp = []
 CLEAR_TABLE = 1
 RIP_ON  = 1
+
 TIME_CLEAR_TABLE = 20
 TIME_RIP = 30
+TIME_LIST_ARP_REQUEST = 5
 
 #Thd1 = Thread(target=email,args=[EMAIL, PASSWORD]) # Cria uma thread
 # limpa todas as entradas da tabela - não testado
 def table_clear(sw,table):
-    while CLEAR_TABLE: 
+    while CLEAR_TABLE: # posivel melhorar usando table_set_timeout
         time.sleep(TIME_CLEAR_TABLE) # segundos
         print('limpando... ',table)
         input_str = "table_clear %s \n" % table
@@ -36,7 +38,7 @@ def table_clear(sw,table):
         sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
 
 
-def connection(thrift_port = 9090):
+def connection(thrift_port = 9090): #9091
     sw = subprocess.Popen(['simple_switch_CLI', '--thrift-port', str(thrift_port)], \
                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     sw.stdout.readline().strip() # Obtaining JSON from switch...
@@ -174,32 +176,38 @@ def packet_out_request(sw, por_dst,ip_dst):
     #pktout.metadata['operand1'] = '0'
     pkt_out.send()
 
+def time_list(sw, list):
+    print('time list waiting answer')
+    time.sleep(TIME_LIST_ARP_REQUEST)
+    if list in queue_arp:
+        queue_arp.remove(list)
+        # gera icmp
+        a = table_from_key(sw,'pre_proc', list[0], clean=3) # a[0]= mac a[1]= ip do roteador
+
+        print('removendo pacote sem resposta',list[1],decimal_to_ip(list[1]))
+        pkt = Ether(dst='ff:ff:ff:ff:ff:ff') # pkt = Ether(src=a[0]) 
+        pkt_re = Ether(list[2])
+        pkt = pkt / IP(src=a[1], dst=pkt_re[IP].src) / ICMP(type=3, code=1) / pkt_re[IP]
+
+        pkt_out.payload = bytes(pkt)
+        pkt_out.send()
+
 # recebe um pacote que não tem correspondência na tabela ARP, salva o  pacote e abre uma chamada ARP request
 def arp_request(sw, pktinfo, packet_bytes, reg = 'controller_op'):
     print("arp_request")
-    # try:
-    #     pk = pkt_in.packet_in_queue.get(block=True, timeout=3)
-    #     #print(pk.packet.payload)
-    # except:
-    #     print('NAO RECEBEU O PACOTE ###########################')
-        
-    # else: # só executa se não tiver erro
-    #     packet_bytes = pk.packet.payload
-    #     #eth_packet = Ether(packet_bytes)
-        
-    #     #eth_packet.show() # pacote que entrou
-    #     pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
-        
-        #por_dst = read_register(sw, register=reg, idx=1)
-        #ip_dst = decimal_to_ip(read_register(sw, register=reg, idx=2))
 
     port_dst = pktinfo['metadata']['operand0']
     ip_dst = pktinfo['metadata']['operand1']
 
     list = []
+    list.append(port_dst)
     list.append(ip_dst)
     list.append(packet_bytes) # lis[ip_dst da interface, pacote]
+
     queue_arp.append(list) # adiciona na lista o pacote
+    # gerar um time para resposta desse pacote
+    Thd = Thread(target=time_list, args=[sw, list]) # Cria uma thread para rodar o backend
+    Thd.start()
 
     #print(por_dst,decimal_to_ip(ip_dst))
     packet_out_request(sw, port_dst, ip_dst)   
@@ -223,13 +231,14 @@ def arp_reply(sw, pktinfo):
     
     ip = f'{ip_src}/32'
 
-    #mac = f'08:00:00:00:04:00 08:00:00:00:04:44' # esse valor vai ser descoberto pelo arp
     mac =  f'{my_mac} {mac_src}'
+    # adicionando na tabela sem fazer verificação
     table_add(sw,'arp_exact','arp_query', ip, mac, ptr=False, clean=5)
     for pkt_env in queue_arp:
-        if pkt_env[0] == ip_src:
-            pkt_out.payload = pkt_env[1]
+        if pkt_env[1] == ip_src: # [0]= port ; [1] = ip [2] pkt
+            pkt_out.payload = pkt_env[2]
             pkt_out.send()
+            queue_arp.remove(pkt_env)
 
 
 def rip(sw):
@@ -244,12 +253,14 @@ def rip_request(packet_bytes):
             
     #eth_packet.show() # pacote que entrou
     if (eth_packet[UDP].dport == 520 and eth_packet[RIP].version == 2) :
-        
+        # consultar a tabela de roteamento
+        # table_num_entries ipv4_lpm
+        # table_dump_entry ipv4_lpm 0
         pkt =  Ether()
         rip_packet = RIP( cmd=2, version=2)
         rip_entry = RIPEntry(AF=2, addr="192.0.11.0", mask="255.255.255.0", nextHop="10.0.0.10", metric=1)
         rip_entry2 = RIPEntry(AF=2, addr="192.0.22.0", mask="255.255.0.0", metric=10)
-        pkt = pkt / IP(dst="224.0.0.9", ttl=6)/ UDP(sport=520, dport=520)/ rip_packet / rip_entry/ rip_entry2
+        pkt = pkt / IP(dst="224.0.0.9", ttl=78)/ UDP(sport=520, dport=520)/ rip_packet / rip_entry/ rip_entry2
 
         pkt_out.payload = bytes(pkt)
        # pkt_out.metadata['operand0'] = str(por_dst) ## interface 
@@ -269,8 +280,8 @@ def main():
     Thd1 = Thread(target=table_clear, args=[sw,'arp_exact']) # Cria uma thread para rodar o backend
     Thd1.start()
 
-    Thd_rip = Thread(target=rip, args=[sw]) # Cria uma thread para rodar o backend
-    Thd_rip.start()
+    # Thd_rip = Thread(target=rip, args=[sw]) # Cria uma thread para rodar o backend
+    # Thd_rip.start()
     
     reg = 'controller_op'
 
