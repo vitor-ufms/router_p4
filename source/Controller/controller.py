@@ -1,4 +1,4 @@
-# Vitor Hugo dos Santos Duarte
+# Vitor Hugo dos Santos Duarte 
 # sudo ifconfig eth0 11.0.0.12 netmask 255.0.0.0 ;  sudo ifconfig eth0 up
 
 import subprocess, ipaddress, time, sys, re
