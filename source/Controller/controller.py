@@ -1,7 +1,7 @@
 # Vitor Hugo dos Santos Duarte
 # sudo ifconfig eth0 11.0.0.12 netmask 255.0.0.0 ;  sudo ifconfig eth0 up
 
-import subprocess, ipaddress, time, sys
+import subprocess, ipaddress, time, sys, re
 from threading import Thread
 
 import p4runtime_sh.shell as sh
@@ -20,11 +20,11 @@ cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_ob
 
 # list with queued packages
 queue_arp = []
-CLEAR_TABLE = 0
+CLEAR_TABLE = 1
 RIP_ON  = 1
 
-TIME_CLEAR_TABLE = 20
-TIME_RIP = 30
+TIME_CLEAR_TABLE = 15
+TIME_RIP = 5
 TIME_LIST_ARP_REQUEST = 5
 
 #Thd1 = Thread(target=email,args=[EMAIL, PASSWORD]) # Cria uma thread
@@ -242,9 +242,62 @@ def arp_reply(sw, pktinfo):
 
 
 def rip(sw): # gera rip command 2 a cada 30 segundos
-    print('rip')
+    list_rip_entry = []
+
     while RIP_ON:
+        print('rip waiting...')
         time.sleep(TIME_RIP) # segundos
+        # envia a tabela
+        input_str = "table_num_entries pre_proc \n "
+        sw.stdin.write(input_str)
+        sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+        num_ports = sw.stdout.readline().strip()
+        # print(num_ports)
+        num_ports = num_ports.split(':', 1)[1].strip()
+        num_ports=  int(re.search(r'\d+',num_ports).group())
+    
+        for i in range(num_ports):
+            port = i + 1
+            mac_router, ip_router = table_from_key(sw,'pre_proc', port, clean=3) # a[0]= mac a[1]= ip
+            input_str = "table_num_entries ipv4_lpm \n"
+            sw.stdin.write(input_str)
+            sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+            num_entries = sw.stdout.readline().strip()
+            num_entries = int(num_entries.split(': ', 1)[1])
+            # precisa pegar o mac e ip no pre_proc
+
+            for i in range(num_entries):
+                input_str = "table_dump_entry ipv4_lpm %d \n" % i
+                sw.stdin.write(input_str)
+                sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+                sw.stdout.readline().strip()
+                sw.stdout.readline().strip()
+                line = sw.stdout.readline().strip()
+                action = sw.stdout.readline().strip()
+                
+                if "ipv4_forward" in action:                                 
+                    ip_hex, mask = line.split('LPM ', 1)[1].split('/', 1)
+                    network = ipaddress.IPv4Network(f'0.0.0.0/{mask}', strict=False)
+                    mask_formatado = str(network.netmask)               
+                    ip_formatado = ip_hex_to_ip_format(ip_hex.strip())
+                    metric = int(action.split(', ', 2)[2])
+                    rip_entry = RIPEntry(AF=2, addr=ip_formatado, mask=mask_formatado, nextHop=ip_router, metric=metric)
+                    #rip_entry.show2()
+                    list_rip_entry.append(rip_entry)
+
+            rip_packet = RIP( cmd=2, version=2)
+            pkt =  Ether(src= mac_router, dst='ff:ff:ff:ff:ff:ff') / IP(dst="224.0.0.9", src=ip_router)/ UDP(sport=520, dport=520)/ rip_packet
+
+            for rip_entry in list_rip_entry:
+                pkt = pkt / rip_entry
+            pkt_out.payload = bytes(pkt)
+            pkt_out.metadata['opcode'] = '1' 
+            pkt_out.metadata['operand0'] = str(port) ## porta para enviar no plano de dados        
+            ##pkt.show()
+            list_rip_entry.clear()
+            pkt_out.send()
+            print('loop do rip ',port)   
+                               
         
 # funçao que respode um resquest de rip 
 def rip_request(sw, packet_bytes, pktinfo):
@@ -309,8 +362,8 @@ def main():
     Thd1 = Thread(target=table_clear, args=[sw,'arp_exact']) # Cria uma thread para rodar o backend
     Thd1.start()
 
-    # Thd_rip = Thread(target=rip, args=[sw]) # Cria uma thread para rodar o backend
-    # Thd_rip.start()
+    Thd_rip = Thread(target=rip, args=[sw]) # Cria uma thread para rodar o backend
+    Thd_rip.start()
     
     reg = 'controller_op'
 

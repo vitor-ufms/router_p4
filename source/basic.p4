@@ -402,8 +402,11 @@ control MyIngress(inout headers hdr,
 
         // procedimentos para ipv4
         if (hdr.ipv4.isValid()) { 
-
-            if (standard_metadata.checksum_error == 1){ 
+            // direcionar a porta para o multicast de envios do rip
+            if(standard_metadata.ingress_port == CPU_PORT && hdr.packet_out.opcode == 1){               
+                standard_metadata.egress_spec = (bit<9>) hdr.packet_out.operand0;
+                meta.encaminhamento = 0;
+            }else if (standard_metadata.checksum_error == 1){ 
                 drop(); // 4.2.2.5 RFC 1812 
             
             }else if(ipv4_lpm.apply().hit){ // match na tabela ipv4_lpm
@@ -480,7 +483,7 @@ control MyIngress(inout headers hdr,
             }  
         }
 
-        /// chamar tabela arp
+        /// chamar tabela arp 
         if( meta.encaminhamento == 1 && meta.pkt_to_router == 0 ){
             if(arp_exact.apply().miss){// configura o mac 
                 // ip sem mac, chamar controlador
@@ -524,6 +527,8 @@ control MyIngress(inout headers hdr,
             }
 
         }
+
+
         // send packet for controller
         // hdr.packet_in.isValid();
         // hdr.packet_in.opcode = 0xFFFF;
