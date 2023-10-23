@@ -21,7 +21,7 @@ cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_ob
 # list with queued packages
 queue_arp = []
 CLEAR_TABLE = 1
-RIP_ON  = 1
+RIP_ON  = 0
 
 TIME_CLEAR_TABLE = 15
 TIME_RIP = 5
@@ -248,39 +248,16 @@ def rip(sw): # gera rip command 2 a cada 30 segundos
         print('rip waiting...')
         time.sleep(TIME_RIP) # segundos
         # envia a tabela
-        input_str = "table_num_entries pre_proc \n "
-        sw.stdin.write(input_str)
-        sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
-        num_ports = sw.stdout.readline().strip()
-        # print(num_ports)
-        num_ports = num_ports.split(':', 1)[1].strip()
-        num_ports=  int(re.search(r'\d+',num_ports).group())
-    
+        num_ports = table_num_entries(sw,'pre_proc')     
         for i in range(num_ports):
             port = i + 1
             mac_router, ip_router = table_from_key(sw,'pre_proc', port, clean=3) # a[0]= mac a[1]= ip
-            input_str = "table_num_entries ipv4_lpm \n"
-            sw.stdin.write(input_str)
-            sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
-            num_entries = sw.stdout.readline().strip()
-            num_entries = int(num_entries.split(': ', 1)[1])
+            num_entries = table_num_entries(sw,'ipv4_lpm') 
             # precisa pegar o mac e ip no pre_proc
-
             for i in range(num_entries):
-                input_str = "table_dump_entry ipv4_lpm %d \n" % i
-                sw.stdin.write(input_str)
-                sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
-                sw.stdout.readline().strip()
-                sw.stdout.readline().strip()
-                line = sw.stdout.readline().strip()
-                action = sw.stdout.readline().strip()
-                
-                if "ipv4_forward" in action:                                 
-                    ip_hex, mask = line.split('LPM ', 1)[1].split('/', 1)
-                    network = ipaddress.IPv4Network(f'0.0.0.0/{mask}', strict=False)
-                    mask_formatado = str(network.netmask)               
-                    ip_formatado = ip_hex_to_ip_format(ip_hex.strip())
-                    metric = int(action.split(', ', 2)[2])
+                resultado = table_dump_entry(sw,i)
+                if resultado:
+                    mask_formatado, ip_formatado, metric = resultado
                     rip_entry = RIPEntry(AF=2, addr=ip_formatado, mask=mask_formatado, nextHop=ip_router, metric=metric)
                     #rip_entry.show2()
                     list_rip_entry.append(rip_entry)
@@ -298,7 +275,40 @@ def rip(sw): # gera rip command 2 a cada 30 segundos
             pkt_out.send()
             print('loop do rip ',port)   
                                
-        
+# table_dump_entry ipv4_lpm r
+# recebe a posição da entrada da tabela e retorna a mascara, o ip e a metrica, caso não encontra retorna None
+def table_dump_entry(sw, i):
+    input_str = "table_dump_entry ipv4_lpm %d \n" % i
+    sw.stdin.write(input_str)
+    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+    sw.stdout.readline().strip()
+    sw.stdout.readline().strip()
+    line = sw.stdout.readline().strip()
+    action = sw.stdout.readline().strip()
+    
+    if "ipv4_forward" in action:                                 
+        ip_hex, mask = line.split('LPM ', 1)[1].split('/', 1)
+        network = ipaddress.IPv4Network(f'0.0.0.0/{mask}', strict=False)
+
+        mask_formatado = str(network.netmask)               
+        ip_formatado = ip_hex_to_ip_format(ip_hex.strip())
+        metric = int(action.split(', ', 2)[2])
+        return mask_formatado, ip_formatado, metric
+    else:
+        return None
+
+# retorna um valor inteiro da quantidade de entradas em uma tabela  
+def table_num_entries(sw, table='pre_proc'):
+    input_str = "table_num_entries %s \n " % table
+    sw.stdin.write(input_str)
+    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+    num_ports = sw.stdout.readline().strip()
+    # print(num_ports)
+    num_ports = num_ports.split(':', 1)[1].strip()
+    num_ports=  int(re.search(r'\d+',num_ports).group())
+    return num_ports
+
+
 # funçao que respode um resquest de rip 
 def rip_request(sw, packet_bytes, pktinfo):
     print('rip request recebido')
@@ -308,30 +318,14 @@ def rip_request(sw, packet_bytes, pktinfo):
     ip_dst = decimal_to_ip(pktinfo['metadata']['operand0'])
 
     #eth_packet.show() # pacote que entrou
-    if (eth_packet[UDP].dport == 520 and eth_packet[RIP].version == 2) :
+    if (eth_packet[UDP].dport == 520 and eth_packet[RIP].version == 2 and eth_packet[RIP].cmd == 1) :
         # consultar a tabela de roteamento
-        # table_num_entries ipv4_lpm
-        input_str = "table_num_entries ipv4_lpm \n"
-        sw.stdin.write(input_str)
-        sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
-        num_entries = sw.stdout.readline().strip()
-        num_entries = num_entries.split(': ', 1)[1]
-        #print(num_entries)
-        for i in range(int(num_entries)):
-            input_str = "table_dump_entry ipv4_lpm %d \n" % i
-            sw.stdin.write(input_str)
-            sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
-            sw.stdout.readline().strip()
-            sw.stdout.readline().strip()
-            line = sw.stdout.readline().strip()
-            action = sw.stdout.readline().strip()
-            
-            if "ipv4_forward" in action:                                 
-                ip_hex, mask = line.split('LPM ', 1)[1].split('/', 1)
-                network = ipaddress.IPv4Network(f'0.0.0.0/{mask}', strict=False)
-                mask_formatado = str(network.netmask)               
-                ip_formatado = ip_hex_to_ip_format(ip_hex.strip())
-                metric = int(action.split(', ', 2)[2])
+        # table_num_entries ipv4_lpm        
+        num_entries = table_num_entries(sw,'ipv4_lpm')        
+        for i in range(num_entries):
+            resultado = table_dump_entry(sw,i)
+            if resultado:
+                mask_formatado, ip_formatado, metric = resultado
                 rip_entry = RIPEntry(AF=2, addr=ip_formatado, mask=mask_formatado, nextHop=ip_router, metric=metric)
                 #rip_entry.show2()
                 list_rip_entry.append(rip_entry)
@@ -349,6 +343,7 @@ def rip_request(sw, packet_bytes, pktinfo):
 
 def rip_reply():
     print('rip_reply') # recebeu um command 2
+
 
 def main():
     sw = connection()
@@ -492,3 +487,55 @@ main()
 # print(reg_val)
 # print(' ')
 # print(reg_val2)
+
+
+# def rip_request(sw, packet_bytes, pktinfo):
+#     print('rip request recebido')
+#     list_rip_entry = []
+#     eth_packet = Ether(packet_bytes)
+#     ip_router = decimal_to_ip(pktinfo['metadata']['operand1'])
+#     ip_dst = decimal_to_ip(pktinfo['metadata']['operand0'])
+
+#     #eth_packet.show() # pacote que entrou
+#     if (eth_packet[UDP].dport == 520 and eth_packet[RIP].version == 2) :
+#         # consultar a tabela de roteamento
+#         # table_num_entries ipv4_lpm
+#         input_str = "table_num_entries ipv4_lpm \n"
+#         sw.stdin.write(input_str)
+#         sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+#         num_entries = sw.stdout.readline().strip()
+#         num_entries = num_entries.split(': ', 1)[1]
+#         #print(num_entries)
+#         for i in range(int(num_entries)):
+#             resultado = table_dump_entry(sw,i)
+#             if resultado:
+#                 mask_formatado, ip_formatado, metric = resultado
+                
+#             input_str = "table_dump_entry ipv4_lpm %d \n" % i
+#             sw.stdin.write(input_str)
+#             sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+#             sw.stdout.readline().strip()
+#             sw.stdout.readline().strip()
+#             line = sw.stdout.readline().strip()
+#             action = sw.stdout.readline().strip()
+            
+#             if "ipv4_forward" in action:                                 
+#                 ip_hex, mask = line.split('LPM ', 1)[1].split('/', 1)
+#                 network = ipaddress.IPv4Network(f'0.0.0.0/{mask}', strict=False)
+#                 mask_formatado = str(network.netmask)               
+#                 ip_formatado = ip_hex_to_ip_format(ip_hex.strip())
+#                 metric = int(action.split(', ', 2)[2])
+#                 rip_entry = RIPEntry(AF=2, addr=ip_formatado, mask=mask_formatado, nextHop=ip_router, metric=metric)
+#                 #rip_entry.show2()
+#                 list_rip_entry.append(rip_entry)
+      
+#         rip_packet = RIP( cmd=2, version=2)
+#         pkt =  Ether(dst='ff:ff:ff:ff:ff:ff') / IP(dst=ip_dst, src=ip_router)/ UDP(sport=520, dport=520)/ rip_packet
+
+#         for rip_entry in list_rip_entry:
+#             pkt = pkt / rip_entry
+        
+#         pkt.show()
+#         pkt_out.payload = bytes(pkt)    
+#         pkt_out.send()
+#         print('saindo do rip request')
