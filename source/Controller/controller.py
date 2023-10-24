@@ -20,19 +20,19 @@ cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_ob
 
 # list with queued packages
 queue_arp = []
-CLEAR_TABLE = 0
-RIP_ON  = 0
+CLEAR_TABLE = 1
+RIP_ON  = 1
 
 TIME_CLEAR_TABLE = 15
-TIME_RIP = 5
-TIME_LIST_ARP_REQUEST = 5
+TIME_RIP = 15
+TIME_LIST_ARP_REQUEST = 15
 
 #Thd1 = Thread(target=email,args=[EMAIL, PASSWORD]) # Cria uma thread
 # limpa todas as entradas da tabela - não testado
 def table_clear(sw,table):
     while CLEAR_TABLE: # posivel melhorar usando table_set_timeout
         time.sleep(TIME_CLEAR_TABLE) # segundos
-        print('limpando... ',table)
+        print(f'--------limpando = {table} ----------------------------------')
         input_str = "table_clear %s \n" % table
         sw.stdin.write(input_str)
         sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
@@ -48,8 +48,8 @@ def connection(thrift_port = 9090): #9091
 
 def connection_sh():
     sh.setup(
-        device_id=0,
-        grpc_addr='localhost:50051',
+        device_id=0, # 1
+        grpc_addr='localhost:50051', # 50052
         election_id=(0, 1), # (high, low)
         #config=sh.FwdPipeConfig(p4info, bmv2_json)
     )
@@ -106,7 +106,7 @@ def ip_hex_to_ip_format(ip_hex):
 def table_add(sw, table, action, val_in, val_out, ptr=False, clean=0): #table_add MyIngress.arp_exact arp_answer 10.0.11.10/32 => 00:11:22:33:44:55
     
     input_str = "table_add %s %s %s => %s \n" % (table, action, val_in, val_out)
-    
+        
     if ptr:
         print(input_str[0:-1])
 
@@ -215,16 +215,7 @@ def arp_request(sw, pktinfo, packet_bytes, reg = 'controller_op'):
 
 
 def arp_reply(sw, pktinfo):
-    print("arp_reply")
-    # try:
-    #     pk = pkt_in.packet_in_queue.get(block=True, timeout=3)
-    #     #print(pk.packet.payload)
-    # except:
-    #     print('NAO RECEBEU O PACOTE ###########################')
-        
-    # else: # só executa se não tiver erro
-    #pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
-    #pktinfo['payload'] # em bytes
+
 
     ip_src = pktinfo['metadata']['operand0']
     mac_src = pktinfo['metadata']['operand1']
@@ -240,41 +231,7 @@ def arp_reply(sw, pktinfo):
             pkt_out.payload = pkt_env[2]
             pkt_out.send()
             queue_arp.remove(pkt_env)
-
-
-
-    list_rip_entry = []
-
-    while RIP_ON:
-        print('rip waiting...')
-        time.sleep(TIME_RIP) # segundos
-        # envia a tabela
-        num_ports = table_num_entries(sw,'pre_proc')     
-        for i in range(num_ports):
-            port = i + 1
-            mac_router, ip_router = table_from_key(sw,'pre_proc', port, clean=3) # a[0]= mac a[1]= ip
-            num_entries = table_num_entries(sw,'ipv4_lpm') 
-            # precisa pegar o mac e ip no pre_proc
-            for i in range(num_entries):
-                resultado = table_dump_entry(sw,i)
-                if resultado:
-                    mask_formatado, ip_formatado, metric = resultado
-                    rip_entry = RIPEntry(AF=2, addr=ip_formatado, mask=mask_formatado, nextHop=ip_router, metric=metric)
-                    #rip_entry.show2()
-                    list_rip_entry.append(rip_entry)
-
-            rip_packet = RIP( cmd=2, version=2)
-            pkt =  Ether(src= mac_router, dst='ff:ff:ff:ff:ff:ff') / IP(dst="224.0.0.9", src=ip_router)/ UDP(sport=520, dport=520)/ rip_packet
-
-            for rip_entry in list_rip_entry:
-                pkt = pkt / rip_entry
-            pkt_out.payload = bytes(pkt)
-            pkt_out.metadata['opcode'] = '1' 
-            pkt_out.metadata['operand0'] = str(port) ## porta para enviar no plano de dados        
-            ##pkt.show()
-            list_rip_entry.clear()
-            pkt_out.send()
-            print('loop do rip ',port)   
+ 
                                
 # table_dump_entry ipv4_lpm r
 # recebe a posição da entrada da tabela e retorna a mascara, o ip e a metrica, caso não encontra retorna None
@@ -342,7 +299,7 @@ def rip(sw): # gera rip command 2 a cada 30 segundos
             ##pkt.show()
             list_rip_entry.clear()
             pkt_out.send()
-            print('loop do rip ',port)   
+            print('enviando tabela rip para a porta: ',port)    
                                
 # funçao que respode um resquest de rip 
 def pacote_rip(sw, packet_bytes, pktinfo):
@@ -397,9 +354,9 @@ def table_dump_entry_from_key(sw,key, ip, clean=2, table='ipv4_lpm'):
         
         stdout_str = sw.stdout.readline().strip()
         #print(stdout_str)
-        num = stdout_str.split('- ', 1)[1].split(',', 2) # num[0] port num[1] ip num[3] metric
+        num = [i.strip() for i in stdout_str.split('- ', 1)[1].split(',', 2)] # num[0] port num[1] ip num[3] metric
         # num = re.findall(r'\d+', stdout_str) 
-        print(num)
+        # print(num)
 
         # mac_formatado = mac_hex_to_mac_format(mac_hex)
         # ip_formatado = ip_hex_to_ip_format(ip_hex)
@@ -407,13 +364,13 @@ def table_dump_entry_from_key(sw,key, ip, clean=2, table='ipv4_lpm'):
         return num
 
 
-# recebe um pacote com as rotas 
+# recebe um pacote com as rotas, e atualiza a tabela de encaminhamento 
 def rip_reply(sw, packet_bytes, pktinfo):
     print('rip_reply') # recebeu um command 2
     eth_packet = Ether(packet_bytes)
-    ip_router = decimal_to_ip(pktinfo['metadata']['operand1'])
-    ip_dst = decimal_to_ip(pktinfo['metadata']['operand0'])
-
+    # ip_router = decimal_to_ip(pktinfo['metadata']['operand1'])
+    # ip_dst = decimal_to_ip(pktinfo['metadata']['operand0'])
+    port = pktinfo['metadata']['operand2']
     rip_entry = eth_packet[RIP].payload
     for i in range(len(eth_packet[RIPEntry].layers())):
         # rip_entry.show()
@@ -423,21 +380,51 @@ def rip_reply(sw, packet_bytes, pktinfo):
         key =  f'{rip_entry.addr}/{cidr_mask}'
 
         result =  table_dump_entry_from_key(sw, key, rip_entry.addr, clean=2, table='ipv4_lpm')
-        if result:
-            print(' if')
-            # sem correspondecia adicionar na tabela do roteador
-            val_out = '112 22'
-            table_add(sw,'ipv4_lpm','ipv4_forward', key, val_out, ptr=False, clean=0)
+        if result: # já tem na tabela
+            print('chave encontrada:',key)
+            
         else:
-            #verificar metric
-            print('else')
+            print('chave não encontrada na tabela:',key) 
+            # sem correspondecia adicionar na tabela do roteador
+            val_out = f'{port} {rip_entry.nextHop} {rip_entry.metric + 1}'
+            table_add(sw,'ipv4_lpm','ipv4_forward', key, val_out, ptr=False, clean=5)
+            print('-------- end else ---')
         # mascara_cidr = ipaddress.IPv4Network(f"0.0.0.0/{rip_entry.mask}", strict=False)
         # cidr_mask = mascara_cidr.prefixlen
         # fazer consulta na tabela ipv4_lpm usando addr, se tiver match e foi forward 
 
         # ir para a proxima entrada
+        print(f'----------- fim for {i} -----')
         rip_entry = rip_entry.payload
-       
+
+def parser_pkt(sw,pk):
+    #reg = 'controller_op'
+    packet_bytes = pk.packet.payload
+        #eth_packet = Ether(packet_bytes)
+        
+    #eth_packet.show() # pacote que entrou
+    pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
+    op = pktinfo['metadata']['opcode']
+    if (op == 0):
+        print('test op 0')
+        return
+    elif (op == 1):
+        print('op = 1')
+        #write_register(sw,register=reg, idx=0, value=0)
+        arp_request(sw, pktinfo, packet_bytes) # roteador gera um request
+    elif (op == 2):
+        print('op = 2')
+        #write_register(sw,register=reg, idx=0, value=0)
+        arp_reply(sw, pktinfo) #reply para o roteador
+    elif (op == 3):
+        print('op 3')
+        pacote_rip(sw, packet_bytes, pktinfo) # pacote udp, pode ser rip
+    elif (op == 4):
+        print('op 4')
+
+    else:
+        print('unknown command: ', op)
+
 def main():
     sw = connection()
     connection_sh()
@@ -453,8 +440,7 @@ def main():
     Thd_rip = Thread(target=rip, args=[sw]) # Cria uma thread para rodar o backend
     Thd_rip.start()
     
-    reg = 'controller_op'
-
+    
     #reg = 'interface_ip'
     #init_reg(sw) // usar reg somente para sinal
     #init_table(sw)
@@ -478,31 +464,11 @@ def main():
             sys.exit()
             
         else: # só executa se não tiver erro
-            packet_bytes = pk.packet.payload
-            #eth_packet = Ether(packet_bytes)
             
-            #eth_packet.show() # pacote que entrou
-            pktinfo = p4rtutil.decode_packet_in_metadata(cpm_packetin_id2data, pk.packet)
-            op = pktinfo['metadata']['opcode']
-            if (op == 0):
-                print('test op 0')
-                continue
-            elif (op == 1):
-                print('op = 1')
-                write_register(sw,register=reg, idx=0, value=0)
-                arp_request(sw, pktinfo, packet_bytes) # roteador gera um request
-            elif (op == 2):
-                print('op = 2')
-                write_register(sw,register=reg, idx=0, value=0)
-                arp_reply(sw, pktinfo) #reply para o roteador
-            elif (op == 3):
-                print('op 3')
-                pacote_rip(sw, packet_bytes, pktinfo) # pacote udp, pode ser rip
-            elif (op == 4):
-                print('op 4')
+            Thd_pkt = Thread(target= parser_pkt, args=[sw, pk]) # Cria uma thread para rodar o backend
+            Thd_pkt.start()
 
-            else:
-                print('unknown command: ', op)
+           
 main()
 
 
@@ -632,3 +598,36 @@ main()
 #         pkt_out.payload = bytes(pkt)    
 #         pkt_out.send()
 #         print('saindo do rip request')
+
+# list_rip_entry = []
+
+#     while RIP_ON:
+#         print('rip waiting...')
+#         time.sleep(TIME_RIP) # segundos
+#         # envia a tabela
+#         num_ports = table_num_entries(sw,'pre_proc')     
+#         for i in range(num_ports):
+#             port = i + 1
+#             mac_router, ip_router = table_from_key(sw,'pre_proc', port, clean=3) # a[0]= mac a[1]= ip
+#             num_entries = table_num_entries(sw,'ipv4_lpm') 
+#             # precisa pegar o mac e ip no pre_proc
+#             for i in range(num_entries):
+#                 resultado = table_dump_entry(sw,i)
+#                 if resultado:
+#                     mask_formatado, ip_formatado, metric = resultado
+#                     rip_entry = RIPEntry(AF=2, addr=ip_formatado, mask=mask_formatado, nextHop=ip_router, metric=metric)
+#                     #rip_entry.show2()
+#                     list_rip_entry.append(rip_entry)
+
+#             rip_packet = RIP( cmd=2, version=2)
+#             pkt =  Ether(src= mac_router, dst='ff:ff:ff:ff:ff:ff') / IP(dst="224.0.0.9", src=ip_router)/ UDP(sport=520, dport=520)/ rip_packet
+
+#             for rip_entry in list_rip_entry:
+#                 pkt = pkt / rip_entry
+#             pkt_out.payload = bytes(pkt)
+#             pkt_out.metadata['opcode'] = '1' 
+#             pkt_out.metadata['operand0'] = str(port) ## porta para enviar no plano de dados        
+#             ##pkt.show()
+#             list_rip_entry.clear()
+#             pkt_out.send()
+#             print('enviando tabela rip para a porta: ',port)  

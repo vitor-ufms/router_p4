@@ -466,6 +466,7 @@ control MyIngress(inout headers hdr,
                     hdr.packet_in.opcode = 3;
                     hdr.packet_in.operand0 = (bit<32>) hdr.ipv4.srcAddr; 
                     hdr.packet_in.operand1 =  (bit<48>) meta.forward_temp.ip_ingress;
+                    hdr.packet_in.operand2 = (bit<48>) standard_metadata.ingress_port;
                     
 
                 }else{ // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
