@@ -117,6 +117,7 @@ def table_add(sw, table, action, val_in, val_out, ptr=False, clean=0): #table_ad
         sw.stdout.readline().strip()
 
 # table_dump_entry_from_key <table name> <match fields>
+# para obter a ip e mac da interface do roteador
 def table_from_key(sw, table, key, clean=0, ptr = False):
     input_str = "table_dump_entry_from_key %s %d \n" % (table, key)
     sw.stdin.write(input_str)
