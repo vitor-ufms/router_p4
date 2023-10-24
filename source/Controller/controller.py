@@ -20,7 +20,7 @@ cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_ob
 
 # list with queued packages
 queue_arp = []
-CLEAR_TABLE = 1
+CLEAR_TABLE = 0
 RIP_ON  = 0
 
 TIME_CLEAR_TABLE = 15
@@ -382,6 +382,31 @@ def rip_request(sw, pktinfo):
     pkt_out.send()
     print('saindo do rip request')
 
+def table_dump_entry_from_key(sw,key, ip, clean=2, table='ipv4_lpm'):
+      
+    input_str = "table_dump_entry_from_key %s %s \n" % (table, key)
+    sw.stdin.write(input_str)
+    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+    valid = sw.stdout.readline().strip()
+    if 'Invalid' in valid: # sem conrespodencia
+        print('invalido')
+        return None
+    else: 
+        for i in range(clean):
+            sw.stdout.readline().strip()
+        
+        stdout_str = sw.stdout.readline().strip()
+        #print(stdout_str)
+        num = stdout_str.split('- ', 1)[1].split(',', 2) # num[0] port num[1] ip num[3] metric
+        # num = re.findall(r'\d+', stdout_str) 
+        print(num)
+
+        # mac_formatado = mac_hex_to_mac_format(mac_hex)
+        # ip_formatado = ip_hex_to_ip_format(ip_hex)
+
+        return num
+
+
 # recebe um pacote com as rotas 
 def rip_reply(sw, packet_bytes, pktinfo):
     print('rip_reply') # recebeu um command 2
@@ -389,11 +414,30 @@ def rip_reply(sw, packet_bytes, pktinfo):
     ip_router = decimal_to_ip(pktinfo['metadata']['operand1'])
     ip_dst = decimal_to_ip(pktinfo['metadata']['operand0'])
 
-    eth_packet.show() # pacote que entrou
-    # if (eth_packet[UDP].dport == 520 and eth_packet[RIP].version == 2 and eth_packet[RIP].cmd == 1) :
- 
+    rip_entry = eth_packet[RIP].payload
+    for i in range(len(eth_packet[RIPEntry].layers())):
+        # rip_entry.show()
+        # print(rip_entry.mask,rip_entry.addr, rip_entry.nextHop, rip_entry.metric)
+        mascara_cidr = ipaddress.IPv4Network(f"0.0.0.0/{rip_entry.mask}", strict=False)
+        cidr_mask = mascara_cidr.prefixlen
+        key =  f'{rip_entry.addr}/{cidr_mask}'
 
+        result =  table_dump_entry_from_key(sw, key, rip_entry.addr, clean=2, table='ipv4_lpm')
+        if result:
+            print(' if')
+            # sem correspondecia adicionar na tabela do roteador
+            val_out = '112 22'
+            table_add(sw,'ipv4_lpm','ipv4_forward', key, val_out, ptr=False, clean=0)
+        else:
+            #verificar metric
+            print('else')
+        # mascara_cidr = ipaddress.IPv4Network(f"0.0.0.0/{rip_entry.mask}", strict=False)
+        # cidr_mask = mascara_cidr.prefixlen
+        # fazer consulta na tabela ipv4_lpm usando addr, se tiver match e foi forward 
 
+        # ir para a proxima entrada
+        rip_entry = rip_entry.payload
+       
 def main():
     sw = connection()
     connection_sh()

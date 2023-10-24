@@ -26,13 +26,15 @@ def main():
     #print("sending on interface %s to %s" % (iface, str(addr)))
     pkt =  Ether()
     # pkt =  Ether(src='11:ff:ff:00:ff:10',  dst='ff:ff:ff:ff:ff:ff')
-    rip_packet = RIP( cmd=1, version=2)
+    #rip_packet = RIP( cmd=1, version=2) # solicitando request
+    rip_packet = RIP( cmd=2, version=2) # enviando tabela
 
+    rip_entry = RIPEntry(AF=2, addr="33.0.0.0", mask="255.0.0.0", nextHop="10.0.0.11", metric=1)
+    rip_entry2 = RIPEntry(AF=2, addr="44.0.0.0", mask="255.0.0.0", nextHop="10.0.0.11", metric=1)
+    rip_entry3 = RIPEntry(AF=2, addr="11.0.0.0", mask="255.0.0.0", nextHop="10.0.0.11", metric=4)
 
-    rip_entry = RIPEntry(AF=2, addr="192.0.11.0", mask="255.255.255.0", nextHop="10.0.0.10", metric=1)
-    rip_entry2 = RIPEntry(AF=2, addr="192.0.22.0", mask="255.255.0.0", metric=10)
     # Envie o pacote RIP
-    pkt = pkt / IP(dst="224.0.0.9", ttl=6)/ UDP(sport=520, dport=520)/ rip_packet / rip_entry/ rip_entry2
+    pkt = pkt / IP(dst="224.0.0.9", ttl=255)/ UDP(sport=520, dport=520)/ rip_packet / rip_entry/ rip_entry2 / rip_entry3
 
     sendp(pkt, verbose=False)
     pkt.show2()
