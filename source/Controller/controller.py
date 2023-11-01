@@ -20,12 +20,15 @@ cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_ob
 
 # list with queued packages
 queue_arp = []
-CLEAR_TABLE = 1
-RIP_ON  = 1
+queeu_rip = []
+
+CLEAR_TABLE = 0
+RIP_ON  = 0
 
 TIME_CLEAR_TABLE = 15
-TIME_RIP = 15
+TIME_RIP = 5
 TIME_LIST_ARP_REQUEST = 15
+TIME_ENTRY_TABLE = 5
 
 #Thd1 = Thread(target=email,args=[EMAIL, PASSWORD]) # Cria uma thread
 # limpa todas as entradas da tabela - não testado
@@ -55,30 +58,10 @@ def connection_sh():
     )
     #return sh
 
-def read_register(sw, register, idx, ptr = False):
-    input_str = "register_read %s %d \n" % (register, idx)
-    
-    if ptr:
-        print(input_str[0:-1])
+def clean_stdout(sw, clean):
+    for i in range(clean):
+        sw.stdout.readline().strip()
 
-    # Envie os dados de entrada para o processo e capture a saída
-    sw.stdin.write(input_str)
-    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
-
-    stdout_str = sw.stdout.readline().strip()
-    reg_val = stdout_str.split('= ', 1)[1] # divide a string em duas partes, no máximo 1 vez, e salva a segunda posição[1]
-    #print(stdout_str)
-    return int(reg_val)
-
-def write_register(sw, register, idx=0, value=0, ptr = False): # name, index, value
-
-    input_str = "register_write %s %d %d \n" % (register, idx, value)
-    if ptr:
-        print(input_str[0:-1])
-
-    # Envie os dados de entrada para o processo e capture a saída
-    sw.stdin.write(input_str)
-    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
 
 def ip_to_decimal(ip_str, ptr=False):
     # Endereço IP no formato "10.0.2.192"
@@ -95,6 +78,7 @@ def decimal_to_ip(decimal_value, ptr=False):
     if ptr:
         print("Endereço IP:", ip_str)
     return ip_str
+
 def mac_hex_to_mac_format(mac_hex):
     mac_formatado = ":".join([mac_hex[i:i+2] for i in range(0, len(mac_hex), 2)]) # fomata uma string em hexa para o foramato mac
     return mac_formatado
@@ -118,15 +102,17 @@ def table_add(sw, table, action, val_in, val_out, ptr=False, clean=0): #table_ad
 
 # table_dump_entry_from_key <table name> <match fields>
 # para obter a ip e mac da interface do roteador
-def table_from_key(sw, table, key, clean=0, ptr = False):
+def table_from_key(sw, key, table='pre_proc', clean=0, ptr = False):
     input_str = "table_dump_entry_from_key %s %d \n" % (table, key)
+    # print(f' entrada table_from_key {input_str}')
     sw.stdin.write(input_str)
     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
     for i in range(clean):
-        sw.stdout.readline().strip()
+        a = sw.stdout.readline().strip()
+        # print(f'- {a}')
     
     stdout_str = sw.stdout.readline().strip()
-    #print(stdout_str)
+    # print(f'-{stdout_str}') ; print('')
     mac_hex = stdout_str.split('- ', 1)[1].split(',', 1)[0]
     ip_hex = stdout_str.split(', ', 1)[1]
 
@@ -136,36 +122,9 @@ def table_from_key(sw, table, key, clean=0, ptr = False):
     return mac_formatado, ip_formatado
 
 
-def init_reg(sw): # não usa mais essa lógica
-    reg = 'interface_ip'
-    value_ip = ip_to_decimal('10.0.11.10')
-    write_register(sw,register=reg, idx=1, value=value_ip, ptr = True)
-    value_ip = ip_to_decimal('10.0.11.10')
-    write_register(sw,register=reg, idx=2, value=value_ip, ptr = True)
-    value_ip = ip_to_decimal('10.0.33.10')
-    write_register(sw,register=reg, idx=3, value=value_ip, ptr = True)
-    value_ip = ip_to_decimal('10.0.44.10')
-    write_register(sw,register=reg, idx=4, value=value_ip, ptr = True)
-
-    reg_val2 = read_register(sw, register='interface_ip', idx=1, ptr=True)
-    print(reg_val2)
-    reg_val = read_register(sw, register='interface_ip', idx=2, ptr=True)
-    print(reg_val)
-    reg_val = read_register(sw, register='interface_ip', idx=3, ptr=True)
-    print(reg_val)
-    reg_val = read_register(sw, register='interface_ip', idx=4, ptr=True)
-    print(reg_val)
-
-def init_table(sw):
-    #MyIngress.arp_exact arp_answer 10.0.11.10/32 => 00:11:22:33:44:55
-    table = 'MyIngress.ipv4_lpm'; action = 'ipv4_forward'
-    v_in = '10.0.11.1/32' ; v_out='5 00:11:22:33:44:55 00:11:22:33:44:55'
-    table_add(sw, table, action, v_in, v_out)
-    sw.stdout.readline().strip() # Entry has been added  with handle x
-
 def packet_out_request(sw, por_dst,ip_dst):
     # qual o mac da interface de saída?
-    a = table_from_key(sw,'pre_proc', por_dst, clean=3) # a[0]= mac a[1]= ip
+    a = table_from_key(sw, por_dst, 'pre_proc', clean=3) # a[0]= mac a[1]= ip
 
     pkt = Ether(src=a[0], dst='ff:ff:ff:ff:ff:ff')
     pkt = pkt / ARP(op="who-has", hwsrc=a[0], psrc=a[1], pdst=ip_dst)
@@ -183,7 +142,7 @@ def time_list(sw, list):
     if list in queue_arp:
         queue_arp.remove(list)
         # gera icmp
-        a = table_from_key(sw,'pre_proc', list[0], clean=3) # a[0]= mac a[1]= ip do roteador
+        a = table_from_key(sw, list[0], 'pre_proc', clean=3) # a[0]= mac a[1]= ip do roteador
 
         print('removendo pacote sem resposta',list[1],decimal_to_ip(list[1]))
         pkt = Ether(dst='ff:ff:ff:ff:ff:ff') # pkt = Ether(src=a[0]) 
@@ -239,7 +198,11 @@ def table_dump_entry(sw, i):
     input_str = "table_dump_entry ipv4_lpm %d \n" % i
     sw.stdin.write(input_str)
     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
-    sw.stdout.readline().strip()
+    valid = sw.stdout.readline().strip()
+    
+    if 'Invalid' in valid:
+        # print('valid : ',valid)
+        return None
     sw.stdout.readline().strip()
     line = sw.stdout.readline().strip()
     action = sw.stdout.readline().strip()
@@ -261,7 +224,7 @@ def table_num_entries(sw, table='pre_proc'):
     sw.stdin.write(input_str)
     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
     num_ports = sw.stdout.readline().strip()
-    # print(num_ports)
+    # print(f'num ports:{num_ports}')
     num_ports = num_ports.split(':', 1)[1].strip()
     num_ports=  int(re.search(r'\d+',num_ports).group())
     return num_ports
@@ -269,19 +232,22 @@ def table_num_entries(sw, table='pre_proc'):
 
 def rip(sw): # gera rip command 2 a cada 30 segundos
     list_rip_entry = []
-
+    
     while RIP_ON:
         print('rip waiting...')
         time.sleep(TIME_RIP) # segundos
         # envia a tabela
-        num_ports = table_num_entries(sw,'pre_proc')     
+        num_ports = table_num_entries(sw,'pre_proc')   
+        
         for i in range(num_ports):
             port = i + 1
-            mac_router, ip_router = table_from_key(sw,'pre_proc', port, clean=3) # a[0]= mac a[1]= ip
-            num_entries = table_num_entries(sw,'ipv4_lpm') 
+            mac_router, ip_router = table_from_key(sw, port,'pre_proc', clean=3) # a[0]= mac a[1]= ip
+            num_entries = table_num_entries(sw,'ipv4_lpm')             
             # precisa pegar o mac e ip no pre_proc
             for i in range(num_entries):
+                # print('num entris env rip',num_entries, i)  
                 resultado = table_dump_entry(sw,i)
+                # print(' resullt ', resultado)
                 if resultado:
                     mask_formatado, ip_formatado, metric = resultado
                     rip_entry = RIPEntry(AF=2, addr=ip_formatado, mask=mask_formatado, nextHop=ip_router, metric=metric)
@@ -342,11 +308,12 @@ def rip_request(sw, pktinfo):
 def table_dump_entry_from_key(sw,key, ip, clean=2, table='ipv4_lpm'):
       
     input_str = "table_dump_entry_from_key %s %s \n" % (table, key)
+    # print(f'====== para lpm input {input_str}')
     sw.stdin.write(input_str)
     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
     valid = sw.stdout.readline().strip()
-    if 'Invalid' in valid: # sem conrespodencia
-        print('invalido')
+    if 'Invalid' in valid or 'Error' in valid: # sem conrespodencia
+        # print('invalido')
         return None
     else: 
         for i in range(clean):
@@ -363,10 +330,49 @@ def table_dump_entry_from_key(sw,key, ip, clean=2, table='ipv4_lpm'):
 
         return num
 
+def obter_handle(sw, table, key, clean=3):
+    input_str = "table_dump_entry_from_key %s %s \n" % (table, key)
+    sw.stdin.write(input_str)
+    # print(stdout_str)
+    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+    stdout_str = sw.stdout.readline().strip()
+    
+    for i in range(clean):
+        sw.stdout.readline().strip()
+    print(f' obter handle {stdout_str} chave {key}')
+    return int(re.search(r'0x\d+',stdout_str).group(),16)
+
+def delete_table(sw, handle, table='ipv4_lpm'):
+    print(f'++++++ apagando a entrada handle: {handle}')
+    input_str = "table_delete %s %d \n" % (table, handle)
+    sw.stdin.write(input_str)
+    sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+    clean_stdout(sw, 1)
+    
+def time_table_entry(sw, key):
+    tm = 1
+    print('começou a contar o tempo para a chave: ',key)
+    while tm:
+        time.sleep(TIME_ENTRY_TABLE)
+        for entry in  queeu_rip:
+            if entry[0] == key:
+                if entry[1] == 1:
+                    tm = 1
+                    break
+                else:
+                    tm = 0
+                    break
+    # deletar a entrada na tabela
+    print('apagando entrada time_table_entry ', key)
+    handle = obter_handle(sw, 'ipv4_lpm', key)
+    print('handle: ',handle)
+    delete_table(sw,handle)
+    sw.terminate()
+
 
 # recebe um pacote com as rotas, e atualiza a tabela de encaminhamento 
 def rip_reply(sw, packet_bytes, pktinfo):
-    print('rip_reply') # recebeu um command 2
+    print('rip_reply, pacote rip com as entradas') # recebeu um command 2
     eth_packet = Ether(packet_bytes)
     # ip_router = decimal_to_ip(pktinfo['metadata']['operand1'])
     # ip_dst = decimal_to_ip(pktinfo['metadata']['operand0'])
@@ -381,20 +387,28 @@ def rip_reply(sw, packet_bytes, pktinfo):
 
         result =  table_dump_entry_from_key(sw, key, rip_entry.addr, clean=2, table='ipv4_lpm')
         if result: # já tem na tabela
-            print('chave encontrada:',key)
-            
+            print('-chave encontrada:',key)
+            # precisa verificar se o metric é menor
         else:
-            print('chave não encontrada na tabela:',key) 
+            print('-chave não encontrada na tabela:',key) 
             # sem correspondecia adicionar na tabela do roteador
             val_out = f'{port} {rip_entry.nextHop} {rip_entry.metric + 1}'
             table_add(sw,'ipv4_lpm','ipv4_forward', key, val_out, ptr=False, clean=5)
-            print('-------- end else ---')
+            # adiciona na lista key e set time 1
+            queeu_rip.append([key,0])
+            sww = connection()
+            Thd_new_entry = Thread(target= time_table_entry, args=[sww, key]) # Cria uma thread para rodar o backend
+            Thd_new_entry.start()
+            # time_table_entry(sw, key)
+            # chama a função para sleep
+            # print('-------- end else ---')
+
         # mascara_cidr = ipaddress.IPv4Network(f"0.0.0.0/{rip_entry.mask}", strict=False)
         # cidr_mask = mascara_cidr.prefixlen
         # fazer consulta na tabela ipv4_lpm usando addr, se tiver match e foi forward 
 
         # ir para a proxima entrada
-        print(f'----------- fim for {i} -----')
+        print(f'---rip reply-------- fim for, entrada: {i} -----')
         rip_entry = rip_entry.payload
 
 def parser_pkt(sw,pk):
@@ -427,6 +441,8 @@ def parser_pkt(sw,pk):
 
 def main():
     sw = connection()
+    sw_arp = connection()
+    sw_rip = connection()
     connection_sh()
     
     global pkt_out
@@ -434,10 +450,10 @@ def main():
     pkt_out = sh.PacketOut()
     pkt_in = sh.PacketIn()
     
-    Thd1 = Thread(target=table_clear, args=[sw,'arp_exact']) # Cria uma thread para rodar o backend
+    Thd1 = Thread(target=table_clear, args=[sw_arp,'arp_exact']) # Cria uma thread para rodar o backend
     Thd1.start()
 
-    Thd_rip = Thread(target=rip, args=[sw]) # Cria uma thread para rodar o backend
+    Thd_rip = Thread(target=rip, args=[sw_rip]) # Cria uma thread para rodar o backend
     Thd_rip.start()
     
     
@@ -500,6 +516,25 @@ main()
     #     write_register(sw,register=reg, idx=0, value=0)
 #main()
 
+# def init_reg(sw): # TODO não usa mais essa lógica
+#     reg = 'interface_ip'
+#     value_ip = ip_to_decimal('10.0.11.10')
+#     write_register(sw,register=reg, idx=1, value=value_ip, ptr = True)
+#     value_ip = ip_to_decimal('10.0.11.10')
+#     write_register(sw,register=reg, idx=2, value=value_ip, ptr = True)
+#     value_ip = ip_to_decimal('10.0.33.10')
+#     write_register(sw,register=reg, idx=3, value=value_ip, ptr = True)
+#     value_ip = ip_to_decimal('10.0.44.10')
+#     write_register(sw,register=reg, idx=4, value=value_ip, ptr = True)
+
+#     reg_val2 = read_register(sw, register='interface_ip', idx=1, ptr=True)
+#     print(reg_val2)
+#     reg_val = read_register(sw, register='interface_ip', idx=2, ptr=True)
+#     print(reg_val)
+#     reg_val = read_register(sw, register='interface_ip', idx=3, ptr=True)
+#     print(reg_val)
+#     reg_val = read_register(sw, register='interface_ip', idx=4, ptr=True)
+#     print(reg_val)
 
 
 
@@ -631,3 +666,36 @@ main()
 #             list_rip_entry.clear()
 #             pkt_out.send()
 #             print('enviando tabela rip para a porta: ',port)  
+
+# def read_register(sw, register, idx, ptr = False):
+#     input_str = "register_read %s %d \n" % (register, idx)
+    
+#     if ptr:
+#         print(input_str[0:-1])
+
+#     # Envie os dados de entrada para o processo e capture a saída
+#     sw.stdin.write(input_str)
+#     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+
+#     stdout_str = sw.stdout.readline().strip()
+#     reg_val = stdout_str.split('= ', 1)[1] # divide a string em duas partes, no máximo 1 vez, e salva a segunda posição[1]
+#     #print(stdout_str)
+#     return int(reg_val)
+
+# def write_register(sw, register, idx=0, value=0, ptr = False): # name, index, value
+
+#     input_str = "register_write %s %d %d \n" % (register, idx, value)
+#     if ptr:
+#         print(input_str[0:-1])
+
+#     # Envie os dados de entrada para o processo e capture a saída
+#     sw.stdin.write(input_str)
+#     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+
+
+# def init_table(sw): # TODO 
+#     #MyIngress.arp_exact arp_answer 10.0.11.10/32 => 00:11:22:33:44:55
+#     table = 'MyIngress.ipv4_lpm'; action = 'ipv4_forward'
+#     v_in = '10.0.11.1/32' ; v_out='5 00:11:22:33:44:55 00:11:22:33:44:55'
+#     table_add(sw, table, action, v_in, v_out)
+#     sw.stdout.readline().strip() # Entry has been added  with handle x
