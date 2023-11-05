@@ -2,7 +2,9 @@
 Este diretório contêm todos os códigos usados na minha monografia
 
 ## Running
-make so
+   ```bash
+   make stop; make clean; make run
+   ```
 
 ## Obtaining required software
 
