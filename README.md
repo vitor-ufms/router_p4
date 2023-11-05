@@ -1,5 +1,9 @@
 # Códigos usado na monografia 
 Este diretório contêm todos os códigos usados na minha monografia
+
+## Running
+make so
+
 ## Obtaining required software
 
 If you are starting this tutorial at one of the proctored tutorial events,
