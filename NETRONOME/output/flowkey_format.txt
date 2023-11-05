@@ -1,7 +1,0 @@
-{'flowkey_sz_lw': 2,
- 'lookup_fields': [],
- 'metadata_fields': ['standard_metadata.ingress_port'],
- 'metadata_packed': OrderedDict([('standard_metadata.ingress_port', 16), ('__padding', 16)]),
- 'metadata_packed_width': 32,
- 'tier_hdr_map': {},
- 'tier_hdrs': OrderedDict()}
