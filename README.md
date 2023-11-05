@@ -6,6 +6,8 @@ then we've already provided you with a virtual machine that has all of
 the required software installed. Ask an instructor for a USB stick with
 the VM image.
 
+test
+
 Otherwise, to complete the exercises, you will need to either build a
 virtual machine or install several dependencies.
 
