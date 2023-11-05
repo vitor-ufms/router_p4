@@ -41,7 +41,7 @@ There are instructions and scripts in another Github repository that can, starti
 ---
 Autor
 ---
-Gilson Gabriel Zozias de Santana - gilsongabr@gmail.com
+Vitor Hugo dos Santos Duarte - vitor.h@ufms.br
 
 ---
 Orientador
