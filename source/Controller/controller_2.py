@@ -22,13 +22,13 @@ cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_ob
 queue_arp = []
 queeu_rip = []
 
-CLEAR_TABLE = 1
+CLEAR_TABLE = 0
 RIP_ON  = 1
 
 TIME_CLEAR_TABLE = 15
-TIME_RIP = 5
+TIME_RIP = 10
 TIME_LIST_ARP_REQUEST = 15
-TIME_ENTRY_TABLE = 5
+TIME_ENTRY_TABLE = 999
 
 #Thd1 = Thread(target=email,args=[EMAIL, PASSWORD]) # Cria uma thread
 # limpa todas as entradas da tabela - não testado

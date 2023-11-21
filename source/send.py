@@ -32,7 +32,7 @@ def main():
     #pkt =  Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
     pkt = pkt /IP(dst=addr) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
 
-    #pkt = pkt /IP(dst=addr, ttl=10) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
+    # pkt = pkt /IP(dst=addr, ttl=1) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
     #pkt = pkt / IP(dst=addr) / ICMP() # enviar ping
 
     #pkt = pkt /IP(dst=addr, ttl=6) / sys.argv[2]
