@@ -1,6 +1,9 @@
 /* -*- P4_16 -*- */
+
+  
 #include <core.p4>
 #include <v1model.p4>
+#define CPU_PORT 510
 
 const bit<32> MAX_INTERFACE = 10;
  
@@ -19,7 +22,9 @@ const bit<8> TYPE_IPV4_ICMP = 0x01;
 const bit<8> ICMP_ECHO_REPLY = 0x00;
 const bit<8> ICMP_ECHO_REQUEST = 0x08;
 const bit<8> ICMP_TIME_EXCEEDED = 0x0B;
+const bit<8> ICMP_DESTINATION_UNREACHABLE = 0X03;
 
+const bit<8> TYPE_IPV4_UDP   = 0x11;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -28,6 +33,22 @@ const bit<8> ICMP_TIME_EXCEEDED = 0x0B;
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
+
+@controller_header("packet_out")
+header packet_out_header_t {
+    bit<8>   opcode;
+    bit<32> operand0;
+    bit<32> operand1;
+    bit<32> operand2;
+}
+
+@controller_header("packet_in")
+header packet_in_header_t {
+    bit<8>   opcode;
+    bit<32> operand0;
+    bit<48> operand1;
+    bit<48> operand2;
+}
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -68,7 +89,7 @@ header icmp_t {
     bit<16> checksum;
 }
 
-header icmp_te_t{ 
+header icmp_un_t{ 
     bit<32> Unused;
 }
 
@@ -82,17 +103,24 @@ header payload_t{
 }
 
 struct temp_t {
-    egressSpec_t  port_dst;
-    macAddr_t     mac_dst;
-    macAddr_t     mac_src;
-   //ip4Addr_t     ip_dst;
+    egressSpec_t  port_dst; // encaminhamento
+    ip4Addr_t     ip_dst; // encaminhamento
+
+    macAddr_t     mac_dst; //arp
+    macAddr_t     mac_src; // arp
+
+    ip4Addr_t     ip_ingress; // pre
+    macAddr_t     mac_ingress; // pre
+
    // ip4Addr_t     ip_scr;
 }
 
 struct metadata {
+    //@field_list(1)
     header_8_t   header_8;
     temp_t       forward_temp;
-    bit<1>       pkt_to_router;  
+    bit<1>       pkt_to_router;
+    bit<4>       encaminhamento;
 }
 
 struct headers {
@@ -100,10 +128,12 @@ struct headers {
     ipv4_t       ipv4;
     arp_t        arp;
     icmp_t       icmp;
-    icmp_te_t    icmp_te;
+    icmp_un_t    icmp_un;
     ipv4_t       icmp_ip_header;
     header_8_t   header_8;
     payload_t    payload;
+    packet_in_header_t  packet_in;
+    packet_out_header_t packet_out;
 }
 
 
@@ -116,7 +146,22 @@ parser MyParser(packet_in packet,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
 
+    // state start {
+    //     transition parse_ethernet;
+    // }
+
     state start {
+        transition check_cpu;
+    }
+    state check_cpu{
+        transition select(standard_metadata.ingress_port){
+            CPU_PORT : parse_controller;
+            default : parse_ethernet;
+        }
+    }
+    
+    state parse_controller{
+        packet.extract(hdr.packet_out);
         transition parse_ethernet;
     }
 
@@ -133,7 +178,7 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ipv4);
 
         meta.header_8.setValid();
-        meta.header_8.data = packet.lookahead<bit<64>>();
+        meta.header_8.data = packet.lookahead<bit<64>>(); // leitura do 8 primeiros bytes do paylod do ipv4
 
         transition select(hdr.ipv4.protocol){
             TYPE_IPV4_ICMP: parse_icmp;
@@ -194,11 +239,8 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    register<bit<8>>(1) controller_op; // registrador que conversa com o plano de controle
-
-    //register<bit<48>>(MAX_INTERFACE) interface_mac; // mac(48) cada index é uma porta
-    register<bit<32>>(MAX_INTERFACE) interface_ip; // ip(32)
-    macAddr_t aux_mac; ip4Addr_t aux_ip;
+    register<bit<64>>(4) controller_op; // registrador que conversa com o plano de controle
+    // 0 - flag; 1 - ip; 2 - mac; 3 - port
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -208,10 +250,11 @@ control MyIngress(inout headers hdr,
 
 /******************** Action for table  ipv4_lpm  ****************************/
 
-    action ipv4_forward(egressSpec_t port, macAddr_t scrAddr, macAddr_t dstAddr) {
+    action ipv4_forward(egressSpec_t port, ip4Addr_t ip_dst, bit<32> metric) {
         meta.forward_temp.port_dst = port;
-        meta.forward_temp.mac_src = scrAddr;
-        meta.forward_temp.mac_dst = dstAddr;
+        meta.forward_temp.ip_dst = ip_dst;
+        //meta.forward_temp.mac_src = scrAddr;
+        //meta.forward_temp.mac_dst = dstAddr;
     }
 
     action my_router( ){
@@ -232,16 +275,6 @@ control MyIngress(inout headers hdr,
       //  default_action = NoAction(); drop(); // default enviar para rota default
     }
 
-/******************** Procedimentos para ICMP ****************************/
-
-    action icmp_ping(){ // respondendo ping
-        //hdr.icmp.type = 0x08; rs loop
-        // falta arrumar o ip 
-        hdr.icmp.type = ICMP_ECHO_REPLY;
-        ip4Addr_t srcAddr_ipv4 = hdr.ipv4.srcAddr;
-        hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
-        hdr.ipv4.dstAddr = srcAddr_ipv4;         
-    }
 
 /******************** Action for table arp_exact  ****************************/
 
@@ -251,29 +284,38 @@ control MyIngress(inout headers hdr,
 
         //Ethernet
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = addr;
+        hdr.ethernet.srcAddr = addr; // mac do roteador
 
         // ARP
         hdr.arp.op = ARP_OPER_REPLY;
        
+        // troca de ip
         ip4Addr_t send_ip = hdr.arp.s_ip;
-        hdr.arp.s_ip = hdr.arp.d_ip;
+        hdr.arp.s_ip = hdr.arp.d_ip; 
         hdr.arp.d_ip = send_ip;
 
+        // mac no arp
         hdr.arp.d_Add = hdr.arp.s_Add;
         hdr.arp.s_Add = addr;
     }
 
-    action multicast() {
-        standard_metadata.mcast_grp = 1;
+    action arp_query(macAddr_t srcAddr, macAddr_t dstAddr){
+
+        meta.forward_temp.mac_src = srcAddr;
+        meta.forward_temp.mac_dst = dstAddr;
+
+        standard_metadata.egress_spec = meta.forward_temp.port_dst;
+        hdr.ethernet.srcAddr = srcAddr;
+        hdr.ethernet.dstAddr = dstAddr;
+    
     }
 
-    table arp_exact {
+    table arp_exact { // ipd => mac
         key = {
-            hdr.arp.d_ip: lpm;
+            meta.forward_temp.ip_dst: lpm;
         }
         actions = {
-            arp_answer;
+            arp_query;
             drop;
             NoAction;
         }
@@ -281,132 +323,231 @@ control MyIngress(inout headers hdr,
         //default_action = NoAction();
     }
 
-/******************** Action da tabela arp_rp  ****************************/
-
-    action arp_forward(egressSpec_t port){
-
-        standard_metadata.egress_spec = port;
+/********************** pre proc ************************************/
+    action set_temp(macAddr_t mac_ingress,ip4Addr_t ip_ingress ){
+        meta.forward_temp.ip_ingress = ip_ingress;
+        meta.forward_temp.mac_ingress = mac_ingress;
     }
 
-    table arp_rp{
+    table pre_proc {
         key = {
-            hdr.arp.d_ip: lpm;
+           standard_metadata.ingress_port : exact;
         }
         actions = {
-            arp_forward;
+            set_temp;
             drop;
             NoAction;
         }
-
-    size = 1024;
-    //default_action = NoAction();
+        size = 10;
+        //default_action = NoAction();
     }
 
 /******************** Action internos  ****************************/
+/******** Procedimentos para ICMP *****************/
+
+    action icmp_ping(){ // respondendo ping
+
+        hdr.icmp.type = ICMP_ECHO_REPLY;
+        ip4Addr_t srcAddr_ipv4 = hdr.ipv4.srcAddr;
+        hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
+        hdr.ipv4.dstAddr = srcAddr_ipv4;         
+    }
 
     action new_icmp(bit<8> type, bit<8> code){
         
        // hdr.header_8.setValid();
-
-        hdr.icmp_ip_header.setValid();
-        hdr.icmp_ip_header = hdr.ipv4;
-
-        hdr.icmp_te.setValid();
-        hdr.icmp_te.Unused = 0x00;
-
         hdr.payload.setInvalid();
         hdr.icmp.setValid();
         hdr.icmp.type =  type;
         hdr.icmp.code =  code;
 
-        hdr.ipv4.ttl = 38;
-        hdr.ipv4.totalLen = 52; // 20 + 20 + 4 + 8
+        hdr.icmp_un.setValid(); // ?
+        hdr.icmp_un.Unused = 0x00;
+
+        hdr.icmp_ip_header.setValid();
+        hdr.icmp_ip_header = hdr.ipv4; // copia cabeçalho ipv4
+
+        hdr.ipv4.ttl = 64; //4.3.2.2 deve originar um novo ttl
+        hdr.ipv4.totalLen = 56; // 20 + 20 + 4 + 4 + 8
         hdr.ipv4.protocol = TYPE_IPV4_ICMP;
         hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
 
-        interface_ip.read(aux_ip, (bit<32>)standard_metadata.ingress_port);
-        //interface_ip.read(aux_ip, (bit<32>) 1);        
-        hdr.ipv4.srcAddr = aux_ip;
-        //hdr.ipv4.srcAddr = 0xAABBFF33; // ip da interface de entrada
-        // alter payload
-        //hdr.payload.data_ip = hdr.payload.data_ip[63:0];  // bit<32> a = (bit<32>)hdr.payload.data_ip;     
+        hdr.ipv4.srcAddr = meta.forward_temp.ip_ingress;
+       
     }
 
     action subtrai_ttl(){ 
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
-    action conf_forward(egressSpec_t port, macAddr_t srcAddr, macAddr_t dstAddr) {
-        standard_metadata.egress_spec = port;
+    // action conf_forward(egressSpec_t port, macAddr_t srcAddr, macAddr_t dstAddr) {
+    //     standard_metadata.egress_spec = port;
 
-        hdr.ethernet.srcAddr = srcAddr;
-        hdr.ethernet.dstAddr = dstAddr;
-        //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;            
-    } 
+    //     hdr.ethernet.srcAddr = srcAddr;
+    //     hdr.ethernet.dstAddr = dstAddr;
+    //     //hdr.ipv4.ttl = hdr.ipv4.ttl - 1;            
+    // } 
 
-    apply {   
+    apply {  
 
-    // procedimentos para ipv4
+        // verify if pakcet is controller
+        // if(standard_metadata.ingress_port == CPU_PORT){
+        //     controller_op.write(0, 11); // send a signal for the controller
+        // }  
+        // if(hdr.packet_out.isValid()){
+        //     controller_op.write(0, 11); // send a signal for the controller
+        // }     
+
+        pre_proc.apply(); 
+
+        // procedimentos para ipv4
         if (hdr.ipv4.isValid()) { 
-
-            if (standard_metadata.checksum_error == 1){ 
+            // direcionar a porta para o multicast de envios do rip
+            if(standard_metadata.ingress_port == CPU_PORT && hdr.packet_out.opcode == 1){               
+                standard_metadata.egress_spec = (bit<9>) hdr.packet_out.operand0;
+                meta.encaminhamento = 0;
+            }else if (standard_metadata.checksum_error == 1){ 
                 drop(); // 4.2.2.5 RFC 1812 
             
             }else if(ipv4_lpm.apply().hit){ // match na tabela ipv4_lpm
 
                 if(meta.pkt_to_router == 0){ // 4.2.2.9 ip destino != do roteador
-                    subtrai_ttl(); // Precisa verificar se o pkt é para o roteador antes de diminuir ttl
-                    if(hdr.ipv4.ttl == 0){ // subtrai e depois verifica
-                        new_icmp(11, 0x00); //gerar um icmp code 11 iniciar o ttl
-                        meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
-                        meta.forward_temp.port_dst = standard_metadata.ingress_port;
-                        conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
+                   
+                    if((hdr.ipv4.ttl -1) == 0){ // subtrai e depois verifica
+                        new_icmp(ICMP_TIME_EXCEEDED, 0x00); //gerar um icmp code 11 iniciar o ttl
+                        
+                        
+                        //standard_metadata.egress_spec = standard_metadata.ingress_port;
+                        //hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
+                        //hdr.ethernet.srcAddr = meta.forward_temp.mac_ingress;                      
+                        
+                        meta.encaminhamento = 2;
                         hdr.header_8.setValid();
                         hdr.header_8.data = meta.header_8.data;
 
+                       // resubmit_preserving_field_list(1);
+
                     }else{
-                        conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst); // Forwarding normal
+                        subtrai_ttl(); // Precisa verificar se o pkt é para o roteador antes de diminuir ttl
+                        //conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst); // Forwarding normal
+                        meta.encaminhamento = 1;
+                        // problema se não tiver mac para o endereço ip
                     }
 
                 }else{ // ip destino é o roteador
 
-                    if(hdr.icmp.isValid())  // icmp para o roteador
+                    if(hdr.icmp.isValid()){  // icmp para o roteador
                         if(hdr.icmp.type == ICMP_ECHO_REQUEST){
-                            meta.forward_temp.port_dst = standard_metadata.ingress_port;
-                            meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
-                            conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
+                            //meta.forward_temp.port_dst = standard_metadata.ingress_port;
+                            //meta.forward_temp.mac_dst = hdr.ethernet.srcAddr;
+                            //conf_forward(meta.forward_temp.port_dst, meta.forward_temp.mac_src, meta.forward_temp.mac_dst);
+                            standard_metadata.egress_spec = standard_metadata.ingress_port;
+                            hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
+                            hdr.ethernet.srcAddr = meta.forward_temp.mac_ingress;
+
+                            meta.encaminhamento = 0 ;
                             icmp_ping();
 
-                        } // }else if(hdr.icmp.type == ICMP_ECHO_REQUEST ){
-                        //     ;
-                        // } // continue
+                        }else if(hdr.icmp.type == ICMP_ECHO_REPLY ){
+                             ;
+                        }else{
+                            drop(); // ICMP 4.3.2.1 Tipos de mensagens desconhecidas, descarta o pacote 
+                        }
+                    }
+                }
+            }else{   
+
+                if(hdr.ipv4.dstAddr == 0xE0000009 && hdr.ipv4.protocol == TYPE_IPV4_UDP  ){ // 224.0.0.9 multicast, pode ser rip
+
+                    standard_metadata.egress_spec = CPU_PORT;
+                    meta.pkt_to_router = 1;
+
+                    hdr.packet_in.setValid();
+                    hdr.packet_in.opcode = 3;
+                    hdr.packet_in.operand0 = (bit<32>) hdr.ipv4.srcAddr; 
+                    hdr.packet_in.operand1 =  (bit<48>) meta.forward_temp.ip_ingress;
+                    hdr.packet_in.operand2 = (bit<48>) standard_metadata.ingress_port;
                     
-                    // 4.3.2.1 icmp Tipos de mensagens desconhecidas  deve descartar o pacote
-                }
-            }else{   // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
 
-                ;
+                }else{ // sem match rota inacessível, devover icmp type 3, verificar  5.2.7.1 Destino Inacessíve
+
+                    new_icmp(ICMP_DESTINATION_UNREACHABLE, 0x00); //gerar um icmp code 11 iniciar o ttl
+                    standard_metadata.egress_spec = standard_metadata.ingress_port;
+                    hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
+                    hdr.ethernet.srcAddr = meta.forward_temp.mac_ingress;
+                    
+                    meta.encaminhamento = 0;
+                    hdr.header_8.setValid();
+                    hdr.header_8.data = meta.header_8.data;
+                }
                 
+            }  
+        }
+
+        /// chamar tabela arp 
+        if( meta.encaminhamento == 1 && meta.pkt_to_router == 0 ){
+            if(arp_exact.apply().miss){// configura o mac 
+                // ip sem mac, chamar controlador
+                
+                //controller_op.write(1, (bit<64>) meta.forward_temp.port_dst); // porta de saída
+                //controller_op.write(2, (bit<64>) meta.forward_temp.ip_dst); // ip de destino
+                //controller_op.write(3,(bit<64>) standard_metadata.ingress_port); //mac de saída
+                controller_op.write(0, 1); // send a signal for the controller
+                hdr.packet_in.setValid();
+                hdr.packet_in.opcode = 1;
+                hdr.packet_in.operand0 = (bit<32>) meta.forward_temp.port_dst; 
+                hdr.packet_in.operand1 =  (bit<48>) meta.forward_temp.ip_dst;
+
+                standard_metadata.egress_spec = CPU_PORT; // pacote vai para o controlador para ser salvo
+                //drop();
             }
+        }
+
         // procedimentos arp
-        }else if(hdr.arp.isValid()){ 
-            controller_op.write(0, 2); // send a signal for the controller
-
+        if(hdr.arp.isValid()){ 
             if(hdr.arp.op == ARP_OPER_REQUEST){
-                if(arp_exact.apply().miss){ // verifica sem tem o ip na tabela cache arp
-                    multicast();
-
+                if(hdr.arp.d_ip == meta.forward_temp.ip_ingress) // request para o roteador na porta certa
+                    arp_answer(meta.forward_temp.mac_ingress); 
+                if(standard_metadata.ingress_port == CPU_PORT){   // roteador fez o request no plano de controle
+                    // tudo pronto, só mandar na porta certa
+                    standard_metadata.egress_spec = (bit<9>) hdr.packet_out.operand0;
+                    controller_op.write(0, 12); // send a signal for the controller, só para teste
                 }
-            } else if(hdr.arp.op == ARP_OPER_REPLY){
-               arp_rp.apply(); // pode vir erro e set my router for 1
+            } else if(hdr.arp.op == ARP_OPER_REPLY){  
+                if(hdr.arp.d_ip == meta.forward_temp.ip_ingress ){ // meu ip, reply para o roteador
+                    hdr.packet_in.setValid();
+                    hdr.packet_in.opcode = 2;
+                    hdr.packet_in.operand0 = (bit<32>) hdr.arp.s_ip; // ip que enviou
+                    hdr.packet_in.operand1 = hdr.arp.s_Add; // mac send
+                    hdr.packet_in.operand2 = hdr.arp.d_Add; // mac dst
+                   
+                    controller_op.write(0, 2); // send a signal for the controller
+                    standard_metadata.egress_spec = CPU_PORT;
+                    //drop();
+                }
             }
 
         }
 
-        // if(ICMP_RM_HEAD_8 == 0)// mudar isso
-        //     hdr.header_8.setInvalid(); // SÓ USAR EM ICMP copiar para metadado e depois validar no icmp
+
+        // send packet for controller
+        // hdr.packet_in.isValid();
+        // hdr.packet_in.opcode = 0xFFFF;
+        // hdr.packet_in.operand0 = 7;
+        // hdr.packet_in.operand1 = 1;
+
+        // send packet for controller
+        // hdr.packet_out.isValid();
+        // hdr.packet_out.opcode = 0;
+        // hdr.packet_out.operand0 = 360;
+        // hdr.packet_out.operand1 = 8;
         
-    }
+        //if(standard_metadata.ingress_port != CPU_PORT)
+        //hdr.ethernet.dstAddr = 0xFF00FFFF0000;
+       // hdr.ethernet.srcAddr = 0xFF0000FFFFFF;
+        //standard_metadata.egress_spec = CPU_PORT;
+
+    }// apply
 }
 
 
@@ -418,15 +559,14 @@ control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
 
-    action drop() {
-        mark_to_drop(standard_metadata);
-    }
+     apply {
 
-    apply {
-        // Não enviar pacote para porta em que o pacote entrou em  Multicast
-        if (standard_metadata.egress_port == standard_metadata.ingress_port && standard_metadata.mcast_grp != 0)
-            drop();
-    }
+        if( meta.encaminhamento == 2){
+            recirculate_preserving_field_list(0);
+        }
+
+      }
+
 }
 
 
@@ -448,7 +588,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
               hdr.ipv4.ttl,
               hdr.ipv4.protocol,
               hdr.ipv4.srcAddr,
-              hdr.ipv4.dstAddr },
+              hdr.ipv4.dstAddr }, 
             hdr.ipv4.hdrChecksum,
             HashAlgorithm.csum16);
 
@@ -460,9 +600,9 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
                     HashAlgorithm.csum16);
 
             update_checksum_with_payload( // verificar se pacote icmp foi alterado
-                hdr.icmp_te.isValid(),
+                hdr.icmp_un.isValid(),
                     { hdr.icmp.type,
-                    hdr.icmp.code,hdr.icmp_te, hdr.icmp_ip_header, hdr.header_8 },
+                    hdr.icmp.code, hdr.icmp_un, hdr.icmp_ip_header, hdr.header_8 },
                     hdr.icmp.checksum,
                     HashAlgorithm.csum16);
     }
@@ -475,14 +615,16 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
+        packet.emit(hdr.packet_in);
         packet.emit(hdr.ethernet);
         packet.emit(hdr.arp);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.icmp);
-        packet.emit(hdr.icmp_te);
+        packet.emit(hdr.icmp_un);
         packet.emit(hdr.icmp_ip_header);
         packet.emit(hdr.header_8);
         packet.emit(hdr.payload);
+       // packet.emit(hdr.packet_in);
         //packet.emit(hdr.tcp);
         //packet.emit(hdr.time);
     }
@@ -509,18 +651,16 @@ MyDeparser()
 
 
 /* RFC 1812
-
+ arrumar myrouter;
  Fazer maquina de estado do parser no tcc
  Qual topologia?
  erro de checksum descarta o pacote // RFC 1812 item 4.2.2.5
 
 IMPREMENTAR:
- - checksum verify
- - forwarding ipv6
+ - checksum verify e update
  - Protocolo arp
- - icmp e icmpv6
+ - terminar icmp
  - broadcast
- - tamanho variado de pacote ip 
 
 TESTAR:
  - ttl
@@ -578,7 +718,6 @@ preciso implementar algo que salve o mac e ip facil de pesquisar
         // meta.time.egress_ts = standard_metadata.egress_global_timestamp;
         // meta.time.enq_ts = standard_metadata.enq_timestamp;
         // meta.time.deq_ts = standard_metadata.deq_timedelta;
-
 
 
         header ipv6_t {
@@ -644,5 +783,21 @@ header udp_t {
 
      //temp test_digest = {0,hdr.ethernet.srcAddr, 0}; // apagar
      //digest(1, test_digest);
+
+     use 
+     digest(1, standard_metadata.ingress_port);
+        //extern void digest<T>(in bit<32> receiver, in T data);`
+
+*/
+
+
+/*
+se tiver flag de cabeçalho de @packet_in, ele será lida no controlador, se não colocar nada nesse header
+e depois emitir primeiro no deparser mesmo assim o controlador vai ler os primeiros campo do pacote como
+packet_in, se não tiver flag @packet_in o controlador considera tudo como pacote.
+vai ler cabelho achando que é packet_in.
+
+Na flag @packet_out o controlador coloca o cabeçalho no começo do pacote, logo é necessário ler primeiro o 
+packet out no parser e ( não testei) depois ler o restante do pacote
 
 */
