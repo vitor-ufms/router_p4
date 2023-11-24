@@ -1,7 +1,7 @@
 # Implementação de Roteamento IPv4 em SDN com P4
 
 Este diretório contêm todos os códigos usados na minha monografia, o projeto consiste na implementação 
-de um roteador usando a linguagem p4 para construção do plano de dados.
+de um roteador usando a metolodiga de SND em linguagem p4 para construção do plano de dados.
 
 ## Executando o projeto
    ```bash
@@ -10,7 +10,7 @@ de um roteador usando a linguagem p4 para construção do plano de dados.
 
 ## Obtaining required software
 
-Para a simulação do roteador foi realizdo utilizado um ambiente emulado através do virtualbox.
+Para a simulação do roteador foi utilizado um ambiente emulado através do virtualbox.
 
 ### Ferramentas necessárias
 

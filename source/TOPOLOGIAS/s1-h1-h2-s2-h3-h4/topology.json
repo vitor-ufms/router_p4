@@ -12,7 +12,7 @@
         "h4": {"ip": "44.0.0.1/8", "mac": "08:00:00:00:04:44",
                 "commands":["route add default gw 44.0.0.10 dev eth0",
                            "arp -i eth0 -s 44.0.0.10 08:00:00:00:04:00"]},
-        "h5": {"ip": "20.0.0.10/8", "mac": "08:00:00:00:13:00",
+        "h9": {"ip": "20.0.0.10/8", "mac": "08:00:00:00:13:00",
                 "commands":["route add 20.0.0.0/8 gw 20.0.0.11 dev eth0",
                             "arp -i eth0 -s 20.0.0.11 08:00:00:00:12:00", "sudo ip link add eth1 type dummy",
                             "sudo ip link add eth2 type dummy", "sudo ip addr add 55.0.0.1/8 dev eth1",
@@ -24,6 +24,6 @@
         "s2": { "runtime_json" : "TOPOLOGIAS/s1-h1-h2-s2-h3-h4/s2-runtime.json" }
     },
     "links": [
-        ["h1", "s1-p1"], ["h2", "s1-p2"], ["h3", "s2-p1"], ["h4", "s2-p2"],["s2-p3", "s1-p3"],["h5", "s2-p4"]
+        ["h1", "s1-p1"], ["h2", "s1-p2"], ["h3", "s2-p1"], ["h4", "s2-p2"],["s2-p3", "s1-p3"],["h9", "s2-p4"]
     ]
 }
