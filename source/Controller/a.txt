@@ -1,3 +1,0 @@
-ARNING: Mac address to reach destination not found. Using broadcast.
-WARNING:scapy.runtime:Mac address to reach destination not found. Using broadcast.
-

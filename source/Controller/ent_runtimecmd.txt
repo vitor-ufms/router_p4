@@ -1,9 +1,0 @@
-register_write interface_ip 1 167774986
-register_write interface_ip 2 167774986
-register_write interface_ip 3 167780618
-register_write interface_ip 4 167783434
-register_read interface_ip 0 
-register_read interface_ip 1 
-register_read interface_ip 2 
-
-

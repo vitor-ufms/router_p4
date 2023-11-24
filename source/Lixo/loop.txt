@@ -1,9 +1,0 @@
-if(mac == reg_mac[0]){ temp = 1 }
-else if(mac == reg_mac[1]){ temp = 1 }
-else if(mac == reg_mac[2]){ temp = 1 }
-else if(mac == reg_mac[3]){ temp = 1 }
-else if(mac == reg_mac[4]){ temp = 1 }
-else if(mac == reg_mac[5]){ temp = 1 }
-else if(mac == reg_mac[6]){ temp = 1 }
-else if(mac == reg_mac[0]){ temp = 1 }
-else if(mac == reg_mac[0]){ temp = 1 }
