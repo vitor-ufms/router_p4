@@ -22,19 +22,19 @@ cpm_packetin_id2data = p4rtutil.controller_packet_metadata_dict_key_id(p4info_ob
 queue_arp = []
 queeu_rip = []
 
-CLEAR_TABLE_ARP = 0
+CLEAR_TABLE = 0
 RIP_ON  = 1
 
-TIME_CLEAR_TABLE_ARP = 15
-TIME_RIP = 10
+TIME_CLEAR_TABLE = 15
+TIME_RIP = 5
 TIME_LIST_ARP_REQUEST = 15
-TIME_ENTRY_TABLE = 999
+TIME_ENTRY_TABLE = 30
 
-
-# limpa todas as entradas da tabela arp
+#Thd1 = Thread(target=email,args=[EMAIL, PASSWORD]) # Cria uma thread
+# limpa todas as entradas da tabela - não testado
 def table_clear(sw,table):
-    while CLEAR_TABLE_ARP: # posivel melhorar usando table_set_timeout
-        time.sleep(TIME_CLEAR_TABLE_ARP) # segundos
+    while CLEAR_TABLE: # posivel melhorar usando table_set_timeout
+        time.sleep(TIME_CLEAR_TABLE) # segundos
         print(f'--------limpando = {table} ----------------------------------')
         input_str = "table_clear %s \n" % table
         sw.stdin.write(input_str)
@@ -232,6 +232,7 @@ def table_num_entries(sw, table='pre_proc'):
 
 def rip(sw): # gera rip command 2 a cada 30 segundos
     list_rip_entry = []
+    num_entries = []
     
     while RIP_ON:
         print('rip waiting...')
@@ -242,9 +243,27 @@ def rip(sw): # gera rip command 2 a cada 30 segundos
         for i in range(num_ports):
             port = i + 1
             mac_router, ip_router = table_from_key(sw, port,'pre_proc', clean=3) # a[0]= mac a[1]= ip
-            num_entries = table_num_entries(sw,'ipv4_lpm')             
+            num_entr = table_num_entries(sw,'ipv4_lpm')             
             # precisa pegar o mac e ip no pre_proc
-            for i in range(num_entries):
+            num_entries.clear()
+            input_str = "table_dump ipv4_lpm \n"
+            sw.stdin.write(input_str)
+            sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
+            
+            # for i in range(num_entr):
+            while 1:
+                line = sw.stdout.readline().strip()
+                # print("==", line)
+                if "Dumping" in line and "default" not in line:
+                    hd = int(re.search(r'0x\w+',line).group(),16) 
+                    # print("dumping handle: is ",hd)
+                    num_entries.append(hd)
+                if "drop" in line:
+                    sw.stdout.readline().strip()
+                    break
+            print(num_entries)
+            for i in num_entries:
+            # for i in range(num_entries):
                 # print('num entris env rip',num_entries, i)  
                 resultado = table_dump_entry(sw,i)
                 # print(' resullt ', resultado)
@@ -354,15 +373,12 @@ def time_table_entry(sw, key):
     print('começou a contar o tempo para a chave: ',key)
     while tm:
         time.sleep(TIME_ENTRY_TABLE)
-        for i, entry in  enumerate(queeu_rip):
+        for entry in  queeu_rip:
             if entry[0] == key:
-                if entry[1] == 1: # posição 0 tem a chave
+                if entry[1] == 1:
                     tm = 1
-                    queeu_rip[i][1] = 0
-                    print('+++++++++++++++++++++++++++++++++++++++++++++++++foi atualizdo ',entry[0])
                     break
                 else:
-                   
                     tm = 0
                     break
     # deletar a entrada na tabela
@@ -392,19 +408,20 @@ def rip_reply(sw, packet_bytes, pktinfo):
         if result: # já tem na tabela
             print('-chave encontrada:',key)
             # precisa verificar se o metric é menor
-            for entry in queeu_rip:
-                if entry[0] == key:
-                    entry[1] = 1
         else:
             print('-chave não encontrada na tabela:',key) 
             # sem correspondecia adicionar na tabela do roteador
-            val_out = f'{port} {rip_entry.nextHop} {rip_entry.metric + 1}'
+            if rip_entry.nextHop == "0.0.0.0":
+                val_out = f'{port} {eth_packet[IP].src} {rip_entry.metric + 1}'
+            else:
+                val_out = f'{port} {rip_entry.nextHop} {rip_entry.metric + 1}'
             table_add(sw,'ipv4_lpm','ipv4_forward', key, val_out, ptr=False, clean=5)
             # adiciona na lista key e set time 1
             queeu_rip.append([key,0])
             sww = connection()
             Thd_new_entry = Thread(target= time_table_entry, args=[sww, key]) # Cria uma thread para rodar o backend
             Thd_new_entry.start()
+            # time_table_entry(sw, key)
             # chama a função para sleep
             # print('-------- end else ---')
 
@@ -521,7 +538,7 @@ main()
     #     write_register(sw,register=reg, idx=0, value=0)
 #main()
 
-# def init_reg(sw): #  não usa mais essa lógica
+# def init_reg(sw): # TODO não usa mais essa lógica
 #     reg = 'interface_ip'
 #     value_ip = ip_to_decimal('10.0.11.10')
 #     write_register(sw,register=reg, idx=1, value=value_ip, ptr = True)
@@ -698,7 +715,7 @@ main()
 #     sw.stdin.flush()  # Certifique-se de que a entrada seja enviada imediatamente
 
 
-# def init_table(sw): # 
+# def init_table(sw): # TODO 
 #     #MyIngress.arp_exact arp_answer 10.0.11.10/32 => 00:11:22:33:44:55
 #     table = 'MyIngress.ipv4_lpm'; action = 'ipv4_forward'
 #     v_in = '10.0.11.1/32' ; v_out='5 00:11:22:33:44:55 00:11:22:33:44:55'
