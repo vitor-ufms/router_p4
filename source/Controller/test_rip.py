@@ -26,8 +26,8 @@ def main():
     #print("sending on interface %s to %s" % (iface, str(addr)))
     pkt =  Ether()
     # pkt =  Ether(src='11:ff:ff:00:ff:10',  dst='ff:ff:ff:ff:ff:ff')
-    rip_packet = RIP( cmd=1, version=2) # solicitando request
-    # rip_packet = RIP( cmd=2, version=2) # enviando tabela
+    # rip_packet = RIP( cmd=1, version=2) # solicitando request
+    rip_packet = RIP( cmd=2, version=2) # enviando tabela
 
     # rip_entry = RIPEntry(metric=16)
     rip_entry = RIPEntry(AF=2, addr="33.0.0.4", mask="255.0.0.0", nextHop="33.0.2.2", metric=3)
