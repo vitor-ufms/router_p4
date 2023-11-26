@@ -489,9 +489,6 @@ control MyIngress(inout headers hdr,
             if(arp_exact.apply().miss){// configura o mac 
                 // ip sem mac, chamar controlador
                 
-                //controller_op.write(1, (bit<64>) meta.forward_temp.port_dst); // porta de saída
-                //controller_op.write(2, (bit<64>) meta.forward_temp.ip_dst); // ip de destino
-                //controller_op.write(3,(bit<64>) standard_metadata.ingress_port); //mac de saída
                 controller_op.write(0, 1); // send a signal for the controller
                 hdr.packet_in.setValid();
                 hdr.packet_in.opcode = 1;
