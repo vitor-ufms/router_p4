@@ -10,7 +10,7 @@ de um roteador usando a metolodiga de SND em linguagem p4 para construção do p
 
 ## Obtaining required software
 
-Para a simulação do roteador foi utilizado um ambiente emulado através do virtualbox.
+Para a simulação do roteador foi utilizado um ambiente emulado através do virtualbox. A maquina virtual usada pode ser encontrada em [aqui](https://github.com/jafingerhut/p4-guide/blob/master/bin/README-install-troubleshooting.md)
 
 ### Ferramentas necessárias
 
