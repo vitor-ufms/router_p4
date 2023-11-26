@@ -8,18 +8,15 @@ de um roteador usando a metolodiga de SND em linguagem p4 para construção do p
    make stop; make clean; make run
    ```
 
-## Obtaining required software
+## Obtendo o software necessário
 
-Para a simulação do roteador foi utilizado um ambiente emulado através do virtualbox. A maquina virtual usada pode ser encontrada em [aqui](https://github.com/jafingerhut/p4-guide/blob/master/bin/README-install-troubleshooting.md)
+Para a simulação do roteador foi utilizado um ambiente emulado através do virtualbox. A máquina virtual usada no projeto pode ser encontrada em [aqui](https://github.com/jafingerhut/p4-guide/blob/master/bin/README-install-troubleshooting.md)
 
-### Ferramentas necessárias
+<!-- ### Ferramentas necessárias -->
 
+## Para instalar ferramentas de desenvolvimento P4 em um sistema existente
 
-
-### To install P4 development tools on an existing system
-
-There are instructions and scripts in another Github repository that can, starting from a freshly installed Ubuntu 20.04 or 22.04 Linux system with enough RAM and free disk space, install all of the necessary P4 development tools to run the exercises in this repository.  You can find those instructions and scripts [here](https://github.com/jafingerhut/p4-guide/blob/master/bin/README-install-troubleshooting.md) (note that you must clone a copy of that entire repository in order for its install scripts to work).
-
+Existem instruções e scripts em outro repositório Github que podem, a partir de um sistema Linux Ubuntu 20.04 ou 22.04 recém-instalado com RAM suficiente e espaço livre em disco, instalar todas as ferramentas de desenvolvimento P4 necessárias para executar os exercícios neste repositório. Você pode encontrar essas instruções e scripts [here](https://github.com/jafingerhut/p4-guide/blob/master/bin/README-install-troubleshooting.md) (observe que você deve clonar uma cópia de todo o repositório para que seus scripts de instalação funcionem).
 
 ---
 Autor
